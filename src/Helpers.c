@@ -548,8 +548,13 @@ int FormatString(LPSTR lpOutput,int nOutput,UINT uIdFormat,...)
 
   char *p = malloc(nOutput);
 
-  if (GetString(uIdFormat,p,nOutput))
-    wvsprintf(lpOutput,p,(LPVOID)(&uIdFormat+1));
+  if (GetString(uIdFormat,p,nOutput)) {
+    va_list arg;
+
+    va_start(arg, uIdFormat);
+    wvsprintf(lpOutput,p,arg);
+    va_end(arg);
+  }
 
   free(p);
 

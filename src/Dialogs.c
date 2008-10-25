@@ -53,11 +53,14 @@ int MsgBox(int iType,UINT uIdMsg,...)
   char szTitle[64];
   int iIcon = 0;
   HWND hwnd;
+  va_list arg;
 
   if (!GetString(uIdMsg,szBuf,COUNTOF(szBuf)))
     return(0);
 
-  wvsprintf(szText,szBuf,(LPVOID)(&uIdMsg + 1));
+  va_start(arg, uIdMsg);
+  wvsprintf(szText,szBuf,arg);
+  va_end(arg);
 
   GetString(IDS_APPTITLE,szTitle,COUNTOF(szTitle));
 
