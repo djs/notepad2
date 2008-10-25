@@ -583,7 +583,7 @@ BOOL CALLBACK OpenWithDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
         SetWindowPos(GetDlgItem(hwnd,IDC_RESIZEGRIP3),NULL,cxClient-cGrip,
                      cyClient-cGrip,cGrip,cGrip,SWP_NOZORDER);
 
-        SetWindowLong(hwnd,DWL_USER,lParam);
+        SetWindowLongPtr(hwnd,DWLP_USER,lParam);
 
         ListView_SetExtendedListViewStyle(GetDlgItem(hwnd,IDC_OPENWITHDIR),/*LVS_EX_FULLROWSELECT|*//*LVS_EX_DOUBLEBUFFER*/0x00010000|LVS_EX_LABELTIP);
         ListView_InsertColumn(GetDlgItem(hwnd,IDC_OPENWITHDIR),0,&lvc);
@@ -718,7 +718,7 @@ BOOL CALLBACK OpenWithDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
 
 
         case IDOK: {
-            LPDLITEM lpdli = (LPDLITEM)GetWindowLong(hwnd,DWL_USER);
+            LPDLITEM lpdli = (LPDLITEM)GetWindowLongPtr(hwnd,DWLP_USER);
             lpdli->mask = DLI_FILENAME | DLI_TYPE;
             lpdli->ntype = DLE_NONE;
             DirList_GetItem(GetDlgItem(hwnd,IDC_OPENWITHDIR),(-1),lpdli);
@@ -845,7 +845,7 @@ BOOL CALLBACK FavoritesDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
         SetWindowPos(GetDlgItem(hwnd,IDC_RESIZEGRIP3),NULL,cxClient-cGrip,
                      cyClient-cGrip,cGrip,cGrip,SWP_NOZORDER);
 
-        SetWindowLong(hwnd,DWL_USER,lParam);
+        SetWindowLongPtr(hwnd,DWLP_USER,lParam);
 
         ListView_SetExtendedListViewStyle(GetDlgItem(hwnd,IDC_FAVORITESDIR),/*LVS_EX_FULLROWSELECT|*//*LVS_EX_DOUBLEBUFFER*/0x00010000|LVS_EX_LABELTIP);
         ListView_InsertColumn(GetDlgItem(hwnd,IDC_FAVORITESDIR),0,&lvc);
@@ -980,7 +980,7 @@ BOOL CALLBACK FavoritesDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
 
 
         case IDOK: {
-            LPDLITEM lpdli = (LPDLITEM)GetWindowLong(hwnd,DWL_USER);
+            LPDLITEM lpdli = (LPDLITEM)GetWindowLongPtr(hwnd,DWLP_USER);
             lpdli->mask = DLI_FILENAME | DLI_TYPE;
             lpdli->ntype = DLE_NONE;
             DirList_GetItem(GetDlgItem(hwnd,IDC_FAVORITESDIR),(-1),lpdli);
@@ -1046,7 +1046,7 @@ BOOL CALLBACK AddToFavDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
 
     case WM_INITDIALOG:
       pszName = (LPSTR)lParam;
-      SetWindowLong(hwnd,DWL_USER,(LONG)pszName);
+      SetWindowLongPtr(hwnd,DWLP_USER,pszName);
 
       SendDlgItemMessage(hwnd,100,EM_LIMITTEXT,MAX_PATH-1,0);
       SetDlgItemText(hwnd,100,pszName);
@@ -1067,7 +1067,7 @@ BOOL CALLBACK AddToFavDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
 
 
         case IDOK:
-          pszName = (LPSTR)GetWindowLong(hwnd,DWL_USER);
+          pszName = (LPSTR)GetWindowLongPtr(hwnd,DWLP_USER);
           GetDlgItemText(hwnd,100,pszName,
             MAX_PATH-1);
           EndDialog(hwnd,IDOK);
@@ -1252,7 +1252,7 @@ BOOL CALLBACK FileMRUDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
         lpit->hExitThread = CreateEvent(NULL,TRUE,FALSE,NULL);
         lpit->hTerminatedThread = CreateEvent(NULL,TRUE,TRUE,NULL);
 
-        SetWindowLong(hwnd,DWL_USER,lParam);
+        SetWindowLongPtr(hwnd,DWLP_USER,lParam);
 
         GetClientRect(hwnd,&rc);
         cxClient = rc.right - rc.left;
@@ -1563,7 +1563,7 @@ BOOL CALLBACK FileMRUDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
               }
 
               else {
-                lstrcpy((LPSTR)GetWindowLong(hwnd,DWL_USER),tch);
+                lstrcpy((LPSTR)GetWindowLongPtr(hwnd,DWLP_USER),tch);
                 EndDialog(hwnd,IDOK);
               }
             }

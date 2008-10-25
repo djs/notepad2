@@ -2346,7 +2346,7 @@ BOOL CALLBACK EditFindReplaceDlgProcW(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
         char *lpszSelection;
         char *lpsz;
 
-        SetWindowLong(hwnd,DWL_USER,lParam);
+        SetWindowLongPtr(hwnd,DWLP_USER,lParam);
         lpefr = (LPEDITFINDREPLACE)lParam;
 
         // Get the current code page for Unicode conversion
@@ -2477,7 +2477,7 @@ BOOL CALLBACK EditFindReplaceDlgProcW(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
         case IDC_REPLACEALL:
         case IDC_REPLACEINSEL:
 
-          (LONG)lpefr = GetWindowLong(hwnd,DWL_USER);
+          lpefr = GetWindowLongPtr(hwnd,DWLP_USER);
 
           // Get the current code page for Unicode conversion
           uCPEdit = SendMessage(lpefr->hwnd,SCI_GETCODEPAGE,0,0);
@@ -3487,7 +3487,7 @@ void SciInitThemes(HWND hwnd)
     pfnDrawThemeParentBackground = GetProcAddress(hModUxTheme,"DrawThemeParentBackground");
     pfnIsThemeBackgroundPartiallyTransparent = GetProcAddress(hModUxTheme,"IsThemeBackgroundPartiallyTransparent");
 
-    pfnSciWndProc = (WNDPROC)SetWindowLongW(hwnd,GWL_WNDPROC,(LONG)&SciThemedWndProc);
+    pfnSciWndProc = (WNDPROC)SetWindowLongPtrW(hwnd,GWLP_WNDPROC, &SciThemedWndProc);
     bThemesPresent = TRUE;
   }
 }

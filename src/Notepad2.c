@@ -1209,7 +1209,7 @@ void CreateBars(HWND hwnd,HINSTANCE hInstance)
 void MsgThemeChanged(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   RECT rc;
-  HINSTANCE hInstance = (HINSTANCE)GetWindowLong(hwnd,GWL_HINSTANCE);
+  HINSTANCE hInstance = (HINSTANCE)GetWindowLongPtr(hwnd,GWLP_HINSTANCE);
 
   // reinitialize edit frame
 
