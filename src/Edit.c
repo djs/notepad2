@@ -2622,7 +2622,7 @@ BOOL CALLBACK EditFindReplaceDlgProcW(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
         char *lpszSelection;
         char *lpsz;
 
-        SetWindowLong(hwnd,DWL_USER,lParam);
+        SetWindowLongPtr(hwnd,DWLP_USER,lParam);
         lpefr = (LPEDITFINDREPLACE)lParam;
 
         // Get the current code page for Unicode conversion
@@ -2776,7 +2776,7 @@ BOOL CALLBACK EditFindReplaceDlgProcW(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
         case IDMSG_SWITCHTOFIND:
         case IDMSG_SWITCHTOREPLACE:
 
-          (LONG)lpefr = GetWindowLong(hwnd,DWL_USER);
+          lpefr = (LPEDITFINDREPLACE) GetWindowLongPtr(hwnd,DWLP_USER);
 
           bIsFindDlg = (GetDlgItem(hwnd,IDC_REPLACE) == NULL);
 
