@@ -22,7 +22,7 @@
 #define _DLAPI_H_
 
 #ifdef __cplusplus
-extern "C" { // C-Declarations
+extern L"C" { // C-Declarations
 #endif //__cplusplus
 
 
@@ -40,7 +40,7 @@ typedef struct tagLV_ITEMDATA // lvid
 
 //==== DlInit() ===============================================================
 
-BOOL DirList_Init(HWND,LPCSTR);
+BOOL DirList_Init(HWND,LPCWSTR);
 
 
 //==== DlDestroy() ============================================================
@@ -65,7 +65,7 @@ BOOL DirList_TerminateIconThread(HWND);
 #define DL_INCLHIDDEN  128
 #define DL_ALLOBJECTS  (32|64|128)
 
-int DirList_Fill(HWND,LPCSTR,DWORD,LPCSTR,BOOL,BOOL,int,BOOL);
+int DirList_Fill(HWND,LPCWSTR,DWORD,LPCWSTR,BOOL,BOOL,int,BOOL);
 
 
 //==== DlIconThread() =========================================================
@@ -108,8 +108,8 @@ typedef struct tagDLITEM // dli
 {
 
   UINT mask;
-  char szFileName[MAX_PATH];
-  char szDisplayName[MAX_PATH];
+  WCHAR szFileName[MAX_PATH];
+  WCHAR szDisplayName[MAX_PATH];
   int  ntype;
 
 } DLITEM, *LPDLITEM;
@@ -133,11 +133,11 @@ void DirList_DoDragDrop(HWND,LPARAM);
 
 //==== DlGetLongPathName() ====================================================
 
-BOOL DirList_GetLongPathName(HWND,LPSTR);
+BOOL DirList_GetLongPathName(HWND,LPWSTR);
 
 //==== DlSelectItem() =========================================================
 
-BOOL DirList_SelectItem(HWND,LPCSTR,LPCSTR);
+BOOL DirList_SelectItem(HWND,LPCWSTR,LPCWSTR);
 
 //==== DlCreateFilter() and DlMatchFilter() ===================================
 
@@ -145,12 +145,12 @@ BOOL DirList_SelectItem(HWND,LPCSTR,LPCSTR);
 
 typedef struct tagDL_FILTER { //dlf
   int   nCount;
-  char  tFilterBuf[DL_FILTER_BUFSIZE];
-  char  *pFilter  [DL_FILTER_BUFSIZE];
+  WCHAR  tFilterBuf[DL_FILTER_BUFSIZE];
+  WCHAR  *pFilter  [DL_FILTER_BUFSIZE];
   BOOL  bExcludeFilter;
 } DL_FILTER, *PDL_FILTER;
 
-void DirList_CreateFilter(PDL_FILTER,LPCSTR,BOOL);
+void DirList_CreateFilter(PDL_FILTER,LPCWSTR,BOOL);
 
 BOOL DirList_MatchFilter(LPSHELLFOLDER,LPCITEMIDLIST,PDL_FILTER);
 
@@ -160,8 +160,8 @@ BOOL DirList_MatchFilter(LPSHELLFOLDER,LPCITEMIDLIST,PDL_FILTER);
 
 BOOL DriveBox_Init(HWND);
 int  DriveBox_Fill(HWND);
-BOOL DriveBox_GetSelDrive(HWND,LPSTR,int,BOOL);
-BOOL DriveBox_SelectDrive(HWND,LPCSTR);
+BOOL DriveBox_GetSelDrive(HWND,LPWSTR,int,BOOL);
+BOOL DriveBox_SelectDrive(HWND,LPCWSTR);
 BOOL DriveBox_PropertyDlg(HWND);
 
 LRESULT DriveBox_DeleteItem(HWND,LPARAM);
@@ -185,7 +185,7 @@ UINT IL_GetSize(LPCITEMIDLIST);
 //==== IL_GetDisplayName() ====================================================
 BOOL IL_GetDisplayName(LPSHELLFOLDER,
                        LPCITEMIDLIST,
-                       DWORD,LPSTR,int);
+                       DWORD,LPWSTR,int);
 
 
 

@@ -30,22 +30,22 @@ int MsgBox(int,UINT,...);
 
 void DisplayCmdLineHelp();
 
-BOOL GetDirectory(HWND,int,LPSTR,LPCSTR,BOOL);
+BOOL GetDirectory(HWND,int,LPWSTR,LPCWSTR,BOOL);
 
 BOOL CALLBACK AboutDlgProc(HWND,UINT,WPARAM,LPARAM);
 
-void RunDlg(HWND,LPCSTR);
-BOOL OpenWithDlg(HWND,LPCSTR);
-BOOL FavoritesDlg(HWND,LPSTR);
-BOOL AddToFavDlg(HWND,LPCSTR,LPCSTR);
-BOOL FileMRUDlg(HWND,LPSTR);
+void RunDlg(HWND,LPCWSTR);
+BOOL OpenWithDlg(HWND,LPCWSTR);
+BOOL FavoritesDlg(HWND,LPWSTR);
+BOOL AddToFavDlg(HWND,LPCWSTR,LPCWSTR);
+BOOL FileMRUDlg(HWND,LPWSTR);
 BOOL ColumnWrapDlg(HWND,UINT,int *);
 BOOL WordWrapSettingsDlg(HWND,UINT,int *);
 BOOL LongLineSettingsDlg(HWND,UINT,int *);
 BOOL TabSettingsDlg(HWND,UINT,int *);
 BOOL SelectEncodingDlg(HWND,int *);
 BOOL SelectLineEndingDlg(HWND,int *);
-int  InfoBox(int,int,LPCSTR);
+int  InfoBox(int,int,LPCWSTR);
 
 
 // End of Dialogs.h

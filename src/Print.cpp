@@ -18,8 +18,10 @@
 *
 *
 ******************************************************************************/
+#define _WIN32_WINNT 0x501
 #include <windows.h>
 #include <commctrl.h>
+#include <shlwapi.h>
 #include <commdlg.h>
 #include <string.h>
 #include "platform.h"
@@ -56,7 +58,7 @@ extern "C" HWND hwndStatus;
 
 void StatusUpdatePrintPage(int iPageNum)
 {
-  char tch[32];
+  WCHAR tch[32];
 
   FormatString(tch,COUNTOF(tch),IDS_PRINTFILE,iPageNum);
 
@@ -68,7 +70,7 @@ void StatusUpdatePrintPage(int iPageNum)
 }
 
 
-extern "C" BOOL EditPrint(HWND hwnd,LPCSTR pszDocTitle,LPCSTR pszPageFormat)
+extern "C" BOOL EditPrint(HWND hwnd,LPCWSTR pszDocTitle,LPCWSTR pszPageFormat)
 {
 
   // Don't print empty documents
@@ -98,7 +100,7 @@ extern "C" BOOL EditPrint(HWND hwnd,LPCSTR pszDocTitle,LPCSTR pszPageFormat)
   int footerLineHeight;
   HFONT fontFooter;
 
-  char dateString[256];
+  WCHAR dateString[256];
 
   DOCINFO di = {sizeof(DOCINFO), 0, 0, 0, 0};
 
@@ -111,7 +113,7 @@ extern "C" BOOL EditPrint(HWND hwnd,LPCSTR pszDocTitle,LPCSTR pszPageFormat)
   int pageNum;
   BOOL printPage;
 
-  char pageString[32];
+  WCHAR pageString[32];
 
   HPEN pen;
   HPEN penOld;
@@ -186,10 +188,10 @@ extern "C" BOOL EditPrint(HWND hwnd,LPCSTR pszDocTitle,LPCSTR pszPageFormat)
     // from the Page Setup dialog to device units.
     // (There are 2540 hundredths of a mm in an inch.)
 
-    char localeInfo[3];
+    WCHAR localeInfo[3];
     GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_IMEASURE, localeInfo, 3);
 
-    if (localeInfo[0] == '0') {  // Metric system. '1' is US System
+    if (localeInfo[0] == L'0') {  // Metric system. L'1' is US System
       rectSetup.left = MulDiv (pagesetupMargin.left, ptDpi.x, 2540);
       rectSetup.top = MulDiv (pagesetupMargin.top, ptDpi.y, 2540);
       rectSetup.right  = MulDiv(pagesetupMargin.right, ptDpi.x, 2540);
@@ -231,7 +233,7 @@ extern "C" BOOL EditPrint(HWND hwnd,LPCSTR pszDocTitle,LPCSTR pszPageFormat)
                           0,
                           0, 0, 0,
                           0, 0, 0,
-                          "Arial");
+                          L"Arial");
   SelectObject(hdc, fontHeader);
   GetTextMetrics(hdc, &tm);
   headerLineHeight = tm.tmHeight + tm.tmExternalLeading;
@@ -247,7 +249,7 @@ extern "C" BOOL EditPrint(HWND hwnd,LPCSTR pszDocTitle,LPCSTR pszPageFormat)
                           0,
                           0, 0, 0,
                           0, 0, 0,
-                          "Arial");
+                          L"Arial");
   SelectObject(hdc, fontFooter);
   GetTextMetrics(hdc, &tm);
   footerLineHeight = tm.tmHeight + tm.tmExternalLeading;
@@ -271,9 +273,9 @@ extern "C" BOOL EditPrint(HWND hwnd,LPCSTR pszDocTitle,LPCSTR pszPageFormat)
   // Get current time...
   if (iPrintHeader == 0)
   {
-    char timeString[128];
+    WCHAR timeString[128];
     GetTimeFormat(LOCALE_USER_DEFAULT,TIME_NOSECONDS,&st,NULL,timeString,128);
-    lstrcat(dateString," ");
+    lstrcat(dateString,L" ");
     lstrcat(dateString,timeString);
   }
 
@@ -455,8 +457,8 @@ extern "C" UINT_PTR CALLBACK PageSetupHook(HWND hwnd, UINT uiMsg, WPARAM wParam,
   {
     case WM_INITDIALOG:
       {
-        char tch[512];
-        char *p1,*p2;
+        WCHAR tch[512];
+        WCHAR *p1,*p2;
 
         SendDlgItemMessage(hwnd,30,EM_LIMITTEXT,32,0);
 
@@ -465,10 +467,10 @@ extern "C" UINT_PTR CALLBACK PageSetupHook(HWND hwnd, UINT uiMsg, WPARAM wParam,
 
         // Set header options
         GetString(IDS_PRINT_HEADER,tch,COUNTOF(tch));
-        lstrcat(tch,"|");
+        lstrcat(tch,L"|");
         p1 = tch;
-        while (p2 = strchr(p1,'|')) {
-          *p2++ = '\0';
+        while (p2 = StrChr(p1,L'|')) {
+          *p2++ = L'\0';
           if (*p1)
             SendDlgItemMessage(hwnd,32,CB_ADDSTRING,0,(LPARAM)p1);
           p1 = p2; }
@@ -476,10 +478,10 @@ extern "C" UINT_PTR CALLBACK PageSetupHook(HWND hwnd, UINT uiMsg, WPARAM wParam,
 
         // Set footer options
         GetString(IDS_PRINT_FOOTER,tch,COUNTOF(tch));
-        lstrcat(tch,"|");
+        lstrcat(tch,L"|");
         p1 = tch;
-        while (p2 = strchr(p1,'|')) {
-          *p2++ = '\0';
+        while (p2 = StrChr(p1,L'|')) {
+          *p2++ = L'\0';
           if (*p1)
             SendDlgItemMessage(hwnd,33,CB_ADDSTRING,0,(LPARAM)p1);
           p1 = p2; }
@@ -487,10 +489,10 @@ extern "C" UINT_PTR CALLBACK PageSetupHook(HWND hwnd, UINT uiMsg, WPARAM wParam,
 
         // Set color options
         GetString(IDS_PRINT_COLOR,tch,COUNTOF(tch));
-        lstrcat(tch,"|");
+        lstrcat(tch,L"|");
         p1 = tch;
-        while (p2 = strchr(p1,'|')) {
-          *p2++ = '\0';
+        while (p2 = StrChr(p1,L'|')) {
+          *p2++ = L'\0';
           if (*p1)
             SendDlgItemMessage(hwnd,34,CB_ADDSTRING,0,(LPARAM)p1);
           p1 = p2; }
@@ -575,10 +577,10 @@ extern "C" void EditPrintInit()
   if (pagesetupMargin.left == -1 || pagesetupMargin.top == -1 ||
       pagesetupMargin.right == -1 || pagesetupMargin.bottom == -1)
   {
-    char localeInfo[3];
+    WCHAR localeInfo[3];
     GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_IMEASURE, localeInfo, 3);
 
-    if (localeInfo[0] == '0') {  // Metric system. '1' is US System
+    if (localeInfo[0] == L'0') {  // Metric system. L'1' is US System
       pagesetupMargin.left = 2000;
       pagesetupMargin.top = 2000;
       pagesetupMargin.right = 2000;

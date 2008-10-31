@@ -29,7 +29,6 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // remains consistent on all systems.
 IDR_MAINWND             ICON                    "..\\res\\Notepad2.ico"
 IDI_RUN                 ICON                    "..\\res\\Run.ico"
-IDI_FIND                ICON                    "..\\res\\Find.ico"
 IDI_STYLES              ICON                    "..\\res\\Styles.ico"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -41,6 +40,7 @@ IDR_MAINWND             BITMAP                  "..\\res\\Toolbar.bmp"
 IDB_OPEN                BITMAP                  "..\\res\\Open.bmp"
 IDB_NEXT                BITMAP                  "..\\res\\Next.bmp"
 IDB_PREV                BITMAP                  "..\\res\\Prev.bmp"
+IDB_PICK                BITMAP                  "..\\res\\Pick.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -128,11 +128,11 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Cu&t\tCtrl+X",                IDM_EDIT_CUT
         MENUITEM "&Copy\tCtrl+C",               IDM_EDIT_COPY
-        MENUITEM "Copy &All\tAlt+C",            IDM_EDIT_COPYALL
+        MENUITEM "Copy A&ll\tAlt+C",            IDM_EDIT_COPYALL
+        MENUITEM "Copy &Add\tCtrl+E",           IDM_EDIT_COPYADD
         MENUITEM "&Paste\tCtrl+V",              IDM_EDIT_PASTE
         MENUITEM "S&wap\tCtrl+K",               IDM_EDIT_SWAP
         MENUITEM "Clear\tDel",                  IDM_EDIT_CLEAR
-        MENUITEM "Clear A&ll",                  IDM_EDIT_CLEARALL
         MENUITEM "Clear Clipboar&d",            IDM_EDIT_CLEARCLIPBOARD
         MENUITEM "&Select All\tCtrl+A",         IDM_EDIT_SELECTALL
         MENUITEM SEPARATOR
@@ -143,7 +143,7 @@ BEGIN
             MENUITEM "&Duplicate\tCtrl+D",          IDM_EDIT_DUPLICATELINE
             MENUITEM "&Cut\tCtrl+Shift+X",          IDM_EDIT_CUTLINE
             MENUITEM "C&opy\tCtrl+Shift+C",         IDM_EDIT_COPYLINE
-            MENUITEM "D&elete\tCtrl+E",             IDM_EDIT_DELETELINE
+            MENUITEM "D&elete\tCtrl+Shift+D",       IDM_EDIT_DELETELINE
         END
         POPUP "&Block"
         BEGIN
@@ -156,6 +156,7 @@ BEGIN
             MENUITEM "&Duplicate Selection\tAlt+D", IDM_EDIT_SELECTIONDUPLICATE
 
             MENUITEM "Strip &First Character\tAlt+Z", IDM_EDIT_STRIP1STCHAR
+            MENUITEM "Strip &Last Character\tAlt+U", 40326
             MENUITEM "Strip &Trailing Blanks\tAlt+W", IDM_EDIT_TRIMLINES
             MENUITEM "Compress &Whitespace\tAlt+P", IDM_EDIT_COMPRESSWS
             MENUITEM "&Remove Blank Lines\tAlt+R",  IDM_EDIT_REMOVEBLANKLINES
@@ -165,6 +166,8 @@ BEGIN
             MENUITEM "&Column Wrap...\tCtrl+Shift+W", IDM_EDIT_COLUMNWRAP
             MENUITEM "&Split Lines\tCtrl+I",        IDM_EDIT_SPLITLINES
             MENUITEM "&Join Lines\tCtrl+J",         IDM_EDIT_JOINLINES
+            MENUITEM "Unwrap &Paragraphs\tCtrl+Shift+J", 
+                                                    IDM_EDIT_JOINLINESEX
         END
         POPUP "C&onvert"
         BEGIN
@@ -262,7 +265,7 @@ BEGIN
         MENUITEM "Sticky Window &Position",     IDM_VIEW_STICKYWINPOS
         MENUITEM "&Always On Top\tAlt+T",       IDM_VIEW_ALWAYSONTOP
         MENUITEM "Minimi&ze To Tray",           IDM_VIEW_MINTOTRAY
-        MENUITEM "Transparent &Mode\tAlt+U",    IDM_VIEW_TRANSPARENT
+        MENUITEM "Transparent &Mode\tAlt+O",    IDM_VIEW_TRANSPARENT
         MENUITEM SEPARATOR
         MENUITEM "Single &File Instance",       IDM_VIEW_SINGLEFILEINSTANCE
         MENUITEM "File &Change Notification",   IDM_VIEW_FILECHANGENOTIFY
@@ -278,7 +281,7 @@ BEGIN
         BEGIN
             MENUITEM "&Minimize Notepad2",          IDM_VIEW_ESCMINIMIZE
             MENUITEM "E&xit Notepad2",              IDM_VIEW_ESCEXIT
-            MENUITEM "&No Function",                IDM_VIEW_NOESNFUNC
+            MENUITEM "&No Function",                IDM_VIEW_NOESCFUNC
         END
         MENUITEM "Sa&ve Before Running Tools",  IDM_VIEW_SAVEBEFORERUNNINGTOOLS
 
@@ -307,7 +310,6 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Cu&t",                        IDM_EDIT_CUT
         MENUITEM "&Copy",                       IDM_EDIT_COPY
-        MENUITEM "Copy &All",                   IDM_EDIT_COPYALL
         MENUITEM "&Paste",                      IDM_EDIT_PASTE
         MENUITEM "Cl&ear",                      IDM_EDIT_CLEAR
         MENUITEM SEPARATOR
@@ -345,6 +347,7 @@ BEGIN
                                                     NOINVERT
     "3",            CMD_EMBRACE,            VIRTKEY, CONTROL, NOINVERT
     "4",            CMD_EMBRACE2,           VIRTKEY, CONTROL, NOINVERT
+    "5",            CMD_EMBRACE3,           VIRTKEY, CONTROL, NOINVERT
     "8",            IDM_VIEW_SHOWWHITESPACE, VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
     "9",            IDM_VIEW_SHOWEOLS,      VIRTKEY, SHIFT, CONTROL, 
@@ -361,7 +364,9 @@ BEGIN
                                                     NOINVERT
     "D",            IDM_EDIT_DUPLICATELINE, VIRTKEY, CONTROL, NOINVERT
     "D",            IDM_EDIT_SELECTIONDUPLICATE, VIRTKEY, ALT, NOINVERT
-    "E",            IDM_EDIT_DELETELINE,    VIRTKEY, CONTROL, NOINVERT
+    "D",            IDM_EDIT_DELETELINE,    VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
+    "E",            IDM_EDIT_COPYADD,       VIRTKEY, CONTROL, NOINVERT
     "F",            IDM_EDIT_FIND,          VIRTKEY, CONTROL, NOINVERT
     "G",            IDM_EDIT_GOTOLINE,      VIRTKEY, CONTROL, NOINVERT
     "G",            IDM_VIEW_SHOWINDENTGUIDES, VIRTKEY, SHIFT, CONTROL, 
@@ -376,6 +381,8 @@ BEGIN
     "I",            IDM_VIEW_HILITECURRENTLINE, VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
     "J",            IDM_EDIT_JOINLINES,     VIRTKEY, CONTROL, NOINVERT
+    "J",            IDM_EDIT_JOINLINESEX,   VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     "K",            IDM_EDIT_SWAP,          VIRTKEY, CONTROL, NOINVERT
     "K",            IDM_FILE_ADDTOFAV,      VIRTKEY, ALT, NOINVERT
     "L",            IDM_FILE_LAUNCH,        VIRTKEY, CONTROL, NOINVERT
@@ -391,6 +398,7 @@ BEGIN
     "N",            IDM_VIEW_LINENUMBERS,   VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
     "O",            IDM_FILE_OPEN,          VIRTKEY, CONTROL, NOINVERT
+    "O",            IDM_VIEW_TRANSPARENT,   VIRTKEY, ALT, NOINVERT
     "O",            IDM_EDIT_CONVERTOEM,    VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
     "P",            IDM_FILE_PRINT,         VIRTKEY, CONTROL, NOINVERT
@@ -411,7 +419,7 @@ BEGIN
     "T",            IDM_EDIT_CONVERTSPACES, VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
     "U",            IDM_EDIT_CONVERTLOWERCASE, VIRTKEY, CONTROL, NOINVERT
-    "U",            IDM_VIEW_TRANSPARENT,   VIRTKEY, ALT, NOINVERT
+    "U",            IDM_EDIT_STRIPLASTCHAR, VIRTKEY, ALT, NOINVERT
     "U",            IDM_EDIT_CONVERTUPPERCASE, VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
     "V",            IDM_EDIT_PASTE,         VIRTKEY, CONTROL, NOINVERT
@@ -433,6 +441,7 @@ BEGIN
     VK_ESCAPE,      CMD_ESCAPE,             VIRTKEY, NOINVERT
     VK_ESCAPE,      CMD_SHIFTESC,           VIRTKEY, SHIFT, NOINVERT
     VK_F1,          IDM_HELP_ABOUT,         VIRTKEY, NOINVERT
+    VK_F5,          CMD_TIMESTAMPS,         VIRTKEY, SHIFT, NOINVERT
     VK_F11,         CMD_LEXDEFAULT,         VIRTKEY, NOINVERT
     VK_F11,         CMD_LEXHTML,            VIRTKEY, CONTROL, NOINVERT
     VK_F11,         CMD_LEXXML,             VIRTKEY, SHIFT, NOINVERT
@@ -457,6 +466,7 @@ BEGIN
     VK_F6,          IDM_FILE_SAVEAS,        VIRTKEY, NOINVERT
     VK_F6,          IDM_FILE_SAVECOPY,      VIRTKEY, CONTROL, NOINVERT
     VK_F7,          IDM_VIEW_SAVESETTINGSNOW, VIRTKEY, NOINVERT
+    VK_F7,          CMD_OPENINIFILE,        VIRTKEY, CONTROL, NOINVERT
     VK_F8,          CMD_F8,                 VIRTKEY, NOINVERT
     VK_F8,          CMD_CTRLF8,             VIRTKEY, CONTROL, NOINVERT
     VK_F8,          CMD_SHIFTF8,            VIRTKEY, SHIFT, NOINVERT
@@ -466,6 +476,8 @@ BEGIN
                                                     NOINVERT
     VK_RETURN,      CMD_CTRLENTER,          VIRTKEY, CONTROL, NOINVERT
     VK_SPACE,       IDM_EDIT_SELECTWORD,    VIRTKEY, CONTROL, NOINVERT
+    VK_SPACE,       IDC_EDIT_SELECTLINE,    VIRTKEY, SHIFT, CONTROL, 
+                                                    NOINVERT
     VK_SUBTRACT,    IDM_VIEW_ZOOMOUT,       VIRTKEY, CONTROL, NOINVERT
     VK_SUBTRACT,    CMD_DECLINELIMIT,       VIRTKEY, ALT, NOINVERT
     VK_TAB,         CMD_CTRLTAB,            VIRTKEY, CONTROL, NOINVERT
@@ -486,6 +498,14 @@ BEGIN
     "Z",            IDM_EDIT_STRIP1STCHAR,  VIRTKEY, ALT, NOINVERT
     "Z",            IDM_EDIT_REDO,          VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
+END
+
+IDR_ACCFINDREPLACE ACCELERATORS 
+BEGIN
+    "F",            IDACC_FIND,             VIRTKEY, CONTROL, NOINVERT
+    "H",            IDACC_REPLACE,          VIRTKEY, CONTROL, NOINVERT
+    "O",            IDACC_SAVEPOS,          VIRTKEY, CONTROL, NOINVERT
+    "P",            IDACC_RESETPOS,         VIRTKEY, CONTROL, NOINVERT
 END
 
 
@@ -510,71 +530,69 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,169,49,50,14
 END
 
-IDD_FIND DIALOGEX 0, 0, 300, 111
+IDD_FIND DIALOGEX 0, 0, 272, 101
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Find Text"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    ICON            IDI_FIND,IDC_STATIC,7,7,20,20
-    LTEXT           "Search Strin&g:",IDC_STATIC,35,7,46,8
-    COMBOBOX        IDC_FINDTEXT,35,20,192,116,CBS_DROPDOWN | 
-                    CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Search Strin&g:",IDC_STATIC,7,7,46,8
+    COMBOBOX        IDC_FINDTEXT,7,17,192,116,CBS_DROPDOWN | CBS_AUTOHSCROLL | 
+                    WS_VSCROLL | WS_TABSTOP
     CONTROL         "Match &case",IDC_FINDCASE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,35,46,53,10
+                    WS_TABSTOP,7,37,53,10
     CONTROL         "Match &whole word only",IDC_FINDWORD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,35,58,89,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,49,89,10
     CONTROL         "Match &beginning of word only",IDC_FINDSTART,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,35,70,110,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,61,110,10
     CONTROL         "Regular &expression search",IDC_FINDREGEXP,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,35,82,101,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,73,101,10
     CONTROL         "&Transform backslashes",IDC_FINDTRANSFORMBS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,35,94,89,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,85,89,10
     CONTROL         "&Don't wrap around",IDC_NOWRAP,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,160,46,75,10
+                    WS_TABSTOP,125,37,75,10
     CONTROL         "Search &up",IDC_FINDUP,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,160,58,48,10
+                    WS_TABSTOP,125,49,48,10
     CONTROL         "C&lose after find",IDC_FINDCLOSE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,160,70,65,10
-    DEFPUSHBUTTON   "&Find",IDOK,243,7,50,14
-    PUSHBUTTON      "&Select To",IDC_SELECTTO,243,24,50,14
-    PUSHBUTTON      "Close",IDCANCEL,243,41,50,14
+                    BS_AUTOCHECKBOX | WS_TABSTOP,125,61,65,10
+    DEFPUSHBUTTON   "&Find",IDOK,215,7,50,14
+    PUSHBUTTON      "&Select To",IDC_SELECTTO,215,24,50,14
+    PUSHBUTTON      "Close",IDCANCEL,215,41,50,14
 END
 
-IDD_REPLACE DIALOGEX 0, 0, 300, 151
+IDD_REPLACE DIALOGEX 0, 0, 272, 130
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Replace Text"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    ICON            IDI_FIND,IDC_STATIC,7,7,20,20
-    LTEXT           "Search Strin&g:",IDC_STATIC,35,7,46,8
-    COMBOBOX        IDC_FINDTEXT,35,20,192,116,CBS_DROPDOWN | 
-                    CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Replace wit&h:",IDC_STATIC,35,46,44,8
-    COMBOBOX        IDC_REPLACETEXT,35,60,192,116,CBS_DROPDOWN | 
+    LTEXT           "Search Strin&g:",IDC_STATIC,7,7,46,8
+    COMBOBOX        IDC_FINDTEXT,7,17,192,116,CBS_DROPDOWN | CBS_AUTOHSCROLL | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Replace wit&h:",IDC_STATIC,7,35,44,8
+    COMBOBOX        IDC_REPLACETEXT,7,46,192,116,CBS_DROPDOWN | 
                     CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
     CONTROL         "Match &case",IDC_FINDCASE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,35,86,53,10
+                    WS_TABSTOP,7,66,53,10
     CONTROL         "Match &whole word only",IDC_FINDWORD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,35,98,89,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,78,89,10
     CONTROL         "Match &beginning of word only",IDC_FINDSTART,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,35,110,110,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,90,110,10
     CONTROL         "Regular &expression search",IDC_FINDREGEXP,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,35,122,101,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,102,101,10
     CONTROL         "&Transform backslashes",IDC_FINDTRANSFORMBS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,35,134,89,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,114,89,10
     CONTROL         "&Don't wrap around",IDC_NOWRAP,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,160,86,75,10
+                    WS_TABSTOP,125,66,75,10
     CONTROL         "Search &up",IDC_FINDUP,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,160,98,48,10
+                    WS_TABSTOP,125,78,48,10
     CONTROL         "C&lose after replace",IDC_FINDCLOSE,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,160,110,77,10
-    DEFPUSHBUTTON   "&Find",IDOK,243,7,50,14
-    PUSHBUTTON      "&Replace",IDC_REPLACE,243,24,50,14
-    PUSHBUTTON      "Replace &All",IDC_REPLACEALL,243,41,50,14
-    PUSHBUTTON      "In &Selection",IDC_REPLACEINSEL,243,58,50,14
-    PUSHBUTTON      "Close",IDCANCEL,243,75,50,14
+                    BS_AUTOCHECKBOX | WS_TABSTOP,125,90,77,10
+    DEFPUSHBUTTON   "&Find",IDOK,215,7,50,14
+    PUSHBUTTON      "&Replace",IDC_REPLACE,215,24,50,14
+    PUSHBUTTON      "Replace &All",IDC_REPLACEALL,215,41,50,14
+    PUSHBUTTON      "In &Selection",IDC_REPLACEINSEL,215,58,50,14
+    PUSHBUTTON      "Close",IDCANCEL,215,75,50,14
 END
 
 IDD_RUN DIALOGEX 0, 0, 224, 85
@@ -619,9 +637,9 @@ BEGIN
     LTEXT           "&Default encoding:",IDC_STATIC,7,7,58,8
     COMBOBOX        100,7,20,98,196,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    CONTROL         "Don't use automatic &Unicode detection.",
+    CONTROL         "Skip automatic &Unicode detection.",
                     IDC_NOUNICODEDETECTION,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,48,141,10
+                    WS_TABSTOP,7,48,124,10
     DEFPUSHBUTTON   "OK",IDOK,123,7,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,123,24,50,14
     LTEXT           "%s|Unicode|Unicode Big Endian|UTF-8|UTF-8 with Signature",
@@ -696,32 +714,32 @@ BEGIN
     SCROLLBAR       IDC_RESIZEGRIP3,7,117,10,10
 END
 
-IDD_STYLECONFIG DIALOGEX 0, 0, 464, 238
+IDD_STYLECONFIG DIALOGEX 0, 0, 468, 238
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Customize Schemes"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "",IDC_STYLELIST,"SysTreeView32",TVS_SHOWSELALWAYS | 
-                    TVS_FULLROWSELECT | WS_BORDER | WS_TABSTOP | 0x400,7,7,
-                    164,224
-    EDITTEXT        IDC_STYLEEDIT,181,145,276,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "&Font...",IDC_STYLEFONT,181,170,54,14
-    PUSHBUTTON      "For&eground...",IDC_STYLEFORE,241,170,54,14
-    PUSHBUTTON      "&Background...",IDC_STYLEBACK,301,170,54,14
-    PUSHBUTTON      "&Reset",IDC_STYLEDEFAULT,361,170,54,14
-    PUSHBUTTON      "",IDC_PREVSTYLE,421,170,15,14
-    PUSHBUTTON      "",IDC_NEXTSTYLE,442,170,15,14
-    PUSHBUTTON      "&Preview",IDC_PREVIEW,295,217,50,14
-    DEFPUSHBUTTON   "OK",IDOK,351,217,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,407,217,50,14
-    GROUPBOX        "Info",IDC_STATIC,181,7,276,127
+                    WS_BORDER | WS_TABSTOP | 0x400,7,7,164,224
+    LTEXT           "",IDC_STYLELABEL,181,140,280,8
+    EDITTEXT        IDC_STYLEEDIT,181,152,280,15,ES_AUTOHSCROLL
+    PUSHBUTTON      "For&e...",IDC_STYLEFORE,181,174,46,14
+    PUSHBUTTON      "&Back...",IDC_STYLEBACK,232,174,46,14
+    PUSHBUTTON      "&Font...",IDC_STYLEFONT,283,174,42,14
+    PUSHBUTTON      "&Preview",IDC_PREVIEW,330,174,42,14
+    PUSHBUTTON      "&Reset",IDC_STYLEDEFAULT,377,174,42,14
+    PUSHBUTTON      "",IDC_PREVSTYLE,426,174,15,14
+    PUSHBUTTON      "",IDC_NEXTSTYLE,446,174,15,14
+    PUSHBUTTON      "&Import...",IDC_IMPORT,181,217,50,14
+    PUSHBUTTON      "E&xport...",IDC_EXPORT,237,217,50,14
+    DEFPUSHBUTTON   "OK",IDOK,355,217,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,411,217,50,14
+    GROUPBOX        "Info",IDC_STATIC,181,7,280,127
     ICON            IDI_STYLES,IDC_STATIC,189,19,20,20
     LTEXT           "Customize Schemes",IDC_TITLE,220,25,200,12
     LTEXT           "Filename extensions must be separated by ;\n\nStyle format:\nfont:Name;size:nn;bold;italic;underline;fore:#ffffff;back:#bbbbbb;eolfilled\n\nStyle properties can be copied using copy and paste or drag and drop.\n\nThe ""Preview"" button will not apply any changes.",
                     IDC_STATIC,197,50,252,70
-    PUSHBUTTON      "&Import",IDC_IMPORT,181,217,26,14,NOT WS_VISIBLE
-    PUSHBUTTON      "E&xport",IDC_EXPORT,208,217,26,14,NOT WS_VISIBLE
 END
 
 IDD_TABSETTINGS DIALOGEX 0, 0, 174, 63
@@ -956,19 +974,19 @@ BEGIN
     IDD_FIND, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 293
+        RIGHTMARGIN, 265
         VERTGUIDE, 35
         TOPMARGIN, 7
-        BOTTOMMARGIN, 104
+        BOTTOMMARGIN, 95
     END
 
     IDD_REPLACE, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 293
+        RIGHTMARGIN, 265
         VERTGUIDE, 35
         TOPMARGIN, 7
-        BOTTOMMARGIN, 144
+        BOTTOMMARGIN, 123
     END
 
     IDD_OPENWITH, DIALOG
@@ -1022,7 +1040,7 @@ BEGIN
     IDD_STYLECONFIG, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 457
+        RIGHTMARGIN, 461
         TOPMARGIN, 7
         BOTTOMMARGIN, 231
     END
@@ -1132,8 +1150,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,1,19,0
- PRODUCTVERSION 2,1,19,0
+ FILEVERSION 3,0,20,0
+ PRODUCTVERSION 3,0,20,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x29L
@@ -1149,7 +1167,7 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "FileDescription", "Notepad2"
-            VALUE "FileVersion", "2.1.19"
+            VALUE "FileVersion", "3.0.20"
             VALUE "InternalName", "Notepad2"
             VALUE "LegalCopyright", "© Florian Balmer 2004-2008"
             VALUE "OriginalFilename", "Notepad2.exe"
@@ -1181,6 +1199,7 @@ BEGIN
     IDS_PRINTFILE           "Printing page %i..."
     IDS_SAVINGSETTINGS      "Saving settings..."
     IDS_LINKDESCRIPTION     "Edit with Notepad2"
+    IDS_STYLELABEL          "Associated file&name extensions:|Style &settings:"
 END
 
 STRINGTABLE 
@@ -1249,7 +1268,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CMDLINEHELP         "Notepad2.exe Command Line Switches\n\n/g:\tJump to specified position (-1 means end of file).\n/s:\tSelect specified syntax scheme.\n/t:\tSelect default text scheme.\n/h:\tSelect Web Source Code scheme.\n/x:\tSelect XML Document scheme.\n/c:\tOpen new window and paste clipboard contents.\n/b:\tOpen new paste board to collect clipboard entries.\n/n:\tAlways open a new window.\n/p:\tSet window position and size (/p0 use system default).\n/i:\tStart as tray icon.\n/f:\tSpecify ini-file (/f0 use no ini-file)."
+    IDS_CMDLINEHELP         "Notepad2.exe Command Line Switches\n\n/g\tJump to specified position (-1 means end of file).\n/m\tMatch specified text.\n/q\tForce creation of new files without prompt.\n/s\tSelect specified syntax scheme.\n/t\tSelect default text scheme.\n/h\tSelect Web Source Code scheme.\n/x\tSelect XML Document scheme.\n/c\tOpen new window and paste clipboard contents.\n/b\tOpen new paste board to collect clipboard entries.\n/n\tAlways open a new window.\n/p\tSet window position and size (/p0 use system default).\n/i\tStart as tray icon.\n/f\tSpecify ini-file (/f0 use no ini-file)."
 END
 
 STRINGTABLE 

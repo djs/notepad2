@@ -22,9 +22,9 @@
 typedef struct _editstyle
 {
   int   iStyle;
-  char* pszName;
-  char* pszDefault;
-  char  szValue[128];
+  WCHAR* pszName;
+  WCHAR* pszDefault;
+  WCHAR  szValue[128];
 
 } EDITSTYLE, *PEDITSTYLE;
 
@@ -39,9 +39,9 @@ typedef struct _keywordlist
 typedef struct _editlexer
 {
   int   iLexer;
-  char* pszName;
-  char* pszDefExt;
-  char  szExtensions[128];
+  WCHAR* pszName;
+  WCHAR* pszDefExt;
+  WCHAR  szExtensions[128];
   PKEYWORDLIST pKeyWords;
   EDITSTYLE    Styles[];
 
@@ -60,7 +60,7 @@ void   Style_SetLexer(HWND,PEDITLEXER);
 //void   Style_SetACPfromCharSet(HWND);
 void   Style_SetLongLineColors(HWND);
 void   Style_SetCurrentLineBackground(HWND);
-void   Style_SetLexerFromFile(HWND,LPCSTR);
+void   Style_SetLexerFromFile(HWND,LPCWSTR,BOOL);
 void   Style_SetDefaultLexer(HWND);
 void   Style_SetHTMLLexer(HWND);
 void   Style_SetXMLLexer(HWND);
@@ -69,20 +69,20 @@ void   Style_SetDefaultFont(HWND);
 void   Style_ToggleUse2ndDefault(HWND);
 BOOL   Style_GetUse2ndDefault(HWND);
 void   Style_SetIndentGuides(HWND,BOOL);
-BOOL   Style_GetOpenDlgFilterStr(LPSTR,int);
-BOOL   Style_StrGetFont(LPCSTR,LPSTR,int);
-BOOL   Style_StrGetCharSet(LPCSTR,int*);
-BOOL   Style_StrGetSize(LPCSTR,int*);
-BOOL   Style_StrGetSizeStr(LPCSTR,LPSTR,int);
-BOOL   Style_StrGetColor(BOOL,LPCSTR,int*);
-BOOL   Style_StrGetCase(LPCSTR,int*);
-BOOL   Style_StrGetAlpha(LPCSTR,int*);
-//BOOL   Style_StrGetAttribute(LPCSTR,LPCSTR);
-//BOOL   Style_StrSetAttribute(LPSTR,int,LPCSTR,BOOL);
-BOOL   Style_SelectFont(HWND,LPSTR,int);
-BOOL   Style_SelectColor(HWND,BOOL,LPSTR,int);
-void   Style_SetStyles(HWND,int,LPCSTR);
-LPCSTR Style_GetCurrentLexerName();
+BOOL   Style_GetOpenDlgFilterStr(LPWSTR,int);
+BOOL   Style_StrGetFont(LPCWSTR,LPWSTR,int);
+BOOL   Style_StrGetCharSet(LPCWSTR,int*);
+BOOL   Style_StrGetSize(LPCWSTR,int*);
+BOOL   Style_StrGetSizeStr(LPCWSTR,LPWSTR,int);
+BOOL   Style_StrGetColor(BOOL,LPCWSTR,int*);
+BOOL   Style_StrGetCase(LPCWSTR,int*);
+BOOL   Style_StrGetAlpha(LPCWSTR,int*);
+//BOOL   Style_StrGetAttribute(LPCWSTR,LPCWSTR);
+//BOOL   Style_StrSetAttribute(LPWSTR,int,LPCWSTR,BOOL);
+BOOL   Style_SelectFont(HWND,LPWSTR,int,BOOL);
+BOOL   Style_SelectColor(HWND,BOOL,LPWSTR,int);
+void   Style_SetStyles(HWND,int,LPCWSTR);
+LPCWSTR Style_GetCurrentLexerName();
 int    Style_GetLexerIconId(PEDITLEXER);
 void   Style_AddLexerToTreeView(HWND,PEDITLEXER);
 BOOL CALLBACK Styles_ConfigDlgProc(HWND,UINT,WPARAM,LPARAM);

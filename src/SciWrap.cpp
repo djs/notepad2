@@ -17,6 +17,7 @@
 *
 *
 ******************************************************************************/
+#define _WIN32_WINNT 0x501
 #include <windows.h>
 #define PLAT_WIN 1
 #include "scintilla.h"

@@ -19,6 +19,7 @@
 *
 *
 ******************************************************************************/
+#define _WIN32_WINNT 0x501
 #include <windows.h>
 #include <shlobj.h>
 #include <shlwapi.h>
@@ -32,22 +33,22 @@
 
 //=============================================================================
 //
-//  Manipulation of cached ini file sections
+//  Manipulation of (cached) ini file sections
 //
 int IniSectionGetString(
-      LPCSTR lpCachedIniSection,
-      LPCSTR lpName,
-      LPCSTR lpDefault,
-      LPSTR lpReturnedString,
+      LPCWSTR lpCachedIniSection,
+      LPCWSTR lpName,
+      LPCWSTR lpDefault,
+      LPWSTR lpReturnedString,
       int cchReturnedString)
 {
-  char *p = (char *)lpCachedIniSection;
-  char tch[256];
+  WCHAR *p = (WCHAR *)lpCachedIniSection;
+  WCHAR tch[256];
   int  ich;
 
   if (p) {
     lstrcpy(tch,lpName);
-    lstrcat(tch,"=");
+    lstrcat(tch,L"=");
     ich = lstrlen(tch);
 
     while (*p) {
@@ -65,23 +66,23 @@ int IniSectionGetString(
 
 
 int IniSectionGetInt(
-      LPCSTR lpCachedIniSection,
-      LPCSTR lpName,
+      LPCWSTR lpCachedIniSection,
+      LPCWSTR lpName,
       int iDefault)
 {
-  char *p = (char *)lpCachedIniSection;
-  char tch[256];
+  WCHAR *p = (WCHAR *)lpCachedIniSection;
+  WCHAR tch[256];
   int  ich;
   int  i;
 
   if (p) {
     lstrcpy(tch,lpName);
-    lstrcat(tch,"=");
+    lstrcat(tch,L"=");
     ich = lstrlen(tch);
 
     while (*p) {
       if (StrCmpNI(p,tch,ich) == 0) {
-        if (sscanf(p + ich,"%i",&i) == 1)
+        if (swscanf(p + ich,L"%i",&i) == 1)
           return(i);
         else
           return(iDefault);
@@ -94,16 +95,16 @@ int IniSectionGetInt(
 }
 
 
-BOOL IniSectionSetString(LPSTR lpCachedIniSection,LPCSTR lpName,LPCSTR lpString)
+BOOL IniSectionSetString(LPWSTR lpCachedIniSection,LPCWSTR lpName,LPCWSTR lpString)
 {
-  char tch[256];
-  char *p = lpCachedIniSection;
+  WCHAR tch[32+512*3+32];
+  WCHAR *p = lpCachedIniSection;
 
   if (p) {
     while (*p) {
       p = StrEnd(p) + 1;
     }
-    wsprintf(tch,"%s=%s",lpName,lpString);
+    wsprintf(tch,L"%s=%s",lpName,lpString);
     lstrcpy(p,tch);
     p = StrEnd(p) + 1;
     *p = 0;
@@ -158,47 +159,69 @@ void EndWaitCursor()
 
 //=============================================================================
 //
-//  IsWindows2korLater()
+//  Is2k()
 //
-BOOL IsWindows2korLater()
+BOOL Is2k()
 {
-  static BOOL bIsWindows2korLater;
+  static BOOL bIs2k;
   static BOOL bCachedResult;
   if (bCachedResult)
-    return(bIsWindows2korLater);
+    return(bIs2k);
   else {
     OSVERSIONINFO osvi;
     osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
     GetVersionEx(&osvi);
-    bIsWindows2korLater =
+    bIs2k =
        (osvi.dwMajorVersion >= 5);
     bCachedResult = TRUE;
-    return(bIsWindows2korLater);
+    return(bIs2k);
   }
 }
 
 
 //=============================================================================
 //
-//  IsWindowsXPorLater()
+//  IsXP()
 //
-//BOOL IsWindowsXPorLater()
+//BOOL IsXP()
 //{
-//  static BOOL bIsWindowsXPorLater;
+//  static BOOL bIsXP;
 //  static BOOL bCachedResult;
 //  if (bCachedResult)
-//    return(bIsWindowsXPorLater);
+//    return(bIsXP);
 //  else {
 //    OSVERSIONINFO osvi;
 //    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
 //    GetVersionEx(&osvi);
-//    bIsWindowsXPorLater =
+//    bIsXP =
 //       ((osvi.dwMajorVersion > 5) ||
 //       ((osvi.dwMajorVersion == 5) && (osvi.dwMinorVersion >= 1)));
 //    bCachedResult = TRUE;
-//    return(bIsWindowsXPorLater);
+//    return(bIsXP);
 //  }
 //}
+
+
+//=============================================================================
+//
+//  IsVista()
+//
+BOOL IsVista()
+{
+  static BOOL bIsVista;
+  static BOOL bCachedResult;
+  if (bCachedResult)
+    return(bIsVista);
+  else {
+    OSVERSIONINFO osvi;
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+    GetVersionEx(&osvi);
+    bIsVista =
+       (osvi.dwMajorVersion >= 6);
+    bCachedResult = TRUE;
+    return(bIsVista);
+  }
+}
 
 
 //=============================================================================
@@ -229,13 +252,13 @@ BOOL PrivateIsAppThemed()
 BOOL bFreezeAppTitle = FALSE;
 
 BOOL SetWindowTitle(HWND hwnd,UINT uIDAppName,UINT uIDUntitled,
-                    LPCSTR lpszFile,int iFormat,BOOL bModified,
+                    LPCWSTR lpszFile,int iFormat,BOOL bModified,
                     UINT uIDReadOnly,BOOL bReadOnly)
 {
 
-  char szUntitled[128],szAppName[128],szReadOnly[32],szTitle[512];
-  static const char *pszSep = " - ";
-  static const char *pszMod = "* ";
+  WCHAR szUntitled[128],szAppName[128],szReadOnly[32],szTitle[512];
+  static const WCHAR *pszSep = L" - ";
+  static const WCHAR *pszMod = L"* ";
 
   if (bFreezeAppTitle)
     return FALSE;
@@ -247,7 +270,7 @@ BOOL SetWindowTitle(HWND hwnd,UINT uIDAppName,UINT uIDUntitled,
   if (bModified)
     lstrcpy(szTitle,pszMod);
   else
-    lstrcpy(szTitle,"");
+    lstrcpy(szTitle,L"");
 
   if (lstrlen(lpszFile))
   {
@@ -259,12 +282,12 @@ BOOL SetWindowTitle(HWND hwnd,UINT uIDAppName,UINT uIDUntitled,
       else
         lstrcat(szTitle,PathFindFileName(lpszFile));
       if (iFormat == 1) {
-        char tchPath[MAX_PATH];
+        WCHAR tchPath[MAX_PATH];
         StrCpyN(tchPath,lpszFile,COUNTOF(tchPath));
         PathRemoveFileSpec(tchPath);
-        StrCat(szTitle," [");
+        StrCat(szTitle,L" [");
         StrCat(szTitle,tchPath);
-        StrCat(szTitle,"]");
+        StrCat(szTitle,L"]");
       }
     }
     else
@@ -276,7 +299,7 @@ BOOL SetWindowTitle(HWND hwnd,UINT uIDAppName,UINT uIDUntitled,
 
   if (bReadOnly && GetString(uIDReadOnly,szReadOnly,COUNTOF(szReadOnly)))
   {
-    lstrcat(szTitle," ");
+    lstrcat(szTitle,L" ");
     lstrcat(szTitle,szReadOnly);
   }
 
@@ -299,23 +322,23 @@ void SetWindowTransparentMode(HWND hwnd,BOOL bTransparentMode)
   BYTE bAlpha;
 
   if (bTransparentMode) {
-    if (fp = GetProcAddress(GetModuleHandle("User32"),"SetLayeredWindowAttributes")) {
+    if (fp = GetProcAddress(GetModuleHandle(L"User32"),"SetLayeredWindowAttributes")) {
       SetWindowLong(hwnd,GWL_EXSTYLE,
-        GetWindowLong(hwnd,GWL_EXSTYLE) | /*WS_EX_LAYERED*/0x00080000);
+        GetWindowLong(hwnd,GWL_EXSTYLE) | WS_EX_LAYERED);
 
       // get opacity level from registry
-      iAlphaPercent = IniGetInt("Settings2","OpacityLevel",75);
+      iAlphaPercent = IniGetInt(L"Settings2",L"OpacityLevel",75);
       if (iAlphaPercent < 0 || iAlphaPercent > 100)
         iAlphaPercent = 75;
       bAlpha = iAlphaPercent * 255 / 100;
 
-      fp(hwnd,0,bAlpha,/*LWA_ALPHA*/0x00000002);
+      fp(hwnd,0,bAlpha,LWA_ALPHA);
     }
   }
 
   else
     SetWindowLong(hwnd,GWL_EXSTYLE,
-      GetWindowLong(hwnd,GWL_EXSTYLE) & ~/*WS_EX_LAYERED*/0x00080000);
+      GetWindowLong(hwnd,GWL_EXSTYLE) & ~WS_EX_LAYERED);
 }
 
 
@@ -366,21 +389,149 @@ void CenterDlgInParent(HWND hDlg)
 
 //=============================================================================
 //
+//  GetDlgPos()
+//
+void GetDlgPos(HWND hDlg,LPINT xDlg,LPINT yDlg)
+{
+
+  RECT rcDlg;
+  HWND hParent;
+  RECT rcParent;
+
+  GetWindowRect(hDlg,&rcDlg);
+
+  hParent = GetParent(hDlg);
+  GetWindowRect(hParent,&rcParent);
+
+  // return positions relative to parent window
+  *xDlg = rcDlg.left - rcParent.left;
+  *yDlg = rcDlg.top - rcParent.top;
+
+}
+
+
+//=============================================================================
+//
+//  SetDlgPos()
+//
+void SetDlgPos(HWND hDlg,int xDlg,int yDlg)
+{
+
+  RECT rcDlg;
+  HWND hParent;
+  RECT rcParent;
+  MONITORINFO mi;
+  HMONITOR hMonitor;
+
+  int xMin, yMin, xMax, yMax, x, y;
+
+  GetWindowRect(hDlg,&rcDlg);
+
+  hParent = GetParent(hDlg);
+  GetWindowRect(hParent,&rcParent);
+
+  hMonitor = MonitorFromRect(&rcParent,MONITOR_DEFAULTTONEAREST);
+  mi.cbSize = sizeof(mi);
+  GetMonitorInfo(hMonitor,&mi);
+
+  xMin = mi.rcWork.left;
+  yMin = mi.rcWork.top;
+
+  xMax = (mi.rcWork.right) - (rcDlg.right - rcDlg.left);
+  yMax = (mi.rcWork.bottom) - (rcDlg.bottom - rcDlg.top);
+
+  // desired positions relative to parent window
+  x = rcParent.left + xDlg;
+  y = rcParent.top + yDlg;
+
+  SetWindowPos(hDlg,NULL,max(xMin,min(xMax,x)),max(yMin,min(yMax,y)),0,0,SWP_NOZORDER|SWP_NOSIZE);
+
+}
+
+
+//=============================================================================
+//
 //  MakeBitmapButton()
 //
 void MakeBitmapButton(HWND hwnd,int nCtlId,HINSTANCE hInstance,UINT uBmpId)
 {
   HWND hwndCtl = GetDlgItem(hwnd,nCtlId);
   BITMAP bmp;
-  struct { HIMAGELIST himl; RECT margin; UINT uAlign; } bi;
+  BUTTON_IMAGELIST bi;
   HBITMAP hBmp = LoadImage(hInstance,MAKEINTRESOURCE(uBmpId),IMAGE_BITMAP,0,0,LR_CREATEDIBSECTION);
   GetObject(hBmp,sizeof(BITMAP),&bmp);
   bi.himl = ImageList_Create(bmp.bmWidth,bmp.bmHeight,ILC_COLOR32|ILC_MASK,1,0);
   ImageList_AddMasked(bi.himl,hBmp,CLR_DEFAULT);
   DeleteObject(hBmp);
   SetRect(&bi.margin,0,0,0,0);
-  bi.uAlign = 4/*BUTTON_IMAGELIST_ALIGN_CENTER*/;
-  SendMessage(hwndCtl,0x1600+0x0002/*BCM_FIRST+BCM_SETIMAGELIST*/,0,(LPARAM)&bi);
+  bi.uAlign = BUTTON_IMAGELIST_ALIGN_CENTER;
+  SendMessage(hwndCtl,BCM_SETIMAGELIST,0,(LPARAM)&bi);
+}
+
+
+//=============================================================================
+//
+//  MakeColorPickButton()
+//
+void MakeColorPickButton(HWND hwnd,int nCtlId,HINSTANCE hInstance,COLORREF crColor)
+{
+  HWND hwndCtl = GetDlgItem(hwnd,nCtlId);
+  BUTTON_IMAGELIST bi;
+  HIMAGELIST himlOld = NULL;
+  HBITMAP hBmp;
+  COLORMAP colormap[2];
+
+  if (SendMessage(hwndCtl,BCM_GETIMAGELIST,0,(LPARAM)&bi))
+    himlOld = bi.himl;
+
+  if (IsWindowEnabled(hwndCtl) && crColor != -1) {
+    colormap[0].from = RGB(0x00,0x00,0x00);
+    colormap[0].to   = GetSysColor(COLOR_3DSHADOW);
+  }
+  else {
+    colormap[0].from = RGB(0x00,0x00,0x00);
+    colormap[0].to   = RGB(0xFF,0xFF,0xFF);
+  }
+
+  if (IsWindowEnabled(hwndCtl) && crColor != -1) {
+    if (crColor == RGB(0xFF,0xFF,0xFF))
+      crColor = RGB(0xFF,0xFF,0xFE);
+
+    colormap[1].from = RGB(0xFF,0xFF,0xFF);
+    colormap[1].to   = crColor;
+  }
+  else {
+    colormap[1].from = RGB(0xFF,0xFF,0xFF);
+    colormap[1].to   = RGB(0xFF,0xFF,0xFF);
+  }
+
+  hBmp = CreateMappedBitmap(hInstance,IDB_PICK,0,colormap,2);
+
+  bi.himl = ImageList_Create(10,10,ILC_COLORDDB|ILC_MASK,1,0);
+  ImageList_AddMasked(bi.himl,hBmp,RGB(0xFF,0xFF,0xFF));
+  DeleteObject(hBmp);
+
+  SetRect(&bi.margin,0,0,4,0);
+  bi.uAlign = BUTTON_IMAGELIST_ALIGN_RIGHT;
+
+  SendMessage(hwndCtl,BCM_SETIMAGELIST,0,(LPARAM)&bi);
+  InvalidateRect(hwndCtl,NULL,TRUE);
+
+  if (himlOld)
+    ImageList_Destroy(himlOld);
+}
+
+
+//=============================================================================
+//
+//  DeleteBitmapButton()
+//
+void DeleteBitmapButton(HWND hwnd,int nCtlId)
+{
+  HWND hwndCtl = GetDlgItem(hwnd,nCtlId);
+  BUTTON_IMAGELIST bi;
+  if (SendMessage(hwndCtl,BCM_GETIMAGELIST,0,(LPARAM)&bi))
+    ImageList_Destroy(bi.himl);
 }
 
 
@@ -388,7 +539,7 @@ void MakeBitmapButton(HWND hwnd,int nCtlId,HINSTANCE hInstance,UINT uBmpId)
 //
 //  StatusSetText()
 //
-BOOL StatusSetText(HWND hwnd,UINT nPart,LPCSTR lpszText)
+BOOL StatusSetText(HWND hwnd,UINT nPart,LPCWSTR lpszText)
 {
 
   UINT uFlags = (nPart == 255) ? nPart|SBT_NOBORDERS : nPart;
@@ -416,7 +567,7 @@ LRESULT SendWMSize(HWND hwnd)
 BOOL StatusSetTextID(HWND hwnd,UINT nPart,UINT uID)
 {
 
-  char szText[256];
+  WCHAR szText[256];
   UINT uFlags = (nPart == 255) ? nPart|SBT_NOBORDERS : nPart;
 
   if (!uID)
@@ -437,7 +588,7 @@ BOOL StatusSetTextID(HWND hwnd,UINT nPart,UINT uID)
 //
 //  StatusCalcPaneWidth()
 //
-int StatusCalcPaneWidth(HWND hwnd,LPCSTR lpsz)
+int StatusCalcPaneWidth(HWND hwnd,LPCWSTR lpsz)
 {
   SIZE  size;
   HDC   hdc   = GetDC(hwnd);
@@ -459,19 +610,19 @@ int StatusCalcPaneWidth(HWND hwnd,LPCSTR lpsz)
 //
 //  Toolbar_Get/SetButtons()
 //
-int Toolbar_GetButtons(HWND hwnd,int cmdBase,LPSTR lpszButtons,int cchButtons)
+int Toolbar_GetButtons(HWND hwnd,int cmdBase,LPWSTR lpszButtons,int cchButtons)
 {
-  char tchButtons[512];
-  char tchItem[32];
+  WCHAR tchButtons[512];
+  WCHAR tchItem[32];
   int i,c;
   TBBUTTON tbb;
 
-  lstrcpy(tchButtons,"");
+  lstrcpy(tchButtons,L"");
   c = min(50,SendMessage(hwnd,TB_BUTTONCOUNT,0,0));
 
   for (i = 0; i < c; i++) {
     SendMessage(hwnd,TB_GETBUTTON,(WPARAM)i,(LPARAM)&tbb);
-    wsprintf(tchItem,"%i ",
+    wsprintf(tchItem,L"%i ",
       (tbb.idCommand==0)?0:tbb.idCommand-cmdBase+1);
     lstrcat(tchButtons,tchItem);
   }
@@ -480,14 +631,14 @@ int Toolbar_GetButtons(HWND hwnd,int cmdBase,LPSTR lpszButtons,int cchButtons)
   return(c);
 }
 
-int Toolbar_SetButtons(HWND hwnd,int cmdBase,LPCSTR lpszButtons,LPCTBBUTTON ptbb,int ctbb)
+int Toolbar_SetButtons(HWND hwnd,int cmdBase,LPCWSTR lpszButtons,LPCTBBUTTON ptbb,int ctbb)
 {
-  char tchButtons[512];
-  char *p;
+  WCHAR tchButtons[512];
+  WCHAR *p;
   int i,c;
   int iCmd;
 
-  ZeroMemory(tchButtons,COUNTOF(tchButtons)/sizeof(tchButtons[1]));
+  ZeroMemory(tchButtons,COUNTOF(tchButtons)*sizeof(tchButtons[0]));
   lstrcpyn(tchButtons,lpszButtons,COUNTOF(tchButtons)-2);
 
   c = SendMessage(hwnd,TB_BUTTONCOUNT,0,0);
@@ -495,11 +646,11 @@ int Toolbar_SetButtons(HWND hwnd,int cmdBase,LPCSTR lpszButtons,LPCTBBUTTON ptbb
     SendMessage(hwnd,TB_DELETEBUTTON,0,0);
 
   for (i = 0; i < COUNTOF(tchButtons); i++)
-    if (tchButtons[i] == ' ') tchButtons[i] = 0;
+    if (tchButtons[i] == L' ') tchButtons[i] = 0;
 
   p = tchButtons;
   while (*p) {
-    if (sscanf(p,"%i",&iCmd) == 1) {
+    if (swscanf(p,L"%i",&iCmd) == 1) {
       iCmd = (iCmd==0)?0:iCmd+cmdBase-1;
       for (i = 0; i < ctbb; i++) {
         if (ptbb[i].idCommand == iCmd) {
@@ -543,20 +694,15 @@ BOOL IsCmdEnabled(HWND hwnd,UINT uId)
 //
 //  FormatString()
 //
-int FormatString(LPSTR lpOutput,int nOutput,UINT uIdFormat,...)
+int FormatString(LPWSTR lpOutput,int nOutput,UINT uIdFormat,...)
 {
 
-  char *p = malloc(nOutput);
+  WCHAR *p = LocalAlloc(LPTR,sizeof(WCHAR)*nOutput);
 
-  if (GetString(uIdFormat,p,nOutput)) {
-    va_list arg;
+  if (GetString(uIdFormat,p,nOutput))
+    wvsprintf(lpOutput,p,(LPVOID)(&uIdFormat+1));
 
-    va_start(arg, uIdFormat);
-    wvsprintf(lpOutput,p,arg);
-    va_end(arg);
-  }
-
-  free(p);
+  LocalFree(p);
 
   return lstrlen(lpOutput);
 
@@ -567,13 +713,13 @@ int FormatString(LPSTR lpOutput,int nOutput,UINT uIdFormat,...)
 //
 //  FormatBytes()
 //
-void FormatBytes(LPSTR lpOutput,int nOutput,DWORD dwBytes)
+void FormatBytes(LPWSTR lpOutput,int nOutput,DWORD dwBytes)
 {
 
-  char tch[256];
+  WCHAR tch[256];
   int i;
   double dBytes = dwBytes;
-  static const char *pBytes[] = { "Bytes","KB","MB","GB" };
+  static const WCHAR *pBytes[] = { L"Bytes",L"KB",L"MB",L"GB" };
 
   if (dwBytes > 1023)
   {
@@ -586,17 +732,17 @@ void FormatBytes(LPSTR lpOutput,int nOutput,DWORD dwBytes)
       else
         break;
     }
-    sprintf(tch,"%.2f",dBytes);
+    swprintf(tch,L"%.2f",dBytes);
     GetNumberFormat(LOCALE_USER_DEFAULT,0,tch,NULL,lpOutput,nOutput);
-    lstrcat(lpOutput," ");
+    lstrcat(lpOutput,L" ");
     lstrcat(lpOutput,pBytes[i]);
   }
 
   else
   {
-    sprintf(lpOutput,"%i",dwBytes);
+    wsprintf(lpOutput,L"%i",dwBytes);
     FormatNumberStr(lpOutput);
-    lstrcat(lpOutput," ");
+    lstrcat(lpOutput,L" ");
     lstrcat(lpOutput,pBytes[0]);
   }
 
@@ -609,38 +755,38 @@ void FormatBytes(LPSTR lpOutput,int nOutput,DWORD dwBytes)
 //  Name: PathIsLnkFile()
 //
 //  Purpose: Determine wheter pszPath is a Windows Shell Link File by
-//           comparing the filename extension with ".lnk"
+//           comparing the filename extension with L".lnk"
 //
 //  Manipulates:
 //
-BOOL PathIsLnkFile(LPCSTR pszPath)
+BOOL PathIsLnkFile(LPCWSTR pszPath)
 {
 
-  //char *pszExt;
+  //WCHAR *pszExt;
 
-  char tchResPath[256];
+  WCHAR tchResPath[256];
 
   if (!pszPath || !*pszPath)
     return FALSE;
 
-/*pszExt = strrchr(pszPath,'.');
+/*pszExt = StrRChr(pszPath,NULL,L'.');
 
   if (!pszExt)
     return FALSE;
 
-  if (!lstrcmpi(pszExt,".lnk"))
+  if (!lstrcmpi(pszExt,L".lnk"))
     return TRUE;
 
   else
     return FALSE;*/
 
-  //if (!lstrcmpi(PathFindExtension(pszPath),".lnk"))
+  //if (!lstrcmpi(PathFindExtension(pszPath),L".lnk"))
   //  return TRUE;
 
   //else
   //  return FALSE;
 
-  if (lstrcmpi(PathFindExtension(pszPath),".lnk"))
+  if (lstrcmpi(PathFindExtension(pszPath),L".lnk"))
     return FALSE;
 
   else
@@ -659,7 +805,7 @@ BOOL PathIsLnkFile(LPCSTR pszPath)
 //
 //  Manipulates: pszResPath
 //
-BOOL PathGetLnkPath(LPCSTR pszLnkFile,LPSTR pszResPath,int cchResPath)
+BOOL PathGetLnkPath(LPCWSTR pszLnkFile,LPWSTR pszResPath,int cchResPath)
 {
 
   IShellLink       *psl;
@@ -676,8 +822,9 @@ BOOL PathGetLnkPath(LPCSTR pszLnkFile,LPSTR pszResPath,int cchResPath)
     {
       WORD wsz[MAX_PATH];
 
-      MultiByteToWideChar(CP_ACP,MB_PRECOMPOSED,
-                          pszLnkFile,-1,wsz,MAX_PATH);
+      /*MultiByteToWideChar(CP_ACP,MB_PRECOMPOSED,
+                          pszLnkFile,-1,wsz,MAX_PATH);*/
+      lstrcpy(wsz,pszLnkFile);
 
       if (SUCCEEDED(ppf->lpVtbl->Load(ppf,wsz,STGM_READ)))
       {
@@ -713,14 +860,14 @@ BOOL PathGetLnkPath(LPCSTR pszLnkFile,LPSTR pszResPath,int cchResPath)
 //
 //  Manipulates: pszResPath
 //
-PathIsLnkToDirectory(LPCSTR pszPath,LPSTR pszResPath,int cchResPath)
+PathIsLnkToDirectory(LPCWSTR pszPath,LPWSTR pszResPath,int cchResPath)
 {
 
-  char tchResPath[MAX_PATH];
+  WCHAR tchResPath[MAX_PATH];
 
   if (PathIsLnkFile(pszPath)) {
 
-    if (PathGetLnkPath(pszPath,tchResPath,sizeof(char)*COUNTOF(tchResPath))) {
+    if (PathGetLnkPath(pszPath,tchResPath,sizeof(WCHAR)*COUNTOF(tchResPath))) {
 
       if (PathIsDirectory(tchResPath)) {
 
@@ -751,16 +898,16 @@ PathIsLnkToDirectory(LPCSTR pszPath,LPSTR pszResPath,int cchResPath)
 //
 //  Manipulates:
 //
-BOOL PathCreateDeskLnk(LPCSTR pszDocument)
+BOOL PathCreateDeskLnk(LPCWSTR pszDocument)
 {
 
-  char tchExeFile[MAX_PATH];
-  char tchDocTemp[MAX_PATH];
-  char tchArguments[MAX_PATH+16];
-  char tchLinkDir[MAX_PATH];
-  char tchDescription[64];
+  WCHAR tchExeFile[MAX_PATH];
+  WCHAR tchDocTemp[MAX_PATH];
+  WCHAR tchArguments[MAX_PATH+16];
+  WCHAR tchLinkDir[MAX_PATH];
+  WCHAR tchDescription[64];
 
-  char tchLnkFileName[MAX_PATH];
+  WCHAR tchLnkFileName[MAX_PATH];
 
   IShellLink *psl;
   BOOL bSucceeded = FALSE;
@@ -775,7 +922,7 @@ BOOL PathCreateDeskLnk(LPCSTR pszDocument)
   lstrcpy(tchDocTemp,pszDocument);
   PathQuoteSpaces(tchDocTemp);
 
-  lstrcpy(tchArguments,"-n ");
+  lstrcpy(tchArguments,L"-n ");
   lstrcat(tchArguments,tchDocTemp);
 
   SHGetSpecialFolderPath(NULL,tchLinkDir,CSIDL_DESKTOP,TRUE);
@@ -796,8 +943,9 @@ BOOL PathCreateDeskLnk(LPCSTR pszDocument)
     {
       WORD wsz[MAX_PATH];
 
-      MultiByteToWideChar(CP_ACP,MB_PRECOMPOSED,
-                          tchLnkFileName,-1,wsz,MAX_PATH);
+      /*MultiByteToWideChar(CP_ACP,MB_PRECOMPOSED,
+                          tchLnkFileName,-1,wsz,MAX_PATH);*/
+      lstrcpy(wsz,tchLnkFileName);
 
       psl->lpVtbl->SetPath(psl,tchExeFile);
       psl->lpVtbl->SetArguments(psl,tchArguments);
@@ -825,10 +973,10 @@ BOOL PathCreateDeskLnk(LPCSTR pszDocument)
 //
 //  Manipulates:
 //
-BOOL PathCreateFavLnk(LPCSTR pszName,LPCSTR pszTarget,LPCSTR pszDir)
+BOOL PathCreateFavLnk(LPCWSTR pszName,LPCWSTR pszTarget,LPCWSTR pszDir)
 {
 
-  char tchLnkFileName[MAX_PATH];
+  WCHAR tchLnkFileName[MAX_PATH];
 
   IShellLink *psl;
   BOOL bSucceeded = FALSE;
@@ -838,7 +986,7 @@ BOOL PathCreateFavLnk(LPCSTR pszName,LPCSTR pszTarget,LPCSTR pszDir)
 
   lstrcpy(tchLnkFileName,pszDir);
   PathAppend(tchLnkFileName,pszName);
-  lstrcat(tchLnkFileName,".lnk");
+  lstrcat(tchLnkFileName,L".lnk");
 
   if (PathFileExists(tchLnkFileName))
     return FALSE;
@@ -853,8 +1001,9 @@ BOOL PathCreateFavLnk(LPCSTR pszName,LPCSTR pszTarget,LPCSTR pszDir)
     {
       WORD wsz[MAX_PATH];
 
-      MultiByteToWideChar(CP_ACP,MB_PRECOMPOSED,
-                          tchLnkFileName,-1,wsz,MAX_PATH);
+      /*MultiByteToWideChar(CP_ACP,MB_PRECOMPOSED,
+                          tchLnkFileName,-1,wsz,MAX_PATH);*/
+      lstrcpy(wsz,tchLnkFileName);
 
       psl->lpVtbl->SetPath(psl,pszTarget);
 
@@ -875,10 +1024,10 @@ BOOL PathCreateFavLnk(LPCSTR pszName,LPCSTR pszTarget,LPCSTR pszDir)
 //
 //  TrimString()
 //
-BOOL TrimString(LPSTR lpString)
+BOOL TrimString(LPWSTR lpString)
 {
 
-  LPSTR psz;
+  LPWSTR psz;
 
 
   if (!lpString || !*lpString)
@@ -887,16 +1036,16 @@ BOOL TrimString(LPSTR lpString)
   // Trim left
   psz = lpString;
 
-  while (*psz == ' ')
+  while (*psz == L' ')
     psz = CharNext(psz);
 
-  MoveMemory(lpString,psz,lstrlen(psz) + 1);
+  MoveMemory(lpString,psz,sizeof(WCHAR)*(lstrlen(psz) + 1));
 
   // Trim right
   psz = StrEnd(lpString);
 
-  while (*(psz = CharPrev(lpString,psz)) == ' ')
-    *psz = '\0';
+  while (*(psz = CharPrev(lpString,psz)) == L' ')
+    *psz = L'\0';
 
   return TRUE;
 
@@ -907,34 +1056,34 @@ BOOL TrimString(LPSTR lpString)
 //
 //  ExtractFirstArgument()
 //
-BOOL ExtractFirstArgument(LPCSTR lpArgs,LPSTR lpArg1,LPSTR lpArg2)
+BOOL ExtractFirstArgument(LPCWSTR lpArgs,LPWSTR lpArg1,LPWSTR lpArg2)
 {
 
-  LPSTR psz;
+  LPWSTR psz;
   BOOL bQuoted = FALSE;
 
   lstrcpy(lpArg1,lpArgs);
   if (lpArg2)
-    *lpArg2 = '\0';
+    *lpArg2 = L'\0';
 
   if (!TrimString(lpArg1))
     return FALSE;
 
-  if (*lpArg1 == '\"')
+  if (*lpArg1 == L'\"')
   {
-    *lpArg1 = ' ';
+    *lpArg1 = L' ';
     TrimString(lpArg1);
     bQuoted = TRUE;
   }
 
   if (bQuoted)
-    psz = strchr(lpArg1,'\"');
+    psz = StrChr(lpArg1,L'\"');
   else
-    psz = strchr(lpArg1,' ');;
+    psz = StrChr(lpArg1,L' ');;
 
   if (psz)
   {
-    *psz = '\0';
+    *psz = L'\0';
     if (lpArg2)
       lstrcpy(lpArg2,psz + 1);
   }
@@ -953,13 +1102,13 @@ BOOL ExtractFirstArgument(LPCSTR lpArgs,LPSTR lpArg1,LPSTR lpArg2)
 //
 //  PrepareFilterStr()
 //
-void PrepareFilterStr(LPSTR lpFilter)
+void PrepareFilterStr(LPWSTR lpFilter)
 {
-  LPSTR psz = StrEnd(lpFilter);
+  LPWSTR psz = StrEnd(lpFilter);
   while (psz != lpFilter)
   {
-    if (*(psz = CharPrev(lpFilter,psz)) == '|')
-      *psz = '\0';
+    if (*(psz = CharPrev(lpFilter,psz)) == L'|')
+      *psz = L'\0';
   }
 }
 
@@ -968,11 +1117,11 @@ void PrepareFilterStr(LPSTR lpFilter)
 //
 //  StrTab2Space() - in place conversion
 //
-void StrTab2Space(LPSTR lpsz)
+void StrTab2Space(LPWSTR lpsz)
 {
-  char *c;
-  while (c = strchr(lpsz,'\t'))
-    *c = ' ';
+  WCHAR *c;
+  while (c = StrChr(lpsz,L'\t'))
+    *c = L' ';
 }
 
 
@@ -982,9 +1131,9 @@ void StrTab2Space(LPSTR lpsz)
 //
 //  Adjusted for Windows 95
 //
-void ExpandEnvironmentStringsEx(LPSTR lpSrc,DWORD dwSrc)
+void ExpandEnvironmentStringsEx(LPWSTR lpSrc,DWORD dwSrc)
 {
-  char szBuf[312];
+  WCHAR szBuf[312];
 
   if (ExpandEnvironmentStrings(lpSrc,szBuf,COUNTOF(szBuf)))
     lstrcpyn(lpSrc,szBuf,dwSrc);
@@ -996,9 +1145,9 @@ void ExpandEnvironmentStringsEx(LPSTR lpSrc,DWORD dwSrc)
 //  PathCanonicalizeEx()
 //
 //
-void PathCanonicalizeEx(LPSTR lpSrc)
+void PathCanonicalizeEx(LPWSTR lpSrc)
 {
-  char szDst[MAX_PATH];
+  WCHAR szDst[MAX_PATH];
 
   if (PathCanonicalize(szDst,lpSrc))
     lstrcpy(lpSrc,szDst);
@@ -1013,20 +1162,26 @@ void PathCanonicalizeEx(LPSTR lpSrc)
 //
 extern LPMALLOC g_lpMalloc;
 
-DWORD GetLongPathNameEx(LPCSTR lpszShortPath,LPSTR lpszLongPath,DWORD cchBuffer)
+DWORD GetLongPathNameEx(LPCWSTR lpszShortPath,LPWSTR lpszLongPath,DWORD cchBuffer)
 {
   WCHAR wszShortPath[MAX_PATH];
+  WCHAR *pwchSep;
   LPSHELLFOLDER lpsfDesktop;
   ULONG chParsed = 0;
   ULONG dwAttributes = 0;
   LPITEMIDLIST  pidl = NULL;
   BOOL fSucceeded = FALSE;
 
-  //MessageBox(GetFocus(),lpszShortPath,"GetLongPathNameEx(): lpszShortPath",0);
+  //MessageBox(GetFocus(),lpszShortPath,L"GetLongPathNameEx(): lpszShortPath",0);
 
   // Convert lpszShortPath to a UNICODE string
-  MultiByteToWideChar(
-    CP_ACP,MB_PRECOMPOSED,lpszShortPath,-1,wszShortPath,MAX_PATH);
+  /*MultiByteToWideChar(
+    CP_ACP,MB_PRECOMPOSED,lpszShortPath,-1,wszShortPath,MAX_PATH);*/
+  lstrcpy(wszShortPath,lpszShortPath);
+
+  // convert slashes to backlsashes
+  while (pwchSep = StrChr(wszShortPath,L'/'))
+    *pwchSep = L'\\';
 
   // Get Desktop Folder
   if (NOERROR == SHGetDesktopFolder(&lpsfDesktop))
@@ -1041,7 +1196,7 @@ DWORD GetLongPathNameEx(LPCSTR lpszShortPath,LPSTR lpszLongPath,DWORD cchBuffer)
     }
   }
 
-  //MessageBox(GetFocus(),lpszLongPath,"GetLongPathNameEx(): lpszLongPath",0);
+  //MessageBox(GetFocus(),lpszLongPath,L"GetLongPathNameEx(): lpszLongPath",0);
 
   if (fSucceeded)
     return(lstrlen(lpszLongPath));
@@ -1059,7 +1214,7 @@ DWORD GetLongPathNameEx(LPCSTR lpszShortPath,LPSTR lpszLongPath,DWORD cchBuffer)
 //
 //  SHGetFileInfo2() - return a default name when the file has been removed
 //
-DWORD_PTR SHGetFileInfo2(LPCTSTR pszPath,DWORD dwFileAttributes,
+DWORD_PTR SHGetFileInfo2(LPCWSTR pszPath,DWORD dwFileAttributes,
                          SHFILEINFO *psfi,UINT cbFileInfo,UINT uFlags)
 {
 
@@ -1077,10 +1232,10 @@ DWORD_PTR SHGetFileInfo2(LPCTSTR pszPath,DWORD dwFileAttributes,
 //
 //  FormatNumberStr()
 //
-int FormatNumberStr(LPSTR lpNumberStr)
+int FormatNumberStr(LPWSTR lpNumberStr)
 {
-  char *c;
-  char szSep[8];
+  WCHAR *c;
+  WCHAR szSep[8];
   int  i = 0;
 
   if (!lstrlen(lpNumberStr))
@@ -1090,7 +1245,7 @@ int FormatNumberStr(LPSTR lpNumberStr)
                      LOCALE_STHOUSAND,
                      szSep,
                      COUNTOF(szSep)))
-    szSep[0] = '\'';
+    szSep[0] = L'\'';
 
   c = StrEnd(lpNumberStr);
 
@@ -1099,7 +1254,7 @@ int FormatNumberStr(LPSTR lpNumberStr)
     if (++i == 3)
     {
       i = 0;
-      MoveMemory(c+1,c,lstrlen(c)+1);
+      MoveMemory(c+1,c,sizeof(WCHAR)*(lstrlen(c)+1));
       *c = szSep[0];
     }
   }
@@ -1114,9 +1269,9 @@ int FormatNumberStr(LPSTR lpNumberStr)
 //
 BOOL SetDlgItemIntEx(HWND hwnd,int nIdItem,UINT uValue)
 {
-  char szBuf[64];
+  WCHAR szBuf[64];
 
-  wsprintf(szBuf,"%u",uValue);
+  wsprintf(szBuf,L"%u",uValue);
   FormatNumberStr(szBuf);
 
   return(SetDlgItemText(hwnd,nIdItem,szBuf));
@@ -1129,23 +1284,24 @@ BOOL SetDlgItemIntEx(HWND hwnd,int nIdItem,UINT uValue)
 //
 UINT GetDlgItemTextA2W(UINT uCP,HWND hDlg,int nIDDlgItem,LPSTR lpString,int nMaxCount)
 {
-  WCHAR wsz[256];
-  UINT uRet = GetDlgItemTextW(hDlg,nIDDlgItem,wsz,256);
-  WCharToMBCS(uCP,wsz,lpString,nMaxCount);
+  WCHAR wsz[1024] = L"";
+  UINT uRet = GetDlgItemTextW(hDlg,nIDDlgItem,wsz,COUNTOF(wsz));
+  ZeroMemory(lpString,nMaxCount);
+  WCharToMBCS(uCP,wsz,lpString,nMaxCount-2);
   return uRet;
 }
 
 UINT SetDlgItemTextA2W(UINT uCP,HWND hDlg,int nIDDlgItem,LPSTR lpString)
 {
-  WCHAR wsz[256];
-  MBCSToWChar(uCP,lpString,wsz,256);
+  WCHAR wsz[1024] = L"";
+  MBCSToWChar(uCP,lpString,wsz,COUNTOF(wsz));
   return SetDlgItemTextW(hDlg,nIDDlgItem,wsz);
 }
 
 LRESULT ComboBox_AddStringA2W(UINT uCP,HWND hwnd,LPCSTR lpString)
 {
-  WCHAR wsz[256];
-  MBCSToWChar(uCP,lpString,wsz,256);
+  WCHAR wsz[1024] = L"";
+  MBCSToWChar(uCP,lpString,wsz,COUNTOF(wsz));
   return SendMessageW(hwnd,CB_ADDSTRING,0,(LPARAM)wsz);
 }
 
@@ -1168,7 +1324,7 @@ UINT CodePageFromCharSet(UINT uCharSet)
 //
 //  MRU functions
 //
-LPMRULIST MRU_Create(LPCSTR pszRegKey,int iFlags,int iSize) {
+LPMRULIST MRU_Create(LPCWSTR pszRegKey,int iFlags,int iSize) {
 
   LPMRULIST pmru = LocalAlloc(LPTR,sizeof(MRULIST));
   ZeroMemory(pmru,sizeof(MRULIST));
@@ -1190,7 +1346,7 @@ BOOL MRU_Destroy(LPMRULIST pmru) {
   return(1);
 }
 
-int MRU_Compare(LPMRULIST pmru,LPCSTR psz1,LPCSTR psz2) {
+int MRU_Compare(LPMRULIST pmru,LPCWSTR psz1,LPCWSTR psz2) {
 
   if (pmru->iFlags & MRU_NOCASE)
     return(lstrcmpi(psz1,psz2));
@@ -1198,7 +1354,7 @@ int MRU_Compare(LPMRULIST pmru,LPCSTR psz1,LPCSTR psz2) {
     return(lstrcmp(psz1,psz2));
 }
 
-BOOL MRU_Add(LPMRULIST pmru,LPCSTR pszNew) {
+BOOL MRU_Add(LPMRULIST pmru,LPCWSTR pszNew) {
 
   int i;
   for (i = 0; i < pmru->iSize; i++) {
@@ -1240,7 +1396,7 @@ BOOL MRU_Empty(LPMRULIST pmru) {
   return(1);
 }
 
-int MRU_Enum(LPMRULIST pmru,int iIndex,LPSTR pszItem,int cchItem) {
+int MRU_Enum(LPMRULIST pmru,int iIndex,LPWSTR pszItem,int cchItem) {
 
   if (pszItem == NULL || cchItem == 0) {
     int i = 0;
@@ -1261,23 +1417,23 @@ int MRU_Enum(LPMRULIST pmru,int iIndex,LPSTR pszItem,int cchItem) {
 BOOL MRU_Load(LPMRULIST pmru) {
 
   int i,n = 0;
-  char tchName[32];
-  char tchItem[1024];
-  char *pIniSection = LocalAlloc(LPTR,32*1024);
+  WCHAR tchName[32];
+  WCHAR tchItem[1024];
+  WCHAR *pIniSection = LocalAlloc(LPTR,sizeof(WCHAR)*32*1024);
 
   MRU_Empty(pmru);
-  LoadIniSection(pmru->szRegKey,pIniSection,LocalSize(pIniSection));
+  LoadIniSection(pmru->szRegKey,pIniSection,LocalSize(pIniSection)/sizeof(WCHAR));
 
   for (i = 0; i < pmru->iSize; i++) {
-    wsprintf(tchName,"%.2i",i+1);
-    if (IniSectionGetString(pIniSection,tchName,"",tchItem,COUNTOF(tchItem))) {
-      if (pmru->iFlags & MRU_UTF8) {
+    wsprintf(tchName,L"%.2i",i+1);
+    if (IniSectionGetString(pIniSection,tchName,L"",tchItem,COUNTOF(tchItem))) {
+      /*if (pmru->iFlags & MRU_UTF8) {
         WCHAR wchItem[1024];
         int cbw = MultiByteToWideChar(CP_UTF7,0,tchItem,-1,wchItem,COUNTOF(wchItem));
         WideCharToMultiByte(CP_UTF8,0,wchItem,cbw,tchItem,COUNTOF(tchItem),NULL,NULL);
         pmru->pszItems[n++] = StrDup(tchItem);
       }
-      else
+      else*/
         pmru->pszItems[n++] = StrDup(tchItem);
     }
   }
@@ -1288,22 +1444,22 @@ BOOL MRU_Load(LPMRULIST pmru) {
 BOOL MRU_Save(LPMRULIST pmru) {
 
   int i;
-  char tchName[32];
-  char *pIniSection = LocalAlloc(LPTR,32*1024);
+  WCHAR tchName[32];
+  WCHAR *pIniSection = LocalAlloc(LPTR,sizeof(WCHAR)*32*1024);
 
   //IniDeleteSection(pmru->szRegKey);
 
   for (i = 0; i < pmru->iSize; i++) {
     if (pmru->pszItems[i]) {
-      wsprintf(tchName,"%.2i",i+1);
-      if (pmru->iFlags & MRU_UTF8) {
-        char  tchItem[1024];
+      wsprintf(tchName,L"%.2i",i+1);
+      /*if (pmru->iFlags & MRU_UTF8) {
+        WCHAR  tchItem[1024];
         WCHAR wchItem[1024];
         int cbw = MultiByteToWideChar(CP_UTF8,0,pmru->pszItems[i],-1,wchItem,COUNTOF(wchItem));
         WideCharToMultiByte(CP_UTF7,0,wchItem,cbw,tchItem,COUNTOF(tchItem),NULL,NULL);
         IniSectionSetString(pIniSection,tchName,tchItem);
       }
-      else
+      else*/
         IniSectionSetString(pIniSection,tchName,pmru->pszItems[i]);
     }
   }
@@ -1433,7 +1589,7 @@ unsigned int UnSlashLowOctal(char *s) {
   return o - sStart;
 }
 
-void TransformBackslashes(LPSTR pszInput,BOOL bRegEx)
+void TransformBackslashes(char* pszInput,BOOL bRegEx)
 {
   if (bRegEx)
     UnSlashLowOctal(pszInput);

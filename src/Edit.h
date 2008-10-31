@@ -22,10 +22,10 @@
 
 typedef struct _editfindreplace
 {
-  char szFind[256];
-  char szReplace[256];
-  char szFindUTF8[256];
-  char szReplaceUTF8[256];
+  char szFind[512];
+  char szReplace[512];
+  char szFindUTF8[3*512];
+  char szReplaceUTF8[3*512];
   UINT fuFlags;
   BOOL bTransformBS;
   BOOL bFindUp;
@@ -39,13 +39,18 @@ typedef struct _editfindreplace
 } EDITFINDREPLACE, *LPEDITFINDREPLACE, *LPCEDITFINDREPLACE;
 
 
+#define IDMSG_SWITCHTOFIND    204
+#define IDMSG_SWITCHTOREPLACE 205
+
+
 HWND  EditCreate(HWND);
-void  EditSetNewText(HWND,LPCSTR,DWORD);
+void  EditSetNewText(HWND,char*,DWORD);
 BOOL  EditConvertText(HWND,UINT,UINT,BOOL);
-LPSTR EditGetClipboardText(HWND);
-int   EditDetectEOLMode(HWND,LPCSTR,DWORD);
-BOOL  EditLoadFile(HWND,LPCSTR,BOOL,int*,int*,BOOL*,BOOL*);
-BOOL  EditSaveFile(HWND,LPCSTR,int,BOOL);
+char* EditGetClipboardText(HWND);
+BOOL  EditCopyAppend(HWND);
+int   EditDetectEOLMode(HWND,char*,DWORD);
+BOOL  EditLoadFile(HWND,LPCWSTR,BOOL,int*,int*,BOOL*,BOOL*);
+BOOL  EditSaveFile(HWND,LPCWSTR,int,BOOL);
 
 void  EditMakeUppercase(HWND);
 void  EditMakeLowercase(HWND);
@@ -60,10 +65,12 @@ void  EditModifyLines(HWND,LPCWSTR,LPCWSTR);
 void  EditEncloseSelection(HWND,LPCWSTR,LPCWSTR);
 void  EditToggleLineComments(HWND,LPCWSTR,BOOL);
 void  EditStripFirstCharacter(HWND);
+void  EditStripLastCharacter(HWND);
 void  EditStripTrailingBlanks(HWND);
 void  EditCompressSpaces(HWND);
 void  EditRemoveBlankLines(HWND);
 void  EditWrapToColumn(HWND,int);
+void  EditJoinLinesEx(HWND);
 
 void  EditJumpTo(HWND,int,int);
 void  EditSelectEx(HWND,int,int);
@@ -78,7 +85,7 @@ BOOL  EditLinenumDlg(HWND);
 BOOL  EditModifyLinesDlg(HWND,LPWSTR,LPWSTR);
 BOOL  EditEncloseSelectionDlg(HWND,LPWSTR,LPWSTR);
 BOOL  EditInsertTagDlg(HWND,LPWSTR,LPWSTR);
-BOOL  EditPrint(HWND,LPCSTR,LPCSTR);
+BOOL  EditPrint(HWND,LPCWSTR,LPCWSTR);
 void  EditPrintSetup(HWND);
 void  EditPrintInit();
 
@@ -95,9 +102,35 @@ BOOL IsUTF8(const char*,int);
 BOOL IsUTF7(const char*,int);
 
 
-void SciInitThemes(HWND);
-LRESULT CALLBACK SciThemedWndProc(HWND,UINT,WPARAM,LPARAM);
+//void SciInitThemes(HWND);
+//LRESULT CALLBACK SciThemedWndProc(HWND,UINT,WPARAM,LPARAM);
 
+
+#define FV_TABWIDTH        1
+#define FV_INDENTWIDTH     2
+#define FV_TABSASSPACES    4
+#define FV_LONGLINESLIMIT  8
+#define FV_ENCODING       16
+#define FV_MODE           32
+
+typedef struct _filevars {
+
+  int mask;
+  int iTabWidth;
+  int iIndentWidth;
+  BOOL bTabsAsSpaces;
+  int iLongLinesLimit;
+  char tchEncoding[32];
+  char tchMode[32];
+
+} FILEVARS, *LPFILEVARS;
+
+BOOL FileVars_Init(char*,DWORD,LPFILEVARS);
+BOOL FileVars_Apply(HWND,LPFILEVARS);
+BOOL FileVars_ParseInt(char*,char*,int*);
+BOOL FileVars_ParseStr(char*,char*,char*,int);
+BOOL FileVars_IsUTF8(LPFILEVARS);
+BOOL FileVars_IsANSI(LPFILEVARS);
 
 
 ///   End of Edit.h   \\\

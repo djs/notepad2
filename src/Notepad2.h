@@ -21,12 +21,24 @@
 
 
 //==== Main Window ============================================================
-#define WC_NOTEPAD2 "Notepad2"
-#define WC_NOTEPAD2PASTEBOARD "Notepad2PasteBoard"
+#define WC_NOTEPAD2 L"Notepad2"
+#define WC_NOTEPAD2PASTEBOARD L"Notepad2PasteBoard"
 
 
 //==== Data Type for WM_COPYDATA ==============================================
-#define DATA_NOTEPAD2_FILEARG 0xDE70
+#define DATA_NOTEPAD2_PARAMS 0xDE71
+typedef struct np2params {
+
+  int   flagFileSpecified;
+  int   flagLexerSpecified;
+  int   iInitialLexer;
+  int   flagQuietCreate;
+  int   flagJumpTo;
+  int   iInitialLine;
+  int   iInitialColumn;
+  WCHAR wchData;
+
+} NP2PARAMS, *LPNP2PARAMS;
 
 
 //==== Toolbar Style ==========================================================
@@ -63,7 +75,7 @@
 //==== Change Notifications ===================================================
 #define ID_WATCHTIMER 0xA000
 #define WM_CHANGENOTIFY WM_USER+1
-#define WM_CHANGENOTIFYCLEAR WM_USER+2
+//#define WM_CHANGENOTIFYCLEAR WM_USER+2
 
 
 //==== Callback Message from System Tray ======================================
@@ -76,15 +88,18 @@ HWND InitInstance(HINSTANCE,LPSTR,int);
 BOOL ActivatePrevInst();
 void ShowNotifyIcon(HWND,BOOL);
 void SetNotifyIconTitle(HWND);
-void InstallFileWatching(LPCSTR);
+void InstallFileWatching(LPCWSTR);
 void CALLBACK WatchTimerProc(HWND,UINT,UINT_PTR,DWORD);
 
 
 void LoadSettings();
 void SaveSettings(BOOL);
-void ParseCommandLine(LPSTR);
+void ParseCommandLine();
 void LoadFlags();
+int  CheckIniFile(LPWSTR,LPCWSTR);
+int  CheckIniFileRedirect(LPWSTR,LPCWSTR);
 int  FindIniFile();
+int  CreateIniFile();
 
 
 void UpdateStatusbar();
@@ -92,11 +107,11 @@ void UpdateToolbar();
 void UpdateLineNumberWidth();
 
 
-BOOL FileIO(BOOL,LPCSTR,BOOL,int*,int*,BOOL*,BOOL*,BOOL);
-BOOL FileLoad(BOOL,BOOL,BOOL,BOOL,LPCSTR);
+BOOL FileIO(BOOL,LPCWSTR,BOOL,int*,int*,BOOL*,BOOL*,BOOL);
+BOOL FileLoad(BOOL,BOOL,BOOL,BOOL,LPCWSTR);
 BOOL FileSave(BOOL,BOOL,BOOL,BOOL);
-BOOL OpenFileDlg(HWND,LPSTR,int,LPCSTR);
-BOOL SaveFileDlg(HWND,LPSTR,int);
+BOOL OpenFileDlg(HWND,LPWSTR,int,LPCWSTR);
+BOOL SaveFileDlg(HWND,LPWSTR,int);
 
 
 LRESULT CALLBACK MainWndProc(HWND,UINT,WPARAM,LPARAM);
@@ -110,4 +125,4 @@ LRESULT MsgNotify(HWND,WPARAM,LPARAM);
 
 
 
-///   End of Textview.h   \\\
+///   End of Notepad2.h   \\\
