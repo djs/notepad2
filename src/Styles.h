@@ -11,7 +11,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2008
+*                                              (c) Florian Balmer 1996-2009
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -60,7 +60,8 @@ void   Style_SetLexer(HWND,PEDITLEXER);
 //void   Style_SetACPfromCharSet(HWND);
 void   Style_SetLongLineColors(HWND);
 void   Style_SetCurrentLineBackground(HWND);
-void   Style_SetLexerFromFile(HWND,LPCWSTR,BOOL);
+void   Style_SetLexerFromFile(HWND,LPCWSTR);
+void   Style_SetLexerFromName(HWND,LPCWSTR,LPCWSTR);
 void   Style_SetDefaultLexer(HWND);
 void   Style_SetHTMLLexer(HWND);
 void   Style_SetXMLLexer(HWND);

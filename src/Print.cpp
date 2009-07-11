@@ -12,7 +12,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2008
+*                                              (c) Florian Balmer 1996-2009
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -531,14 +531,15 @@ extern "C" UINT_PTR CALLBACK PageSetupHook(HWND hwnd, UINT uiMsg, WPARAM wParam,
 
 extern "C" void EditPrintSetup(HWND hwnd)
 {
-  PAGESETUPDLG pdlg = {
-                          sizeof(PAGESETUPDLG), 0, 0, 0, 0, {0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, 0, 0, 0, 0, 0, 0
-                      };
+  DLGTEMPLATE* pDlgTemplate =
+    LoadThemedDialogTemplate(MAKEINTRESOURCE(IDD_PAGESETUP),g_hInstance);
 
-  pdlg.Flags = PSD_ENABLEPAGESETUPHOOK | PSD_ENABLEPAGESETUPTEMPLATE;
+  PAGESETUPDLG pdlg;
+  ZeroMemory(&pdlg,sizeof(PAGESETUPDLG));
+  pdlg.lStructSize = sizeof(PAGESETUPDLG);
+  pdlg.Flags = PSD_ENABLEPAGESETUPHOOK | PSD_ENABLEPAGESETUPTEMPLATEHANDLE;
   pdlg.lpfnPageSetupHook = PageSetupHook;
-  pdlg.lpPageSetupTemplateName = MAKEINTRESOURCE(IDD_PAGESETUP);
-
+  pdlg.hPageSetupTemplate = pDlgTemplate;
   pdlg.hwndOwner = GetParent(hwnd);
   pdlg.hInstance = g_hInstance;
 
@@ -555,16 +556,18 @@ extern "C" void EditPrintSetup(HWND hwnd)
   pdlg.hDevMode = hDevMode;
   pdlg.hDevNames = hDevNames;
 
-  if (!PageSetupDlg(&pdlg))
-    return;
+  if (PageSetupDlg(&pdlg)) {
 
-  pagesetupMargin.left = pdlg.rtMargin.left;
-  pagesetupMargin.top = pdlg.rtMargin.top;
-  pagesetupMargin.right = pdlg.rtMargin.right;
-  pagesetupMargin.bottom = pdlg.rtMargin.bottom;
+    pagesetupMargin.left = pdlg.rtMargin.left;
+    pagesetupMargin.top = pdlg.rtMargin.top;
+    pagesetupMargin.right = pdlg.rtMargin.right;
+    pagesetupMargin.bottom = pdlg.rtMargin.bottom;
 
-  hDevMode = pdlg.hDevMode;
-  hDevNames = pdlg.hDevNames;
+    hDevMode = pdlg.hDevMode;
+    hDevNames = pdlg.hDevNames;
+  }
+
+  LocalFree(pDlgTemplate);
 }
 
 

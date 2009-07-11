@@ -11,7 +11,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2008
+*                                              (c) Florian Balmer 1996-2009
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -45,7 +45,7 @@ BOOL LongLineSettingsDlg(HWND,UINT,int *);
 BOOL TabSettingsDlg(HWND,UINT,int *);
 BOOL SelectEncodingDlg(HWND,int *);
 BOOL SelectLineEndingDlg(HWND,int *);
-int  InfoBox(int,int,LPCWSTR);
+int  InfoBox(int,LPCWSTR,int,...);
 
 
 // End of Dialogs.h

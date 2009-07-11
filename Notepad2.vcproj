@@ -274,10 +274,6 @@
 				>
 			</File>
 			<File
-				RelativePath="res\Hover.cur"
-				>
-			</File>
-			<File
 				RelativePath="scintilla\win32\Margin.cur"
 				>
 			</File>

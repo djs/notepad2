@@ -11,7 +11,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2008
+*                                              (c) Florian Balmer 1996-2009
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -40,6 +40,8 @@ extern HINSTANCE g_hInstance;
 extern LPMALLOC  g_lpMalloc;
 extern BOOL bSkipUnicodeDetection;
 extern BOOL bFixLineEndings;
+extern BOOL bAutoStripBlanks;
+extern WCHAR szCurFile[MAX_PATH+40];
 
 
 //=============================================================================
@@ -186,192 +188,86 @@ BOOL GetDirectory(HWND hwndParent,int iTitle,LPWSTR pszFolder,LPCWSTR pszBase,BO
 //  AboutDlgProc()
 //
 static const DWORD  dwVerMajor    = 3;
-static const DWORD  dwVerMinor    = 0;
-static const DWORD  dwBuildNumber = 20;
+static const DWORD  dwVerMinor    = 1;
+static const DWORD  dwBuildNumber = 21;
 static const WCHAR* szRevision    = L"";
 static const WCHAR* szExtra       = L"";
+static const BOOL   bReleaseBuild = TRUE;
 
 BOOL CALLBACK AboutDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
 {
 
   static HFONT hFontTitle;
 
-  static BOOL hover_email;
-  static BOOL capture_email;
-  static BOOL hover_webpage;
-  static BOOL capture_webpage;
-
-  static HFONT hFontNormal;
-  static HFONT hFontHover;
-
-  static HCURSOR hCursorNormal;
-  static HCURSOR hCursorHover;
-
   switch(umsg)
   {
     case WM_INITDIALOG:
       {
         WCHAR  szVersion[64];
+        WCHAR  szDate[64];
+        WCHAR  szLink[256];
+        WCHAR  szLinkCode[256];
         LOGFONT lf;
 
-        wsprintf(szVersion,L"Notepad2 %u.%u.%0.2u%s%s",
-          dwVerMajor,dwVerMinor,dwBuildNumber,szRevision,szExtra);
-        SetDlgItemText(hwnd,IDC_VERSION,szVersion);
-
-        if (hFontTitle == NULL) {
-          if (NULL == (hFontTitle = (HFONT)SendDlgItemMessage(hwnd,IDC_VERSION,WM_GETFONT,0,0)))
-            hFontTitle = GetStockObject(DEFAULT_GUI_FONT);
-          GetObject(hFontTitle,sizeof(LOGFONT),&lf);
-          lf.lfWeight = FW_BOLD;
-          hFontTitle = CreateFontIndirect(&lf);
+        if (bReleaseBuild) {
+          wsprintf(szVersion,L"Notepad2 %u.%u.%0.2u%s",
+            dwVerMajor,dwVerMinor,dwBuildNumber,szRevision);
+          SetDlgItemText(hwnd,IDC_VERSION,szVersion);
+        }
+        else {
+          MultiByteToWideChar(CP_ACP,0,__DATE__,-1,szDate,COUNTOF(szDate));
+          wsprintf(szVersion,L"Notepad2 %u.%u.%0.2u%s%s %s",
+            dwVerMajor,dwVerMinor,dwBuildNumber,szRevision,szExtra,szDate);
+          SetDlgItemText(hwnd,IDC_VERSION,szVersion);
         }
 
-        hover_email = FALSE;
-        capture_email = FALSE;
-        hover_webpage = FALSE;
-        capture_webpage = FALSE;
+        if (hFontTitle)
+          DeleteObject(hFontTitle);
 
-        //  Font setup
-        if (NULL == (hFontHover = (HFONT)SendDlgItemMessage(hwnd,IDC_EMAIL,WM_GETFONT,0,0)))
-          hFontHover = GetStockObject(DEFAULT_GUI_FONT);
-        GetObject(hFontHover,sizeof(LOGFONT),&lf);
-        lf.lfUnderline = TRUE;
-        hFontNormal = CreateFontIndirect(&lf);
+        if (NULL == (hFontTitle = (HFONT)SendDlgItemMessage(hwnd,IDC_VERSION,WM_GETFONT,0,0)))
+          hFontTitle = GetStockObject(DEFAULT_GUI_FONT);
+        GetObject(hFontTitle,sizeof(LOGFONT),&lf);
+        lf.lfWeight = FW_BOLD;
+        hFontTitle = CreateFontIndirect(&lf);
+        SendDlgItemMessage(hwnd,IDC_VERSION,WM_SETFONT,(WPARAM)hFontTitle,TRUE);
 
-        //  Cursor setup
-        hCursorNormal = LoadCursor(NULL,MAKEINTRESOURCE(IDC_ARROW));
-        if (!(hCursorHover = LoadCursor(NULL,MAKEINTRESOURCE(IDC_HAND))))
-          hCursorHover  = LoadCursor(g_hInstance,MAKEINTRESOURCE(IDC_HOVER));
+        if (GetDlgItem(hwnd,IDC_WEBPAGE) == NULL)
+          ShowWindow(GetDlgItem(hwnd,IDC_WEBPAGE2),SW_SHOWNORMAL);
+        else {
+          GetDlgItemText(hwnd,IDC_WEBPAGE2,szLink,COUNTOF(szLink));
+          wsprintf(szLinkCode,L"<A>%s</A>",szLink);
+          SetDlgItemText(hwnd,IDC_WEBPAGE,szLinkCode);
+        }
+
+        if (GetDlgItem(hwnd,IDC_EMAIL) == NULL)
+          ShowWindow(GetDlgItem(hwnd,IDC_EMAIL2),SW_SHOWNORMAL);
+        else {
+          GetDlgItemText(hwnd,IDC_EMAIL2,szLink,COUNTOF(szLink));
+          wsprintf(szLinkCode,L"<A>%s</A>",szLink);
+          SetDlgItemText(hwnd,IDC_EMAIL,szLinkCode);
+        }
 
         CenterDlgInParent(hwnd);
       }
       return TRUE;
 
-    case WM_NCACTIVATE:
-      if (!(BOOL)wParam) { //  we're not active, clear hover states
-        hover_email = FALSE;
-        capture_email = FALSE;
-        hover_webpage = FALSE;
-        capture_webpage = FALSE;
-        InvalidateRect(GetDlgItem(hwnd,IDC_EMAIL),NULL,FALSE);
-        InvalidateRect(GetDlgItem(hwnd,IDC_WEBPAGE),NULL,FALSE);
-      }
-      return FALSE;
-
-    case WM_CTLCOLORSTATIC:
+    case WM_NOTIFY:
       {
-        DWORD dwId = GetWindowLong((HWND)lParam,GWL_ID);
-        HDC hdc = (HDC)wParam;
+        LPNMHDR pnmhdr = (LPNMHDR)lParam;
+        switch (pnmhdr->code) {
 
-        if (dwId == IDC_VERSION) {
-          SetBkMode(hdc,TRANSPARENT);
-          SetTextColor(hdc,GetSysColor(COLOR_BTNTEXT));
-          SelectObject(hdc,hFontTitle);
-          return(LONG)GetSysColorBrush(COLOR_BTNFACE);
+          case NM_CLICK:
+          case NM_RETURN:
+            {
+              if (pnmhdr->idFrom == IDC_WEBPAGE) {
+                ShellExecute(hwnd,L"open",L"http://www.flos-freeware.ch",NULL,NULL,SW_SHOWNORMAL);
+              }
+              else if (pnmhdr->idFrom == IDC_EMAIL) {
+                ShellExecute(hwnd,L"open",L"mailto:florian.balmer@gmail.com",NULL,NULL,SW_SHOWNORMAL);
+              }
+            }
+            break;
         }
-
-        if (dwId == IDC_EMAIL || dwId == IDC_WEBPAGE) {
-
-          SetBkMode(hdc,TRANSPARENT);
-
-          if (GetSysColorBrush(COLOR_HOTLIGHT))
-            SetTextColor(hdc,GetSysColor(COLOR_HOTLIGHT));
-          else
-            SetTextColor(hdc,RGB(0,0,255));
-
-          if (dwId == IDC_EMAIL)
-            SelectObject(hdc,hover_email?hFontHover:hFontNormal);
-          else
-            SelectObject(hdc,hover_webpage?hFontHover:hFontNormal);
-
-          return(LONG)GetSysColorBrush(COLOR_BTNFACE);
-        }
-      }
-      break;
-
-    case WM_MOUSEMOVE:
-      {
-        POINT pt = { LOWORD(lParam), HIWORD(lParam) };
-        HWND hwndHover = ChildWindowFromPoint(hwnd,pt);
-        DWORD dwId = GetWindowLong(hwndHover,GWL_ID);
-
-        if (GetActiveWindow() == hwnd) {
-
-          if (wParam & MK_LBUTTON && !capture_email && !capture_webpage) {
-            ;
-          }
-
-          else if (hover_email != (dwId == IDC_EMAIL) && !capture_webpage) {
-            hover_email = !hover_email;
-            InvalidateRect(GetDlgItem(hwnd,IDC_EMAIL),NULL,FALSE);
-          }
-
-          else if (hover_webpage != (dwId == IDC_WEBPAGE) && !capture_email) {
-            hover_webpage = !hover_webpage;
-            InvalidateRect(GetDlgItem(hwnd,IDC_WEBPAGE),NULL,FALSE);
-          }
-
-          SetCursor((hover_email || hover_webpage)?hCursorHover:hCursorNormal);
-        }
-      }
-      break;
-
-    case WM_LBUTTONDOWN:
-      {
-        POINT pt = { LOWORD(lParam), HIWORD(lParam) };
-        HWND hwndHover = ChildWindowFromPoint(hwnd,pt);
-        DWORD dwId = GetWindowLong(hwndHover,GWL_ID);
-
-        if (dwId == IDC_EMAIL) {
-          GetCapture();
-          hover_email = TRUE;
-          capture_email = TRUE;
-          InvalidateRect(GetDlgItem(hwnd,IDC_EMAIL),NULL,FALSE);
-        }
-
-        else if (dwId == IDC_WEBPAGE) {
-          GetCapture();
-          hover_webpage = TRUE;
-          capture_webpage = TRUE;
-          InvalidateRect(GetDlgItem(hwnd,IDC_WEBPAGE),NULL,FALSE);
-        }
-
-        SetCursor((hover_email || hover_webpage)?hCursorHover:hCursorNormal);
-      }
-      break;
-
-    case WM_LBUTTONUP:
-      {
-        POINT pt = { LOWORD(lParam), HIWORD(lParam) };
-        HWND hwndHover = ChildWindowFromPoint(hwnd,pt);
-        DWORD dwId = GetWindowLong(hwndHover,GWL_ID);
-
-        if (capture_email || capture_webpage) {
-            ReleaseCapture();
-
-          if (dwId == IDC_EMAIL && capture_email) {
-            ShellExecute(hwnd,L"open",L"mailto:florian.balmer@gmail.com",NULL,NULL,SW_SHOWNORMAL);
-          }
-
-          else if (dwId == IDC_WEBPAGE && capture_webpage) {
-            ShellExecute(hwnd,L"open",L"http://www.flos-freeware.ch",NULL,NULL,SW_SHOWNORMAL);
-          }
-
-          capture_email = FALSE;
-          capture_webpage = FALSE;
-        }
-        SetCursor((hover_email || hover_webpage)?hCursorHover:hCursorNormal);
-      }
-      break;
-
-    case WM_CANCELMODE:
-      if (capture_email || capture_webpage) {
-        ReleaseCapture();
-        hover_email = FALSE;
-        capture_email = FALSE;
-        hover_webpage = FALSE;
-        capture_webpage = FALSE;
-        SetCursor(hCursorNormal);
       }
       break;
 
@@ -388,6 +284,7 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
   }
   return FALSE;
 }
+
 
 
 //=============================================================================
@@ -482,6 +379,7 @@ BOOL CALLBACK RunDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
             WCHAR arg1[MAX_PATH];
             WCHAR arg2[MAX_PATH];
             SHELLEXECUTEINFO sei;
+            WCHAR wchDirectory[MAX_PATH] = L"";
 
             if (GetDlgItemText(hwnd,IDC_COMMANDLINE,arg1,MAX_PATH))
             {
@@ -496,6 +394,11 @@ BOOL CALLBACK RunDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
                 bQuickExit = TRUE;
               }
 
+              if (lstrlen(szCurFile)) {
+                lstrcpy(wchDirectory,szCurFile);
+                PathRemoveFileSpec(wchDirectory);
+              }
+
               ZeroMemory(&sei,sizeof(SHELLEXECUTEINFO));
 
               sei.cbSize = sizeof(SHELLEXECUTEINFO);
@@ -504,7 +407,7 @@ BOOL CALLBACK RunDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
               sei.lpVerb = NULL;
               sei.lpFile = arg1;
               sei.lpParameters = arg2;
-              sei.lpDirectory = NULL;
+              sei.lpDirectory = wchDirectory;
               sei.nShow = SW_SHOWNORMAL;
 
               if (bQuickExit) {
@@ -548,7 +451,7 @@ BOOL CALLBACK RunDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
 void RunDlg(HWND hwnd,LPCWSTR lpstrDefault)
 {
 
-  DialogBoxParam(g_hInstance,MAKEINTRESOURCE(IDD_RUN),
+  ThemedDialogBoxParam(g_hInstance,MAKEINTRESOURCE(IDD_RUN),
     hwnd,RunDlgProc,(LPARAM)lpstrDefault);
 
 }
@@ -559,7 +462,6 @@ void RunDlg(HWND hwnd,LPCWSTR lpstrDefault)
 //  OpenWithDlgProc()
 //
 extern WCHAR tchOpenWithDir[MAX_PATH];
-extern WCHAR tchOpenWithDirBuf[MAX_PATH];
 extern int  flagNoFadeHidden;
 
 extern int cxOpenWithDlg;
@@ -587,9 +489,9 @@ BOOL CALLBACK OpenWithDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
         cxClient = rc.right - rc.left;
         cyClient = rc.bottom - rc.top;
 
-        GetWindowRect(hwnd,&rc);
-        mmiPtMaxY = rc.bottom-rc.top;
+        AdjustWindowRectEx(&rc,GetWindowLongPtr(hwnd,GWL_STYLE)|WS_THICKFRAME,FALSE,0);
         mmiPtMinX = rc.right-rc.left;
+        mmiPtMaxY = rc.bottom-rc.top;
 
         if (cxOpenWithDlg < (rc.right-rc.left))
           cxOpenWithDlg = rc.right-rc.left;
@@ -597,15 +499,15 @@ BOOL CALLBACK OpenWithDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
           cyOpenWithDlg = rc.bottom-rc.top;
         SetWindowPos(hwnd,NULL,rc.left,rc.top,cxOpenWithDlg,cyOpenWithDlg,SWP_NOZORDER);
 
-        SetWindowLong(hwnd,GWL_STYLE,GetWindowLong(hwnd,GWL_STYLE)|WS_THICKFRAME);
+        SetWindowLongPtr(hwnd,GWL_STYLE,GetWindowLongPtr(hwnd,GWL_STYLE)|WS_THICKFRAME);
         SetWindowPos(hwnd,NULL,0,0,0,0,SWP_NOZORDER|SWP_NOMOVE|SWP_NOSIZE|SWP_FRAMECHANGED);
 
         GetMenuString(GetSystemMenu(GetParent(hwnd),FALSE),SC_SIZE,tch,COUNTOF(tch),MF_BYCOMMAND);
         InsertMenu(GetSystemMenu(hwnd,FALSE),SC_CLOSE,MF_BYCOMMAND|MF_STRING|MF_ENABLED,SC_SIZE,tch);
         InsertMenu(GetSystemMenu(hwnd,FALSE),SC_CLOSE,MF_BYCOMMAND|MF_SEPARATOR,0,NULL);
 
-        SetWindowLong(GetDlgItem(hwnd,IDC_RESIZEGRIP3),GWL_STYLE,
-          GetWindowLong(GetDlgItem(hwnd,IDC_RESIZEGRIP3),GWL_STYLE)|SBS_SIZEGRIP|WS_CLIPSIBLINGS);
+        SetWindowLongPtr(GetDlgItem(hwnd,IDC_RESIZEGRIP3),GWL_STYLE,
+          GetWindowLongPtr(GetDlgItem(hwnd,IDC_RESIZEGRIP3),GWL_STYLE)|SBS_SIZEGRIP|WS_CLIPSIBLINGS);
 
         cGrip = GetSystemMetrics(SM_CXHTHUMB);
         SetWindowPos(GetDlgItem(hwnd,IDC_RESIZEGRIP3),NULL,cxClient-cGrip,
@@ -613,6 +515,7 @@ BOOL CALLBACK OpenWithDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
 
         SetWindowLongPtr(hwnd,DWLP_USER,lParam);
 
+        //SetExplorerTheme(GetDlgItem(hwnd,IDC_OPENWITHDIR));
         ListView_SetExtendedListViewStyle(GetDlgItem(hwnd,IDC_OPENWITHDIR),/*LVS_EX_FULLROWSELECT|*/LVS_EX_DOUBLEBUFFER|LVS_EX_LABELTIP);
         ListView_InsertColumn(GetDlgItem(hwnd,IDC_OPENWITHDIR),0,&lvc);
         DirList_Init(GetDlgItem(hwnd,IDC_OPENWITHDIR),NULL);
@@ -735,7 +638,6 @@ BOOL CALLBACK OpenWithDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
           {
             if (GetDirectory(hwnd,IDS_OPENWITH,tchOpenWithDir,tchOpenWithDir,TRUE))
             {
-              lstrcpy(tchOpenWithDirBuf,tchOpenWithDir);
               DirList_Fill(GetDlgItem(hwnd,IDC_OPENWITHDIR),tchOpenWithDir,DL_ALLOBJECTS,NULL,FALSE,flagNoFadeHidden,DS_NAME,FALSE);
               DirList_StartIconThread(GetDlgItem(hwnd,IDC_OPENWITHDIR));
               ListView_EnsureVisible(GetDlgItem(hwnd,IDC_OPENWITHDIR),0,FALSE);
@@ -785,11 +687,17 @@ BOOL OpenWithDlg(HWND hwnd,LPCWSTR lpstrFile)
   DLITEM dliOpenWith;
   dliOpenWith.mask = DLI_FILENAME;
 
-  if (IDOK == DialogBoxParam(g_hInstance,MAKEINTRESOURCE(IDD_OPENWITH),
+  if (IDOK == ThemedDialogBoxParam(g_hInstance,MAKEINTRESOURCE(IDD_OPENWITH),
                              hwnd,OpenWithDlgProc,(LPARAM)&dliOpenWith))
   {
     SHELLEXECUTEINFO sei;
     WCHAR szParam[MAX_PATH];
+    WCHAR wchDirectory[MAX_PATH] = L"";
+
+    if (lstrlen(szCurFile)) {
+      lstrcpy(wchDirectory,szCurFile);
+      PathRemoveFileSpec(wchDirectory);
+    }
 
     ZeroMemory(&sei,sizeof(SHELLEXECUTEINFO));
     sei.cbSize = sizeof(SHELLEXECUTEINFO);
@@ -798,14 +706,14 @@ BOOL OpenWithDlg(HWND hwnd,LPCWSTR lpstrFile)
     sei.lpVerb = NULL;
     sei.lpFile = dliOpenWith.szFileName;
     sei.lpParameters = szParam;
-    sei.lpDirectory = NULL;
+    sei.lpDirectory = wchDirectory;
     sei.nShow = SW_SHOWNORMAL;
 
     // resolve links and get short path name
     if (!(PathIsLnkFile(lpstrFile) && PathGetLnkPath(lpstrFile,szParam,COUNTOF(szParam))))
       lstrcpy(szParam,lpstrFile);
-    GetShortPathName(szParam,szParam,sizeof(WCHAR)*COUNTOF(szParam));
-    //PathQuoteSpaces(szParam);
+    //GetShortPathName(szParam,szParam,sizeof(WCHAR)*COUNTOF(szParam));
+    PathQuoteSpaces(szParam);
 
     ShellExecuteEx(&sei);
 
@@ -822,7 +730,6 @@ BOOL OpenWithDlg(HWND hwnd,LPCWSTR lpstrFile)
 //  FavoritesDlgProc()
 //
 extern WCHAR tchFavoritesDir[MAX_PATH];
-extern WCHAR tchFavoritesDirBuf[MAX_PATH];
 //extern int  flagNoFadeHidden;
 
 extern int cxFavoritesDlg;
@@ -850,9 +757,9 @@ BOOL CALLBACK FavoritesDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
         cxClient = rc.right - rc.left;
         cyClient = rc.bottom - rc.top;
 
-        GetWindowRect(hwnd,&rc);
-        mmiPtMaxY = rc.bottom-rc.top;
+        AdjustWindowRectEx(&rc,GetWindowLongPtr(hwnd,GWL_STYLE)|WS_THICKFRAME,FALSE,0);
         mmiPtMinX = rc.right-rc.left;
+        mmiPtMaxY = rc.bottom-rc.top;
 
         if (cxFavoritesDlg < (rc.right-rc.left))
           cxFavoritesDlg = rc.right-rc.left;
@@ -860,15 +767,15 @@ BOOL CALLBACK FavoritesDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
           cyFavoritesDlg = rc.bottom-rc.top;
         SetWindowPos(hwnd,NULL,rc.left,rc.top,cxFavoritesDlg,cyFavoritesDlg,SWP_NOZORDER);
 
-        SetWindowLong(hwnd,GWL_STYLE,GetWindowLong(hwnd,GWL_STYLE)|WS_THICKFRAME);
+        SetWindowLongPtr(hwnd,GWL_STYLE,GetWindowLongPtr(hwnd,GWL_STYLE)|WS_THICKFRAME);
         SetWindowPos(hwnd,NULL,0,0,0,0,SWP_NOZORDER|SWP_NOMOVE|SWP_NOSIZE|SWP_FRAMECHANGED);
 
         GetMenuString(GetSystemMenu(GetParent(hwnd),FALSE),SC_SIZE,tch,COUNTOF(tch),MF_BYCOMMAND);
         InsertMenu(GetSystemMenu(hwnd,FALSE),SC_CLOSE,MF_BYCOMMAND|MF_STRING|MF_ENABLED,SC_SIZE,tch);
         InsertMenu(GetSystemMenu(hwnd,FALSE),SC_CLOSE,MF_BYCOMMAND|MF_SEPARATOR,0,NULL);
 
-        SetWindowLong(GetDlgItem(hwnd,IDC_RESIZEGRIP3),GWL_STYLE,
-          GetWindowLong(GetDlgItem(hwnd,IDC_RESIZEGRIP3),GWL_STYLE)|SBS_SIZEGRIP|WS_CLIPSIBLINGS);
+        SetWindowLongPtr(GetDlgItem(hwnd,IDC_RESIZEGRIP3),GWL_STYLE,
+          GetWindowLongPtr(GetDlgItem(hwnd,IDC_RESIZEGRIP3),GWL_STYLE)|SBS_SIZEGRIP|WS_CLIPSIBLINGS);
 
         cGrip = GetSystemMetrics(SM_CXHTHUMB);
         SetWindowPos(GetDlgItem(hwnd,IDC_RESIZEGRIP3),NULL,cxClient-cGrip,
@@ -876,6 +783,7 @@ BOOL CALLBACK FavoritesDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
 
         SetWindowLongPtr(hwnd,DWLP_USER,lParam);
 
+        //SetExplorerTheme(GetDlgItem(hwnd,IDC_FAVORITESDIR));
         ListView_SetExtendedListViewStyle(GetDlgItem(hwnd,IDC_FAVORITESDIR),/*LVS_EX_FULLROWSELECT|*/LVS_EX_DOUBLEBUFFER|LVS_EX_LABELTIP);
         ListView_InsertColumn(GetDlgItem(hwnd,IDC_FAVORITESDIR),0,&lvc);
         DirList_Init(GetDlgItem(hwnd,IDC_FAVORITESDIR),NULL);
@@ -998,7 +906,6 @@ BOOL CALLBACK FavoritesDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
           {
             if (GetDirectory(hwnd,IDS_FAVORITES,tchFavoritesDir,tchFavoritesDir,TRUE))
             {
-              lstrcpy(tchFavoritesDirBuf,tchFavoritesDir);
               DirList_Fill(GetDlgItem(hwnd,IDC_FAVORITESDIR),tchFavoritesDir,DL_ALLOBJECTS,NULL,FALSE,flagNoFadeHidden,DS_NAME,FALSE);
               DirList_StartIconThread(GetDlgItem(hwnd,IDC_FAVORITESDIR));
               ListView_EnsureVisible(GetDlgItem(hwnd,IDC_FAVORITESDIR),0,FALSE);
@@ -1048,7 +955,7 @@ BOOL FavoritesDlg(HWND hwnd,LPWSTR lpstrFile)
   DLITEM dliFavorite;
   dliFavorite.mask = DLI_FILENAME;
 
-  if (IDOK == DialogBoxParam(g_hInstance,MAKEINTRESOURCE(IDD_FAVORITES),
+  if (IDOK == ThemedDialogBoxParam(g_hInstance,MAKEINTRESOURCE(IDD_FAVORITES),
                              hwnd,FavoritesDlgProc,(LPARAM)&dliFavorite))
   {
     lstrcpyn(lpstrFile,dliFavorite.szFileName,MAX_PATH);
@@ -1076,7 +983,7 @@ BOOL CALLBACK AddToFavDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
 
     case WM_INITDIALOG:
       pszName = (LPWSTR)lParam;
-      SetWindowLongPtr(hwnd,DWLP_USER,pszName);
+      SetWindowLongPtr(hwnd,DWLP_USER,(LONG_PTR)pszName);
 
       SendDlgItemMessage(hwnd,100,EM_LIMITTEXT,MAX_PATH-1,0);
       SetDlgItemText(hwnd,100,pszName);
@@ -1131,7 +1038,7 @@ BOOL AddToFavDlg(HWND hwnd,LPCWSTR lpszName,LPCWSTR lpszTarget)
   WCHAR pszName[MAX_PATH];
   lstrcpy(pszName,lpszName);
 
-  iResult = DialogBoxParam(
+  iResult = ThemedDialogBoxParam(
               g_hInstance,
               MAKEINTRESOURCE(IDD_ADDTOFAV),
               hwnd,
@@ -1288,9 +1195,9 @@ BOOL CALLBACK FileMRUDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
         cxClient = rc.right - rc.left;
         cyClient = rc.bottom - rc.top;
 
-        GetWindowRect(hwnd,&rc);
-        mmiPtMaxY = rc.bottom-rc.top;
+        AdjustWindowRectEx(&rc,GetWindowLongPtr(hwnd,GWL_STYLE)|WS_THICKFRAME,FALSE,0);
         mmiPtMinX = rc.right-rc.left;
+        mmiPtMaxY = rc.bottom-rc.top;
 
         if (cxFileMRUDlg < (rc.right-rc.left))
           cxFileMRUDlg = rc.right-rc.left;
@@ -1298,15 +1205,15 @@ BOOL CALLBACK FileMRUDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
           cyFileMRUDlg = rc.bottom-rc.top;
         SetWindowPos(hwnd,NULL,0,0,cxFileMRUDlg,cyFileMRUDlg,SWP_NOZORDER|SWP_NOMOVE);
 
-        SetWindowLong(hwnd,GWL_STYLE,GetWindowLong(hwnd,GWL_STYLE)|WS_THICKFRAME);
+        SetWindowLongPtr(hwnd,GWL_STYLE,GetWindowLongPtr(hwnd,GWL_STYLE)|WS_THICKFRAME);
         SetWindowPos(hwnd,NULL,0,0,0,0,SWP_NOZORDER|SWP_NOMOVE|SWP_NOSIZE|SWP_FRAMECHANGED);
 
         GetMenuString(GetSystemMenu(GetParent(hwnd),FALSE),SC_SIZE,tch,COUNTOF(tch),MF_BYCOMMAND);
         InsertMenu(GetSystemMenu(hwnd,FALSE),SC_CLOSE,MF_BYCOMMAND|MF_STRING|MF_ENABLED,SC_SIZE,tch);
         InsertMenu(GetSystemMenu(hwnd,FALSE),SC_CLOSE,MF_BYCOMMAND|MF_SEPARATOR,0,NULL);
 
-        SetWindowLong(GetDlgItem(hwnd,IDC_RESIZEGRIP),GWL_STYLE,
-          GetWindowLong(GetDlgItem(hwnd,IDC_RESIZEGRIP),GWL_STYLE)|SBS_SIZEGRIP|WS_CLIPSIBLINGS);
+        SetWindowLongPtr(GetDlgItem(hwnd,IDC_RESIZEGRIP),GWL_STYLE,
+          GetWindowLongPtr(GetDlgItem(hwnd,IDC_RESIZEGRIP),GWL_STYLE)|SBS_SIZEGRIP|WS_CLIPSIBLINGS);
 
         cGrip = GetSystemMetrics(SM_CXHTHUMB);
         SetWindowPos(GetDlgItem(hwnd,IDC_RESIZEGRIP),NULL,cxClient-cGrip,
@@ -1320,6 +1227,7 @@ BOOL CALLBACK FileMRUDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
           (HIMAGELIST)SHGetFileInfo(L"C:\\",0,&shfi,sizeof(SHFILEINFO),SHGFI_LARGEICON | SHGFI_SYSICONINDEX),
           LVSIL_NORMAL);
 
+        //SetExplorerTheme(GetDlgItem(hwnd,IDC_FILEMRU));
         ListView_SetExtendedListViewStyle(GetDlgItem(hwnd,IDC_FILEMRU),/*LVS_EX_FULLROWSELECT|*/LVS_EX_DOUBLEBUFFER|LVS_EX_LABELTIP);
         ListView_InsertColumn(GetDlgItem(hwnd,IDC_FILEMRU),0,&lvc);
 
@@ -1533,6 +1441,7 @@ BOOL CALLBACK FileMRUDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
 
             for (i = 0; i < MRU_Enum(pFileMRU,0,NULL,0); i++) {
               MRU_Enum(pFileMRU,i,tch,COUNTOF(tch));
+              PathAbsoluteFromApp(tch,NULL,0,TRUE);
               //  SendDlgItemMessage(hwnd,IDC_FILEMRU,LB_ADDSTRING,0,(LPARAM)tch); }
               //  SendDlgItemMessage(hwnd,IDC_FILEMRU,LB_SETCARETINDEX,0,FALSE);
               lvi.iItem = i;
@@ -1624,7 +1533,7 @@ BOOL CALLBACK FileMRUDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
 BOOL FileMRUDlg(HWND hwnd,LPWSTR lpstrFile)
 {
 
-  if (IDOK == DialogBoxParam(g_hInstance,MAKEINTRESOURCE(IDD_FILEMRU),
+  if (IDOK == ThemedDialogBoxParam(g_hInstance,MAKEINTRESOURCE(IDD_FILEMRU),
                 hwnd,FileMRUDlgProc,(LPARAM)lpstrFile))
     return TRUE;
   else
@@ -1710,7 +1619,7 @@ BOOL ColumnWrapDlg(HWND hwnd,UINT uidDlg,int *iNumber)
 
   int iResult;
 
-  iResult = DialogBoxParam(
+  iResult = ThemedDialogBoxParam(
               g_hInstance,
               MAKEINTRESOURCE(uidDlg),
               hwnd,
@@ -1750,8 +1659,7 @@ BOOL CALLBACK WordWrapSettingsDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
         SetDlgItemInt(hwnd,100,*piNumber,FALSE);
         SendDlgItemMessage(hwnd,100,EM_LIMITTEXT,15,0);
 
-        // Load options
-        GetString(IDS_WORDWRAPVISUALS,tch,COUNTOF(tch));
+        GetDlgItemText(hwnd,102,tch,COUNTOF(tch));
         lstrcat(tch,L"|");
         p1 = tch;
         while (p2 = StrChr(p1,L'|')) {
@@ -1829,7 +1737,7 @@ BOOL WordWrapSettingsDlg(HWND hwnd,UINT uidDlg,int *iNumber)
 
   int iResult;
 
-  iResult = DialogBoxParam(
+  iResult = ThemedDialogBoxParam(
               g_hInstance,
               MAKEINTRESOURCE(uidDlg),
               hwnd,
@@ -1928,7 +1836,7 @@ BOOL LongLineSettingsDlg(HWND hwnd,UINT uidDlg,int *iNumber)
 
   int iResult;
 
-  iResult = DialogBoxParam(
+  iResult = ThemedDialogBoxParam(
               g_hInstance,
               MAKEINTRESOURCE(uidDlg),
               hwnd,
@@ -2028,7 +1936,7 @@ BOOL TabSettingsDlg(HWND hwnd,UINT uidDlg,int *iNumber)
 
   int iResult;
 
-  iResult = DialogBoxParam(
+  iResult = ThemedDialogBoxParam(
               g_hInstance,
               MAKEINTRESOURCE(uidDlg),
               hwnd,
@@ -2112,7 +2020,7 @@ BOOL SelectEncodingDlg(HWND hwnd,int *iOption)
 
   int iResult;
 
-  iResult = DialogBoxParam(
+  iResult = ThemedDialogBoxParam(
               g_hInstance,
               MAKEINTRESOURCE(IDD_ENCODING),
               hwnd,
@@ -2129,6 +2037,7 @@ BOOL SelectEncodingDlg(HWND hwnd,int *iOption)
 //
 //  Controls: 100 Combo
 //            IDC_CONSISTENTEOLS
+//            IDC_AUTOSTRIPBLANKS
 //
 BOOL CALLBACK SelectLineEndingDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
 {
@@ -2160,6 +2069,9 @@ BOOL CALLBACK SelectLineEndingDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
         if (bFixLineEndings)
           CheckDlgButton(hwnd,IDC_CONSISTENTEOLS,BST_CHECKED);
 
+        if (bAutoStripBlanks)
+          CheckDlgButton(hwnd,IDC_AUTOSTRIPBLANKS, BST_CHECKED);
+
         CenterDlgInParent(hwnd);
       }
       return TRUE;
@@ -2171,6 +2083,7 @@ BOOL CALLBACK SelectLineEndingDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
         case IDOK: {
             *piOption = SendDlgItemMessage(hwnd,100,CB_GETCURSEL,0,0);
             bFixLineEndings = (IsDlgButtonChecked(hwnd,IDC_CONSISTENTEOLS) == BST_CHECKED) ? 1 : 0;
+            bAutoStripBlanks = (IsDlgButtonChecked(hwnd,IDC_AUTOSTRIPBLANKS) == BST_CHECKED) ? 1 : 0;
             EndDialog(hwnd,IDOK);
           }
           break;
@@ -2194,7 +2107,7 @@ BOOL SelectLineEndingDlg(HWND hwnd,int *iOption)
 
   int iResult;
 
-  iResult = DialogBoxParam(
+  iResult = ThemedDialogBoxParam(
               g_hInstance,
               MAKEINTRESOURCE(IDD_EOLMODE),
               hwnd,
@@ -2212,23 +2125,23 @@ BOOL SelectLineEndingDlg(HWND hwnd,int *iOption)
 //
 //
 typedef struct _infobox {
-  int    uidMessage;
-  LPCWSTR lpstrSetting;
+  LPWSTR lpstrMessage;
+  LPWSTR lpstrSetting;
 } INFOBOX, *LPINFOBOX;
 
 BOOL CALLBACK InfoBoxDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
 {
-  WCHAR tch[512];
-  static LPINFOBOX lpib;
+  LPINFOBOX lpib;
 
   switch(umsg)
   {
     case WM_INITDIALOG:
       lpib = (LPINFOBOX)lParam;
+      SetWindowLongPtr(hwnd,DWLP_USER,lParam);
       SendDlgItemMessage(hwnd,IDC_INFOBOXICON,STM_SETICON,
         (WPARAM)LoadIcon(NULL,IDI_EXCLAMATION),0);
-      GetString(lpib->uidMessage,tch,COUNTOF(tch));
-      SetDlgItemText(hwnd,IDC_INFOBOXTEXT,tch);
+      SetDlgItemText(hwnd,IDC_INFOBOXTEXT,lpib->lpstrMessage);
+      LocalFree(lpib->lpstrMessage);
       CenterDlgInParent(hwnd);
       return TRUE;
 
@@ -2239,6 +2152,7 @@ BOOL CALLBACK InfoBoxDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
         case IDCANCEL:
         case IDYES:
         case IDNO:
+          lpib = (LPINFOBOX)GetWindowLongPtr(hwnd,DWLP_USER);
           if (IsDlgButtonChecked(hwnd,IDC_INFOBOXCHECK))
             IniSetInt(L"Suppressed Messages",lpib->lpstrSetting,1);
           EndDialog(hwnd,LOWORD(wParam));
@@ -2255,27 +2169,39 @@ BOOL CALLBACK InfoBoxDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
 //  InfoBox()
 //
 //
-int InfoBox(int iType,int uidMessage,LPCWSTR lpstrSetting)
+int InfoBox(int iType,LPCWSTR lpstrSetting,int uidMessage,...)
 {
 
   HWND hwnd;
-  int idDlg;
+  int idDlg = IDD_INFOBOX;
   INFOBOX ib;
+  WCHAR wchFormat[512];
+  va_list args;
 
   if (IniGetInt(L"Suppressed Messages",lpstrSetting,0))
     return (iType == MBYESNO) ? IDYES : IDOK;
 
-  idDlg = (iType == MBYESNO) ? IDD_INFOBOX2 : IDD_INFOBOX;
+  if (!GetString(uidMessage,wchFormat,COUNTOF(wchFormat)))
+    return(-1);
 
-  ib.uidMessage = uidMessage;
-  ib.lpstrSetting = lpstrSetting;
+  ib.lpstrMessage = LocalAlloc(LPTR,1024 * sizeof(WCHAR));
+  va_start(args, uidMessage);
+  wvsprintf(ib.lpstrMessage,wchFormat,args);
+  va_end(args);
+
+  ib.lpstrSetting = (LPWSTR)lpstrSetting;
+
+  if (iType == MBYESNO)
+    idDlg = IDD_INFOBOX2;
+  else if (iType == MBOKCANCEL)
+    idDlg = IDD_INFOBOX3;
 
   if (!(hwnd = GetFocus()))
     hwnd = hwndMain;
 
   MessageBeep(MB_ICONEXCLAMATION);
 
-  return DialogBoxParam(
+  return ThemedDialogBoxParam(
            g_hInstance,
            MAKEINTRESOURCE(idDlg),
            hwnd,

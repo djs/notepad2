@@ -5,8 +5,8 @@
 =   Notepad2 - light-weight Scintilla-based text editor for Windows   =
 =                                                                     =
 =                                                                     =
-=                                                   Notepad2 3.0.20   =
-=                                      (c) Florian Balmer 2004-2008   =
+=                                                   Notepad2 3.1.21   =
+=                                      (c) Florian Balmer 2004-2009   =
 =                                       http://www.flos-freeware.ch   =
 =                                                                     =
 =                                                                     =
@@ -17,8 +17,8 @@ Description
 
   Notepad2 is a light-weight, free and open source Notepad-like text
   editor with syntax highlighting for a few commonly used languages.
-  It's based on the Scintilla source code editing component
-  (http://www.scintilla.org) and works on NT-based versions of Windows.
+  It's based on the Scintilla source code editing component and works
+  on NT-based versions of Windows.
 
 
 Features
@@ -35,6 +35,57 @@ Features
   - Support for Unicode, UTF-8, Unix and Mac text files
   - Open shell links
   - Mostly adjustable
+
+
+New in Version 3.1.21 (released June 21, 2009)
+
+  - No ini-file is created by default (save settings with F7, once)
+  - "Move Up" and "Move Down" keep selection and work with blocks
+  - Set cursor to start (Ctrl+,) or end of text selection (Ctrl+.)
+  - "URL Encode" (Ctrl+Shift+E) and "URL Decode" (Ctrl+Shift+R)
+  - "Escape" (Ctrl+Alt+E) and "Unescape C Special Chars" (Ctrl+Alt+U)
+  - "Sort Lines" with several options (Alt+O)
+  - "Pad With Spaces" block command (Alt+B)
+  - "Replace Next" assigned to hotkey (F4)
+  - Auto strip trailing blanks option (File, Line Endings, Default)
+  - Remapped "Transparent Mode" hotkey to Ctrl+0
+  - Simple XML detection for files without extensions
+  - Simple language detection for cgi and fcgi files
+  - Reload file without file variable parsing (Alt+F8)
+  - Enabled better styling of C/C++ preprocessor elements
+  - Recent files and search strings merged with existing items on save
+  - Paste board mode ignores immediately repeated copy actions
+  - Command line switch + to accept multiple files (quoted spaces)
+  - Command line switch - to accept single file argument (no quotes)
+  - Option to set default command line mode (single or multiple files)
+  - Command line switches to set file encoding and line ending mode
+  - More /p command line switches (see "Command Line Switches" below)
+  - /r command line switch to reuse existing window
+  - /ns and /rs command line switches to enable single file instance
+  - Renamed /t command line switch to /d (select default text scheme)
+  - /t command line switch to set window title
+  - Set window title to excerpt of current text selection (Ctrl+9)
+  - Save relative pathnames for recent files (ini-option to disable)
+  - Save relative directories for "Open with..." and "Favorites"
+  - "Open with..." no longer sends short pathnames to external programs
+  - External commands use current file directory as working directory
+  - Remember "Save Copy" location until exit
+  - Require only single click to restore window from tray icon
+  - "Reuse Window" option timeout improves opening multiple files
+  - Replaced "Find Up" option with "Find Previous" button in dialogs
+  - "Find Wrap" notification dialogs provide "Cancel" button
+  - Option to suppress replace count notifications
+  - Find and replace dialogs provide new system menu commands
+  - Dialog boxes use correct theme fonts on Vista
+  - Patches to default styles, file types and auto-detection by Kai Liu
+  - Incorporated base x64 source code compatibility patch
+  - Fixed some problems with relative ini-file locations
+  - Fixed some minor file variable problems
+  - Fixed some encoding detection issues
+  - Fixed some find and replace problems
+  - Fixed several memory leaks when saving files
+  - Fixed several memory leaks for editing operations
+  - Reduced size of Notepad2.exe program file
 
 
 New in Version 3.0.20 (released October 31, 2008)
@@ -359,6 +410,7 @@ Keyboard Shortcuts for Notepad2
     F8                    Reload file without encoding detection.
     Ctrl+F8               Reload file with Unicode detection toggled.
     Shift+F8              Reload file with ANSI/UTF-8 defaults toggled.
+    Alt+F8                Reload file without file variable parsing.
     Ctrl+S                Save file.
     F6                    Save file as.
     Ctrl+F6               Save file copy.
@@ -409,17 +461,21 @@ Keyboard Shortcuts for Notepad2
     Ctrl+Del              Delete word after/right.
     Ctrl+Tab              Insert tabulator.
 
-  Line
+  Lines
 
     Ctrl+Shift+Space      Select line.
-    Ctrl+Shift+Up         Move line up.
-    Ctrl+Shift+Down       Move line down.
+    Ctrl+Shift+Up         Move line (block) up.
+    Ctrl+Shift+Down       Move line (block) down.
     Ctrl+D                Duplicate line.
     Ctrl+Shift+X          Cut line.
     Ctrl+Shift+C          Copy line.
     Ctrl+Shift+D          Delete line.
     Ctrl+Shift+Backspace  Delete line left.
     Ctrl+Shift+Del        Delete line right.
+    Ctrl+Shift+W          Column wrap.
+    Ctrl+I                Split lines.
+    Ctrl+J                Join lines.
+    Ctrl+Shift+J          Join paragraphs.
 
   Block
 
@@ -427,16 +483,14 @@ Keyboard Shortcuts for Notepad2
     Shift+Tab             Unindent selected block.
     Alt+Q                 Enclose selection.
     Alt+D                 Duplicate selection.
+    Alt+B                 Pad with spaces.
     Alt+Z                 Strip first character.
     Alt+U                 Strip last character.
     Alt+W                 Strip trailing blanks.
     Alt+P                 Compress whitespace.
     Alt+R                 Remove blank lines.
     Alt+M                 Modify lines.
-    Ctrl+Shift+W          Column wrap.
-    Ctrl+I                Split lines.
-    Ctrl+J                Join lines.
-    Ctrl+Shift+J          Unwrap paragraphs.
+    Alt+O                 Sort lines.
 
   Convert
 
@@ -462,6 +516,10 @@ Keyboard Shortcuts for Notepad2
 
     Ctrl+Q                Block comment (toggle).
     Ctrl+Shift+Q          Stream comment.
+    Ctrl+Shift+E          URL Encode.
+    Ctrl+Shift+R          URL Decode.
+    Ctrl+Alt+E            Escape C Special Chars.
+    Ctrl+Alt+U            Unescape C Special Chars.
     Ctrl+B                Find matching brace.
     Ctrl+Shift+B          Select to matching brace.
     Ctrl+1                Enclose within ''.
@@ -469,7 +527,10 @@ Keyboard Shortcuts for Notepad2
     Ctrl+3                Enclose within ().
     Ctrl+4                Enclose within [].
     Ctrl+5                Enclose within {}.
+    Ctrl+6                Enclose within ``.
     Shift+F5              Update timestamps.
+    Ctrl+,                Jump to selection start.
+    Ctrl+.                Jump to selection end.
 
   Find, Replace
 
@@ -482,6 +543,7 @@ Keyboard Shortcuts for Notepad2
     F2                    Expand selection to next match.
     Shift+F2              Expand selection to previous match.
     Ctrl+H                Replace.
+    F4                    Replace next.
     Ctrl+G                Jump to line.
 
   Syntax scheme, Font
@@ -520,7 +582,8 @@ Keyboard Shortcuts for Notepad2
     Alt+-                 Decrease limit for long lines.
     Ctrl+Shift+H          Toggle auto close HTML/XML.
     Alt+T                 Always on top.
-    Alt+O                 Transparent mode.
+    Ctrl+0                Transparent mode.
+    Ctrl+9                Display text excerpt in title.
     F7                    Save settings now.
     Ctrl+F7               Jump to ini-file.
 
@@ -591,24 +654,34 @@ Regular Expression Syntax
 
 Command Line Switches
 
-  Notepad2.exe [/g ln[,col]] [/m[-][r|b] text] [/q] [/s ext] [/t] [/h]
-               [/x] [/c] [/b] [/n] [/p x,y,cx,cy[,max]|/p0] [/i]
-               [/f ini|/f0] [/?] [file]
+  Notepad2.exe [(encoding)] [(line ending mode)] [/g ln[,col]]
+               [/m[-][r|b] text] [/q] [/s ext] [/d] [/h] [/x] [/c]
+               [/b] [/n|/ns] [/r|/rs]
+               [/p x,y,cx,cy[,max]|/p0|/ps|/pf,l,t,r,b,m]
+               [/t title] [/i] [/f ini|/f0] [/?] [+|-] [file] ...
 
     file  File to open, can be a relative pathname, or a shell link.
-          This must be the last argument, quotes are not necessary.
-    /g    Jump to specified position, a line of -1 means end of file.
-    /m    Match specified text (- last, r regex, b backslashes).
+          Must be the last argument, no quoted spaces by default.
+    +     Accept multiple file arguments (with quoted spaces).
+    -     Accept single file argument (without quoted spaces).
+    ...   Desired file encoding (can be one of /ansi, /unicode,
+          /unicodebe, /utf8 or /utf8sig).
+    ...   Desired line ending mode (either /crlf, /lf, or /cr).
+    /g    Jump to specified position, /g -1 means end of file.
+    /m    Match specified text (/m- last, /mr regex, /mb backslash).
     /q    Force creation of new files without prompt.
     /s    Select syntax scheme associated with specified extension.
-    /t    Select default text scheme.
+    /d    Select default text scheme.
     /h    Select Web Source Code scheme.
     /x    Select XML Document scheme.
     /c    Open a new Notepad2 window and paste the clipboard contents.
     /b    Open a new Notepad2 paste board to collect clipboard entries.
-    /n    Always open a new Notepad2 window.
+    /n    Always open a new Notepad2 window (/ns single file instance).
+    /r    Reuse Notepad2 window (/rs single file instance).
     /p    Set window position to x,y with size cx,cy, optional max set
-          to nonzero to maximize window; /p0 means use system default.
+          to nonzero to zoom; /p0 system, /ps internal defaults;
+          /p(f)ull,(l)eft,(t)op,(r)ight,(b)ottom,(m)argin.
+    /t    Set window title.
     /i    Start as tray icon.
     /f    Specify ini-file; /f0 use no ini-file (don't save settings).
     /?    Display a brief summary about command line parameters.
@@ -648,17 +721,22 @@ Feature Requests
 Credits and Special Thanks
 
   Here I would like to say "THANK YOU" to the developers of the great
-  Scintilla source code editing component (http://www.scintilla.org),
-  which is the core of Notepad2. Without Scintilla, the rich features
-  found in Notepad2 wouldn't have been possible!
+  Scintilla source code editing component [1], which is the core of
+  Notepad2. Without Scintilla, the rich features found in Notepad2
+  wouldn't have been possible!
+
+  [1] http://www.scintilla.org
 
   Many thanks to everybody for sending me bug reports and useful hints.
-  A special thank goes to Roland Weigelt (http://www.roland-weigelt.de)
-  for his helpful thoughts and comments about Notepad2 features and
-  usability in early development stages. I'd also like to express my
-  thanks to Timo Kunze (http://www.TimoSoft-Software.de), to Kai Liu
-  (http://www.kailiu.com) and Moritz Kroll for sending detailed bug
-  reports and ready-to-use patches.
+  A special thank goes to Roland Weigelt [2] for his helpful thoughts
+  and comments about Notepad2 features and usability in early develop-
+  ment stages. I'd also like to express my thanks to Timo Kunze [3],
+  to Kai Liu [4] and to Moritz Kroll for sending detailed bug reports
+  and ready-to-use patches.
+
+  [2] http://www.roland-weigelt.de
+  [3] http://www.TimoSoft-Software.de
+  [4] http://www.kailiu.com/notepad2/
 
 
 Copyright
@@ -671,6 +749,6 @@ Copyright
   If you have comments or questions, please drop me a note:
   florian.balmer@gmail.com
 
-  (c) Florian Balmer 2004-2008
+  (c) Florian Balmer 2004-2009
 
 ###

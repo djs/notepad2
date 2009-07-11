@@ -11,7 +11,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2008
+*                                              (c) Florian Balmer 1996-2009
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -28,7 +28,7 @@ typedef struct _editfindreplace
   char szReplaceUTF8[3*512];
   UINT fuFlags;
   BOOL bTransformBS;
-  BOOL bFindUp;
+  BOOL bObsolete /* was bFindUp */;
   BOOL bFindClose;
   BOOL bReplaceClose;
   BOOL bNoFindWrap;
@@ -41,6 +41,12 @@ typedef struct _editfindreplace
 
 #define IDMSG_SWITCHTOFIND    204
 #define IDMSG_SWITCHTOREPLACE 205
+
+
+#define SORT_ASCENDING  0
+#define SORT_DESCENDING 1
+#define SORT_UNIQ       2
+#define SORT_LOGICAL    4
 
 
 HWND  EditCreate(HWND);
@@ -58,22 +64,32 @@ void  EditInvertCase(HWND);
 void  EditTitleCase(HWND);
 void  EditSentenceCase(HWND);
 
+void  EditURLEncode(HWND);
+void  EditURLDecode(HWND);
+void  EditEscapeCChars(HWND);
+void  EditUnescapeCChars(HWND);
+
 void  EditTabsToSpaces(HWND,int);
 void  EditSpacesToTabs(HWND,int);
 
+void  EditMoveUp(HWND);
+void  EditMoveDown(HWND);
 void  EditModifyLines(HWND,LPCWSTR,LPCWSTR);
 void  EditEncloseSelection(HWND,LPCWSTR,LPCWSTR);
 void  EditToggleLineComments(HWND,LPCWSTR,BOOL);
+void  EditPadWithSpaces(HWND);
 void  EditStripFirstCharacter(HWND);
 void  EditStripLastCharacter(HWND);
-void  EditStripTrailingBlanks(HWND);
+void  EditStripTrailingBlanks(HWND,BOOL);
 void  EditCompressSpaces(HWND);
 void  EditRemoveBlankLines(HWND);
 void  EditWrapToColumn(HWND,int);
 void  EditJoinLinesEx(HWND);
+void  EditSortLines(HWND,int);
 
 void  EditJumpTo(HWND,int,int);
 void  EditSelectEx(HWND,int,int);
+void  EditGetExcerpt(HWND,LPWSTR,DWORD);
 
 HWND  EditFindReplaceDlg(HWND,LPCEDITFINDREPLACE,BOOL);
 BOOL  EditFindNext(HWND,LPCEDITFINDREPLACE,BOOL);
@@ -85,6 +101,7 @@ BOOL  EditLinenumDlg(HWND);
 BOOL  EditModifyLinesDlg(HWND,LPWSTR,LPWSTR);
 BOOL  EditEncloseSelectionDlg(HWND,LPWSTR,LPWSTR);
 BOOL  EditInsertTagDlg(HWND,LPWSTR,LPWSTR);
+BOOL  EditSortDlg(HWND,int*);
 BOOL  EditPrint(HWND,LPCWSTR,LPCWSTR);
 void  EditPrintSetup(HWND);
 void  EditPrintInit();

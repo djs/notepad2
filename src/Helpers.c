@@ -13,7 +13,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2008
+*                                              (c) Florian Balmer 1996-2009
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -24,6 +24,7 @@
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <commctrl.h>
+#include <uxtheme.h>
 #include <stdio.h>
 #include <string.h>
 #include "helpers.h"
@@ -231,12 +232,11 @@ BOOL IsVista()
 extern HMODULE hModUxTheme;
 BOOL PrivateIsAppThemed()
 {
-  static FARPROC pfnIsAppThemed;
+  FARPROC pfnIsAppThemed;
   BOOL bIsAppThemed = FALSE;
 
   if (hModUxTheme) {
-    if (!pfnIsAppThemed)
-      pfnIsAppThemed = GetProcAddress(hModUxTheme,"IsAppThemed");
+    pfnIsAppThemed = GetProcAddress(hModUxTheme,"IsAppThemed");
 
     if (pfnIsAppThemed)
       bIsAppThemed = pfnIsAppThemed();
@@ -247,16 +247,41 @@ BOOL PrivateIsAppThemed()
 
 //=============================================================================
 //
+//  SetExplorerTheme()
+//
+//BOOL SetExplorerTheme(HWND hwnd)
+//{
+//  FARPROC pfnSetWindowTheme;
+//
+//  if (IsVista()) {
+//    if (hModUxTheme) {
+//      pfnSetWindowTheme = GetProcAddress(hModUxTheme,"SetWindowTheme");
+//
+//      if (pfnSetWindowTheme)
+//        return (S_OK == pfnSetWindowTheme(hwnd,L"Explorer",NULL));
+//    }
+//  }
+//  return FALSE;
+//}
+
+
+//=============================================================================
+//
 //  SetWindowTitle()
 //
 BOOL bFreezeAppTitle = FALSE;
 
 BOOL SetWindowTitle(HWND hwnd,UINT uIDAppName,UINT uIDUntitled,
                     LPCWSTR lpszFile,int iFormat,BOOL bModified,
-                    UINT uIDReadOnly,BOOL bReadOnly)
+                    UINT uIDReadOnly,BOOL bReadOnly,LPCWSTR lpszExcerpt)
 {
 
-  WCHAR szUntitled[128],szAppName[128],szReadOnly[32],szTitle[512];
+  WCHAR szUntitled[128];
+  WCHAR szExcrptQuot[256];
+  WCHAR szExcrptFmt[32];
+  WCHAR szAppName[128];
+  WCHAR szReadOnly[32];
+  WCHAR szTitle[512];
   static const WCHAR *pszSep = L" - ";
   static const WCHAR *pszMod = L"* ";
 
@@ -272,7 +297,13 @@ BOOL SetWindowTitle(HWND hwnd,UINT uIDAppName,UINT uIDUntitled,
   else
     lstrcpy(szTitle,L"");
 
-  if (lstrlen(lpszFile))
+  if (lstrlen(lpszExcerpt)) {
+    GetString(IDS_TITLEEXCERPT,szExcrptFmt,COUNTOF(szExcrptFmt));
+    wsprintf(szExcrptQuot,szExcrptFmt,lpszExcerpt);
+    StrCat(szTitle,szExcrptQuot);
+  }
+
+  else if (lstrlen(lpszFile))
   {
     if (iFormat < 2 && !PathIsRoot(lpszFile))
     {
@@ -640,6 +671,9 @@ int Toolbar_SetButtons(HWND hwnd,int cmdBase,LPCWSTR lpszButtons,LPCTBBUTTON ptb
 
   ZeroMemory(tchButtons,COUNTOF(tchButtons)*sizeof(tchButtons[0]));
   lstrcpyn(tchButtons,lpszButtons,COUNTOF(tchButtons)-2);
+  TrimString(tchButtons);
+  while (p = StrStr(tchButtons,L"  "))
+    MoveMemory((WCHAR*)p,(WCHAR*)p+1,(lstrlen(p) + 1) * sizeof(WCHAR));
 
   c = SendMessage(hwnd,TB_BUTTONCOUNT,0,0);
   for (i = 0; i < c; i++)
@@ -716,41 +750,70 @@ int FormatString(LPWSTR lpOutput,int nOutput,UINT uIdFormat,...)
 
 //=============================================================================
 //
-//  FormatBytes()
+//  PathRelativeToApp()
 //
-void FormatBytes(LPWSTR lpOutput,int nOutput,DWORD dwBytes)
-{
+void PathRelativeToApp(LPWSTR lpszSrc,LPWSTR lpszDest,int cchDest,BOOL bSrcIsFile,BOOL bUnexpandEnv) {
 
-  WCHAR tch[256];
-  int i;
-  double dBytes = dwBytes;
-  static const WCHAR *pBytes[] = { L"Bytes",L"KB",L"MB",L"GB" };
+  WCHAR wchAppPath[MAX_PATH];
+  WCHAR wchWinDir[MAX_PATH];
+  WCHAR wchPath[MAX_PATH];
+  WCHAR wchResult[MAX_PATH];
+  DWORD dwAttrTo = (bSrcIsFile) ? 0 : FILE_ATTRIBUTE_DIRECTORY;
 
-  if (dwBytes > 1023)
-  {
-    for (i = 0; i < 4; i++)
-    {
+  GetModuleFileName(NULL,wchAppPath,COUNTOF(wchAppPath));
+  PathRemoveFileSpec(wchAppPath);
+  GetWindowsDirectory(wchWinDir,COUNTOF(wchWinDir));
 
-      if (dBytes >= 1024.0)
-        dBytes /= 1024.0;
-
-      else
-        break;
-    }
-    swprintf(tch,L"%.2f",dBytes);
-    GetNumberFormat(LOCALE_USER_DEFAULT,0,tch,NULL,lpOutput,nOutput);
-    lstrcat(lpOutput,L" ");
-    lstrcat(lpOutput,pBytes[i]);
+  if (PathCommonPrefix(wchAppPath,wchWinDir,NULL) || PathIsRelative(lpszSrc))
+    lstrcpyn(wchPath,lpszSrc,COUNTOF(wchPath));
+  else {
+    if (!PathRelativePathTo(wchPath,wchAppPath,FILE_ATTRIBUTE_DIRECTORY,lpszSrc,dwAttrTo))
+      lstrcpyn(wchPath,lpszSrc,COUNTOF(wchPath));
   }
 
+  if (bUnexpandEnv) {
+    if (!PathUnExpandEnvStrings(wchPath,wchResult,COUNTOF(wchResult)))
+      lstrcpyn(wchResult,wchPath,COUNTOF(wchResult));
+  }
   else
-  {
-    wsprintf(lpOutput,L"%i",dwBytes);
-    FormatNumberStr(lpOutput);
-    lstrcat(lpOutput,L" ");
-    lstrcat(lpOutput,pBytes[0]);
-  }
+    lstrcpyn(wchResult,wchPath,COUNTOF(wchResult));
 
+  if (lpszDest == NULL || lpszSrc == lpszDest)
+    lstrcpyn(lpszSrc,wchResult,(cchDest == 0) ? MAX_PATH : cchDest);
+  else
+    lstrcpyn(lpszDest,wchResult,(cchDest == 0) ? MAX_PATH : cchDest);
+}
+
+
+//=============================================================================
+//
+//  PathAbsoluteFromApp()
+//
+void PathAbsoluteFromApp(LPWSTR lpszSrc,LPWSTR lpszDest,int cchDest,BOOL bExpandEnv) {
+
+  WCHAR wchPath[MAX_PATH];
+  WCHAR wchResult[MAX_PATH];
+
+  lstrcpyn(wchPath,lpszSrc,COUNTOF(wchPath));
+  if (bExpandEnv)
+    ExpandEnvironmentStringsEx(wchPath,COUNTOF(wchPath));
+
+  if (PathIsRelative(wchPath)) {
+    GetModuleFileName(NULL,wchResult,COUNTOF(wchResult));
+    PathRemoveFileSpec(wchResult);
+    PathAppend(wchResult,wchPath);
+  }
+  else
+    lstrcpyn(wchResult,wchPath,COUNTOF(wchResult));
+
+  PathCanonicalizeEx(wchResult);
+  if (PathGetDriveNumber(wchResult) != -1)
+    CharUpperBuff(wchResult,1);
+
+  if (lpszDest == NULL || lpszSrc == lpszDest)
+    lstrcpyn(lpszSrc,wchResult,(cchDest == 0) ? MAX_PATH : cchDest);
+  else
+    lstrcpyn(lpszDest,wchResult,(cchDest == 0) ? MAX_PATH : cchDest);
 }
 
 
@@ -865,7 +928,7 @@ BOOL PathGetLnkPath(LPCWSTR pszLnkFile,LPWSTR pszResPath,int cchResPath)
 //
 //  Manipulates: pszResPath
 //
-PathIsLnkToDirectory(LPCWSTR pszPath,LPWSTR pszResPath,int cchResPath)
+BOOL PathIsLnkToDirectory(LPCWSTR pszPath,LPWSTR pszResPath,int cchResPath)
 {
 
   WCHAR tchResPath[MAX_PATH];
@@ -1375,6 +1438,37 @@ BOOL MRU_Add(LPMRULIST pmru,LPCWSTR pszNew) {
   return(1);
 }
 
+BOOL MRU_AddFile(LPMRULIST pmru,LPCWSTR pszFile,BOOL bRelativePath) {
+
+  int i;
+  for (i = 0; i < pmru->iSize; i++) {
+    if (lstrcmpi(pmru->pszItems[i],pszFile) == 0) {
+      LocalFree(pmru->pszItems[i]);
+      break;
+    }
+    else {
+      WCHAR wchItem[MAX_PATH];
+      PathAbsoluteFromApp(pmru->pszItems[i],wchItem,COUNTOF(wchItem),TRUE);
+      if (lstrcmpi(wchItem,pszFile) == 0) {
+        LocalFree(pmru->pszItems[i]);
+        break;
+      }
+    }
+  }
+  i = min(i,pmru->iSize-1);
+  for (; i > 0; i--)
+    pmru->pszItems[i] = pmru->pszItems[i-1];
+
+  if (bRelativePath) {
+    WCHAR wchFile[MAX_PATH];
+    PathRelativeToApp((LPWSTR)pszFile,wchFile,COUNTOF(wchFile),TRUE,TRUE);
+    pmru->pszItems[0] = StrDup(wchFile);
+  }
+  else
+    pmru->pszItems[0] = StrDup(pszFile);
+  return(1);
+}
+
 BOOL MRU_Delete(LPMRULIST pmru,int iIndex) {
 
   int i;
@@ -1471,6 +1565,243 @@ BOOL MRU_Save(LPMRULIST pmru) {
   SaveIniSection(pmru->szRegKey,pIniSection);
   LocalFree(pIniSection);
   return(1);
+}
+
+
+BOOL MRU_MergeSave(LPMRULIST pmru,BOOL bAddFiles,BOOL bRelativePath) {
+
+  int i;
+  LPMRULIST pmruBase;
+
+  pmruBase = MRU_Create(pmru->szRegKey,pmru->iFlags,pmru->iSize);
+  MRU_Load(pmruBase);
+
+  if (bAddFiles) {
+    for (i = pmru->iSize-1; i >= 0; i--) {
+      if (pmru->pszItems[i]) {
+        WCHAR wchItem[MAX_PATH];
+        PathAbsoluteFromApp(pmru->pszItems[i],wchItem,COUNTOF(wchItem),TRUE);
+        MRU_AddFile(pmruBase,wchItem,bRelativePath);
+      }
+    }
+  }
+
+  else {
+    for (i = pmru->iSize-1; i >= 0; i--) {
+      if (pmru->pszItems[i])
+        MRU_Add(pmruBase,pmru->pszItems[i]);
+    }
+  }
+
+  MRU_Save(pmruBase);
+  MRU_Destroy(pmruBase);
+  return(1);
+}
+
+
+/*
+
+  Themed Dialogs
+  Modify dialog templates to use current theme font
+  Based on code of MFC helper class CDialogTemplate
+
+*/
+
+BOOL GetThemedDialogFont(LPWSTR lpFaceName,WORD* wSize)
+{
+  HDC hDC;
+  int iLogPixelsY;
+  HMODULE hModUxTheme;
+  HTHEME hTheme;
+  LOGFONT lf;
+  BOOL bSucceed = FALSE;
+
+  hDC = GetDC(NULL);
+  iLogPixelsY = GetDeviceCaps(hDC,LOGPIXELSY);
+  ReleaseDC(NULL,hDC);
+
+  if (hModUxTheme = GetModuleHandle(L"uxtheme.dll")) {
+    if ((BOOL)(GetProcAddress(hModUxTheme,"IsAppThemed"))()) {
+      hTheme = (HTHEME)(GetProcAddress(hModUxTheme,"OpenThemeData"))(NULL,L"WINDOWSTYLE;WINDOW");
+      if (hTheme) {
+        if (S_OK == (HRESULT)(GetProcAddress(hModUxTheme,"GetThemeSysFont"))(hTheme,/*TMT_MSGBOXFONT*/805,&lf)) {
+          if (lf.lfHeight < 0)
+            lf.lfHeight = -lf.lfHeight;
+          *wSize = (WORD)MulDiv(lf.lfHeight,72,iLogPixelsY);
+          if (*wSize == 0)
+            *wSize = 8;
+          StrCpyN(lpFaceName,lf.lfFaceName,LF_FACESIZE);
+          bSucceed = TRUE;
+        }
+        (GetProcAddress(hModUxTheme,"CloseThemeData"))(hTheme);
+      }
+    }
+  }
+
+  /*
+  if (!bSucceed) {
+    NONCLIENTMETRICS ncm;
+    ncm.cbSize = sizeof(NONCLIENTMETRICS);
+    SystemParametersInfo(SPI_GETNONCLIENTMETRICS,sizeof(NONCLIENTMETRICS),&ncm,0);
+    if (ncm.lfMessageFont.lfHeight < 0)
+      ncm.lfMessageFont.lfHeight = -ncm.lfMessageFont.lfHeight;
+    *wSize = (WORD)MulDiv(ncm.lfMessageFont.lfHeight,72,iLogPixelsY);
+    if (*wSize == 0)
+      *wSize = 8;
+    StrCpyN(lpFaceName,ncm.lfMessageFont.lfFaceName,LF_FACESIZE);
+  }*/
+
+  return(bSucceed);
+}
+
+__inline BOOL DialogTemplate_IsDialogEx(const DLGTEMPLATE* pTemplate) {
+
+  return ((DLGTEMPLATEEX*)pTemplate)->signature == 0xFFFF;
+}
+
+__inline BOOL DialogTemplate_HasFont(const DLGTEMPLATE* pTemplate) {
+
+  return (DS_SETFONT &
+    (DialogTemplate_IsDialogEx(pTemplate) ? ((DLGTEMPLATEEX*)pTemplate)->style : pTemplate->style));
+}
+
+__inline int DialogTemplate_FontAttrSize(BOOL bDialogEx) {
+
+  return (int)sizeof(WORD) * (bDialogEx ? 3 : 1);
+}
+
+__inline BYTE* DialogTemplate_GetFontSizeField(const DLGTEMPLATE* pTemplate) {
+
+  BOOL bDialogEx = DialogTemplate_IsDialogEx(pTemplate);
+  WORD* pw;
+
+  if (bDialogEx)
+    pw = (WORD*)((DLGTEMPLATEEX*)pTemplate + 1);
+  else
+    pw = (WORD*)(pTemplate + 1);
+
+  if (*pw == (WORD)-1)
+    pw += 2;
+  else
+    while(*pw++);
+
+  if (*pw == (WORD)-1)
+    pw += 2;
+  else
+    while(*pw++);
+
+  while (*pw++);
+
+  return (BYTE*)pw;
+}
+
+DLGTEMPLATE* LoadThemedDialogTemplate(LPCTSTR lpDialogTemplateID,HINSTANCE hInstance) {
+
+  HRSRC hRsrc;
+  HGLOBAL hRsrcMem;
+  DLGTEMPLATE *pRsrcMem;
+  DLGTEMPLATE *pTemplate;
+  UINT dwTemplateSize = 0;
+  WCHAR wchFaceName[LF_FACESIZE];
+  WORD wFontSize;
+  BOOL bDialogEx;
+  BOOL bHasFont;
+  int cbFontAttr;
+  int cbNew;
+  int cbOld;
+  BYTE* pbNew;
+  BYTE* pb;
+  BYTE* pOldControls;
+  BYTE* pNewControls;
+  WORD nCtrl;
+
+  hRsrc = FindResource(hInstance,lpDialogTemplateID,RT_DIALOG);
+  if (hRsrc == NULL)
+    return(NULL);
+
+  hRsrcMem = LoadResource(hInstance,hRsrc);
+  pRsrcMem = (DLGTEMPLATE*)LockResource(hRsrcMem);
+  dwTemplateSize = (UINT)SizeofResource(hInstance,hRsrc);
+
+  if ((dwTemplateSize == 0) ||
+      (pTemplate = LocalAlloc(LPTR,dwTemplateSize+LF_FACESIZE*2)) == NULL) {
+    UnlockResource(hRsrcMem);
+    FreeResource(hRsrcMem);
+    return(NULL);
+  }
+
+  CopyMemory((BYTE*)pTemplate,pRsrcMem,(size_t)dwTemplateSize);
+  UnlockResource(hRsrcMem);
+  FreeResource(hRsrcMem);
+
+  if (!GetThemedDialogFont(wchFaceName,&wFontSize))
+    return(pTemplate);
+
+  bDialogEx  = DialogTemplate_IsDialogEx(pTemplate);
+  bHasFont   = DialogTemplate_HasFont(pTemplate);
+  cbFontAttr = DialogTemplate_FontAttrSize(bDialogEx);
+
+  if (bDialogEx)
+    ((DLGTEMPLATEEX*)pTemplate)->style |= DS_SHELLFONT;
+  else
+    pTemplate->style |= DS_SHELLFONT;
+
+  cbNew = cbFontAttr + ((lstrlen(wchFaceName) + 1) * sizeof(WCHAR));
+  pbNew = (BYTE*)wchFaceName;
+
+  pb = DialogTemplate_GetFontSizeField(pTemplate);
+  cbOld = (int)(bHasFont ? cbFontAttr + 2 * (lstrlen((WCHAR*)(pb + cbFontAttr)) + 1) : 0);
+
+  pOldControls = (BYTE*)(((DWORD_PTR)pb + cbOld + 3) & ~(DWORD_PTR)3);
+  pNewControls = (BYTE*)(((DWORD_PTR)pb + cbNew + 3) & ~(DWORD_PTR)3);
+
+  nCtrl = bDialogEx ?
+    (WORD)((DLGTEMPLATEEX*)pTemplate)->cDlgItems :
+    (WORD)pTemplate->cdit;
+
+  if (cbNew != cbOld && nCtrl > 0)
+    MoveMemory(pNewControls,pOldControls,(size_t)(dwTemplateSize - (pOldControls - (BYTE*)pTemplate)));
+
+  *(WORD*)pb = wFontSize;
+  MoveMemory(pb + cbFontAttr,pbNew,(size_t)(cbNew - cbFontAttr));
+
+  return(pTemplate);
+}
+
+INT_PTR ThemedDialogBoxParam(
+  HINSTANCE hInstance,
+  LPCTSTR lpTemplate,
+  HWND hWndParent,
+  DLGPROC lpDialogFunc,
+  LPARAM dwInitParam) {
+
+  INT ret;
+  DLGTEMPLATE *pDlgTemplate;
+
+  pDlgTemplate = LoadThemedDialogTemplate(lpTemplate,hInstance);
+  ret = DialogBoxIndirectParam(hInstance,pDlgTemplate,hWndParent,lpDialogFunc,dwInitParam);
+  if (pDlgTemplate)
+    LocalFree(pDlgTemplate);
+
+  return(ret);
+}
+
+HWND CreateThemedDialogParam(
+  HINSTANCE hInstance,
+  LPCTSTR lpTemplate,
+  HWND hWndParent,
+  DLGPROC lpDialogFunc,
+  LPARAM dwInitParam) {
+
+  HWND hwnd;
+  DLGTEMPLATE *pDlgTemplate;
+
+  pDlgTemplate = LoadThemedDialogTemplate(lpTemplate,hInstance);
+  hwnd = CreateDialogIndirectParam(hInstance,pDlgTemplate,hWndParent,lpDialogFunc,dwInitParam);
+  if (pDlgTemplate)
+    LocalFree(pDlgTemplate);
+
+  return(hwnd);
 }
 
 

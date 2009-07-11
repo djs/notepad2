@@ -11,7 +11,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2008
+*                                              (c) Florian Balmer 1996-2009
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -36,6 +36,9 @@ typedef struct np2params {
   int   flagJumpTo;
   int   iInitialLine;
   int   iInitialColumn;
+  int   flagSetEncoding;
+  int   flagSetEOLMode;
+  int   flagTitleExcerpt;
   WCHAR wchData;
 
 } NP2PARAMS, *LPNP2PARAMS;
@@ -60,6 +63,7 @@ typedef struct np2params {
 #define IDC_EDIT         0xFB03
 #define IDC_EDITFRAME    0xFB04
 #define IDC_FILENAME     0xFB05
+#define IDC_REUSELOCK    0xFB06
 
 
 //==== Statusbar ==============================================================
@@ -82,14 +86,24 @@ typedef struct np2params {
 #define WM_TRAYMESSAGE WM_USER
 
 
+//==== Paste Board Timer ======================================================
+#define ID_PASTEBOARDTIMER 0xA001
+
+
+//==== Reuse Window Lock Timeout ==============================================
+#define REUSEWINDOWLOCKTIMEOUT 1000
+
+
 //==== Function Declarations ==================================================
 BOOL InitApplication(HINSTANCE);
 HWND InitInstance(HINSTANCE,LPSTR,int);
 BOOL ActivatePrevInst();
+BOOL ActivateMultiInst();
 void ShowNotifyIcon(HWND,BOOL);
 void SetNotifyIconTitle(HWND);
 void InstallFileWatching(LPCWSTR);
 void CALLBACK WatchTimerProc(HWND,UINT,UINT_PTR,DWORD);
+void CALLBACK PasteBoardTimer(HWND,UINT,UINT_PTR,DWORD);
 
 
 void LoadSettings();
@@ -99,7 +113,9 @@ void LoadFlags();
 int  CheckIniFile(LPWSTR,LPCWSTR);
 int  CheckIniFileRedirect(LPWSTR,LPCWSTR);
 int  FindIniFile();
+int  TestIniFile();
 int  CreateIniFile();
+int  CreateIniFileEx(LPCWSTR);
 
 
 void UpdateStatusbar();
@@ -111,7 +127,7 @@ BOOL FileIO(BOOL,LPCWSTR,BOOL,int*,int*,BOOL*,BOOL*,BOOL);
 BOOL FileLoad(BOOL,BOOL,BOOL,BOOL,LPCWSTR);
 BOOL FileSave(BOOL,BOOL,BOOL,BOOL);
 BOOL OpenFileDlg(HWND,LPWSTR,int,LPCWSTR);
-BOOL SaveFileDlg(HWND,LPWSTR,int);
+BOOL SaveFileDlg(HWND,LPWSTR,int,LPCWSTR);
 
 
 LRESULT CALLBACK MainWndProc(HWND,UINT,WPARAM,LPARAM);

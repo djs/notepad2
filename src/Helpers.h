@@ -11,7 +11,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2008
+*                                              (c) Florian Balmer 1996-2009
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -61,9 +61,10 @@ BOOL Is2k();
 //BOOL IsXP();
 BOOL IsVista();
 BOOL PrivateIsAppThemed();
+//BOOL SetExplorerTheme(HWND);
 
 
-BOOL SetWindowTitle(HWND,UINT,UINT,LPCWSTR,int,BOOL,UINT,BOOL);
+BOOL SetWindowTitle(HWND,UINT,UINT,LPCWSTR,int,BOOL,UINT,BOOL,LPCWSTR);
 void SetWindowTransparentMode(HWND,BOOL);
 
 
@@ -99,7 +100,10 @@ BOOL IsCmdEnabled(HWND, UINT);
 #define StrEnd(pStart) (pStart + lstrlen(pStart))
 
 int FormatString(LPWSTR,int,UINT,...);
-void FormatBytes(LPWSTR,int,DWORD);
+
+
+void PathRelativeToApp(LPWSTR,LPWSTR,int,BOOL,BOOL);
+void PathAbsoluteFromApp(LPWSTR,LPWSTR,int,BOOL);
 
 
 BOOL PathIsLnkFile(LPCWSTR);
@@ -138,10 +142,6 @@ LRESULT ComboBox_AddStringA2W(UINT,HWND,LPCSTR);
 UINT CodePageFromCharSet(UINT);
 
 
-//==== UnSlash Functions ======================================================
-void TransformBackslashes(char*,BOOL);
-
-
 //==== MRU Functions ==========================================================
 #define MRU_MAXITEMS 24
 #define MRU_NOCASE    1
@@ -159,11 +159,43 @@ typedef struct _mrulist {
 LPMRULIST MRU_Create(LPCWSTR,int,int);
 BOOL      MRU_Destroy(LPMRULIST);
 BOOL      MRU_Add(LPMRULIST,LPCWSTR);
+BOOL      MRU_AddFile(LPMRULIST,LPCWSTR,BOOL);
 BOOL      MRU_Delete(LPMRULIST,int);
 BOOL      MRU_Empty(LPMRULIST);
 int       MRU_Enum(LPMRULIST,int,LPWSTR,int);
 BOOL      MRU_Load(LPMRULIST);
 BOOL      MRU_Save(LPMRULIST);
+BOOL      MRU_MergeSave(LPMRULIST,BOOL,BOOL);
+
+
+//==== Themed Dialogs =========================================================
+#ifndef DLGTEMPLATEEX
+#pragma pack(push, 1)
+typedef struct {
+  WORD      dlgVer;
+  WORD      signature;
+  DWORD     helpID;
+  DWORD     exStyle;
+  DWORD     style;
+  WORD      cDlgItems;
+  short     x;
+  short     y;
+  short     cx;
+  short     cy;
+} DLGTEMPLATEEX;
+#pragma pack(pop)
+#endif
+
+BOOL GetThemedDialogFont(LPWSTR,WORD*);
+DLGTEMPLATE* LoadThemedDialogTemplate(LPCTSTR,HINSTANCE);
+#define ThemedDialogBox(hInstance,lpTemplate,hWndParent,lpDialogFunc) \
+  ThemedDialogBoxParam(hInstance,lpTemplate,hWndParent,lpDialogFunc,0)
+INT_PTR ThemedDialogBoxParam(HINSTANCE,LPCTSTR,HWND,DLGPROC,LPARAM);
+HWND    CreateThemedDialogParam(HINSTANCE,LPCTSTR,HWND,DLGPROC,LPARAM);
+
+
+//==== UnSlash Functions ======================================================
+void TransformBackslashes(char*,BOOL);
 
 
 //==== MinimizeToTray Functions - see comments in Helpers.c ===================

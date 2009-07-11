@@ -11,7 +11,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2008
+*                                              (c) Florian Balmer 1996-2009
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -528,7 +528,6 @@ DWORD WINAPI DirList_IconThread(LPVOID lpParam)
           }
         }
       }
-      //MessageBox(NULL,NULL,NULL,MB_ICONWARNING);
       lvi.iSubItem = 0;
       ListView_SetItem(hwnd,&lvi);
     }
@@ -707,6 +706,7 @@ int CALLBACK DirList_CompareProcFw(LPARAM lp1,LPARAM lp2,LPARAM lFlags)
 {
 
   HRESULT hr;
+  int result;
 
   LPLV_ITEMDATA lplvid1 = (LPLV_ITEMDATA)lp1;
   LPLV_ITEMDATA lplvid2 = (LPLV_ITEMDATA)lp2;
@@ -717,7 +717,20 @@ int CALLBACK DirList_CompareProcFw(LPARAM lp1,LPARAM lp2,LPARAM lFlags)
                                  lplvid1->pidl,
                                  lplvid2->pidl));
 
-  return(short)(SCODE_CODE(GetScode(hr)));
+  result = (short)(SCODE_CODE(GetScode(hr)));
+
+  if (result != 0 || lFlags == 0)
+    return(result);
+
+  hr = (lplvid1->lpsf->lpVtbl->CompareIDs(
+                                 lplvid1->lpsf,
+                                 0,
+                                 lplvid1->pidl,
+                                 lplvid2->pidl));
+
+  result = (short)(SCODE_CODE(GetScode(hr)));
+
+  return(result);
 
 }
 
@@ -725,6 +738,7 @@ int CALLBACK DirList_CompareProcRw(LPARAM lp1,LPARAM lp2,LPARAM lFlags)
 {
 
   HRESULT hr;
+  int result;
 
   LPLV_ITEMDATA lplvid1 = (LPLV_ITEMDATA)lp1;
   LPLV_ITEMDATA lplvid2 = (LPLV_ITEMDATA)lp2;
@@ -735,7 +749,20 @@ int CALLBACK DirList_CompareProcRw(LPARAM lp1,LPARAM lp2,LPARAM lFlags)
                                  lplvid1->pidl,
                                  lplvid2->pidl));
 
-  return(-(short)(SCODE_CODE(GetScode(hr))));
+  result = -(short)(SCODE_CODE(GetScode(hr)));
+
+  if (result != 0)
+    return(result);
+
+  hr = (lplvid1->lpsf->lpVtbl->CompareIDs(
+                                 lplvid1->lpsf,
+                                 0,
+                                 lplvid1->pidl,
+                                 lplvid2->pidl));
+
+  result = -(short)(SCODE_CODE(GetScode(hr)));
+
+  return(result);
 
 }
 

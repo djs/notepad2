@@ -11,7 +11,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2008
+*                                              (c) Florian Balmer 1996-2009
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -229,7 +229,7 @@ KEYWORDLIST KeyWords_XML = {
 "", "", "", "", "", "ELEMENT DOCTYPE ATTLIST ENTITY NOTATION", "", "", "" };
 
 
-EDITLEXER lexXML = { SCLEX_XML, L"XML Document", L"xml; xsl; rss; svg; xul; xsd; xslt; axl; rdf; vcproj; manifest", L"", &KeyWords_XML, {
+EDITLEXER lexXML = { SCLEX_XML, L"XML Document", L"xml; xsl; rss; svg; xul; xsd; xslt; axl; rdf; xaml; vcproj; manifest", L"", &KeyWords_XML, {
                      { STYLE_DEFAULT, L"Default", L"", L"" },
                      //{ SCE_H_DEFAULT, L"Default", L"", L"" },
                      { SCE_H_TAG, L"XML Tag", L"fore:#800080", L"" },
@@ -397,14 +397,17 @@ EDITLEXER lexCSS = { SCLEX_CSS, L"CSS Style Sheets", L"css", L"", &KeyWords_CSS,
 
 
 KEYWORDLIST KeyWords_CPP = {
-"and and_eq asm auto bitand bitor bool break case catch char class "
-"compl const const_cast continue default delete do double "
-"dynamic_cast else enum explicit export extern false float for friend "
-"goto if inline int long mutable namespace new not not_eq operator or "
-"or_eq private protected public register reinterpret_cast return short "
-"signed sizeof static static_cast struct switch template this throw true "
-"try typedef typeid typename union unsigned using virtual void volatile "
-"wchar_t while xor xor_eq",
+"__abstract __alignof __asm __assume __based __box __cdecl __declspec __delegate __event "
+"__except __except__try __fastcall __finally __forceinline __gc __hook __identifier "
+"__if_exists __if_not_exists __inline __int16 __int32 __int64 __int8 __interface __leave "
+"__m128 __m128d __m128i __m64 __multiple_inheritance __nogc __noop __pin __property __raise "
+"__sealed __single_inheritance __stdcall __super __try __try_cast __unhook __uuidof __value "
+"__virtual_inheritance __wchar_t auto bool break case catch char class const const_cast "
+"continue default defined delete do double dynamic_cast else enum explicit extern false float "
+"for friend goto if inline int long mutable naked namespace new operator private protected "
+"public register reinterpret_cast return short signed size_t sizeof static static_cast struct "
+"switch template this throw true try typedef typeid typename union unsigned using uuid "
+"virtual void volatile wchar_t while",
 "",
 "a addindex addtogroup anchor arg attention author b brief bug c class code "
 "date def defgroup deprecated dontinclude e em endcode endhtmlonly endif "
@@ -418,7 +421,7 @@ KEYWORDLIST KeyWords_CPP = {
 "", "", "", "", "", "" };
 
 
-EDITLEXER lexCPP = { SCLEX_CPP, L"C/C++ Source Code", L"c; cpp; cxx; cc; h; hpp; hxx; hh", L"", &KeyWords_CPP, {
+EDITLEXER lexCPP = { SCLEX_CPP, L"C/C++ Source Code", L"c; cpp; cxx; cc; h; hpp; hxx; hh; m; mm; idl; inl; odl", L"", &KeyWords_CPP, {
                      { STYLE_DEFAULT, L"Default", L"", L"" },
                      //{ SCE_C_DEFAULT, L"Default", L"", L"" },
                      { SCE_C_COMMENT, L"Comment", L"fore:#008000", L"" },
@@ -501,7 +504,7 @@ KEYWORDLIST KeyWords_RC = {
 "", "", "", "", "", "", "", "" };
 
 
-EDITLEXER lexRC = { SCLEX_CPP, L"Resource Script", L"rc; rc2; rct; dlg", L"", &KeyWords_RC, {
+EDITLEXER lexRC = { SCLEX_CPP, L"Resource Script", L"rc; rc2; rct; dlg; r", L"", &KeyWords_RC, {
                     { STYLE_DEFAULT, L"Default", L"", L"" },
                     //{ SCE_C_DEFAULT, L"Default", L"", L"" },
                     { SCE_C_COMMENT, L"Comment", L"fore:#008000", L"" },
@@ -543,12 +546,12 @@ EDITLEXER lexMAK = { SCLEX_MAKEFILE, L"Makefiles", L"mak; make; dsp", L"", &KeyW
 
 
 KEYWORDLIST KeyWords_VBS = {
-"and begin case call continue do each else elseif end erase error event exit false "
-"for function get gosub goto if implement in load loop lset me mid new next not nothing "
-"on or property raiseevent rem resume return rset select set stop sub then to true unload "
-"until wend while with withevents attribute alias as boolean byref byte byval const compare "
-"currency date declare dim double enum explicit friend global integer let lib long module object "
-"option optional preserve private property public redim single static string type variant",
+"alias and as attribute begin boolean byref byte byval call case class compare const continue "
+"currency date declare dim do double each else elseif empty end enum erase error event exit "
+"explicit false for friend function get global gosub goto if implement in integer let lib load "
+"long loop lset me mid module new next not nothing null object on option optional or preserve "
+"private property public raiseevent redim rem resume return rset select set single static stop "
+"string sub then to true type unload until variant wend while with withevents",
 "", "", "", "", "", "", "", "" };
 
 
@@ -618,7 +621,7 @@ KEYWORDLIST KeyWords_JS = {
 "", "", "", "", "", "", "", "" };
 
 
-EDITLEXER lexJS = { SCLEX_CPP, L"JavaScript", L"js; jse; jsm; json", L"", &KeyWords_JS, {
+EDITLEXER lexJS = { SCLEX_CPP, L"JavaScript", L"js; jse; jsm; json; as", L"", &KeyWords_JS, {
                     { STYLE_DEFAULT, L"Default", L"", L"" },
                     //{ SCE_C_DEFAULT, L"Default", L"", L"" },
                     { SCE_C_COMMENT, L"Comment", L"fore:#008000", L"" },
@@ -905,11 +908,11 @@ KEYWORDLIST KeyWords_INI = {
 "", "", "", "", "", "", "", "", "" };
 
 
-EDITLEXER lexINI = { SCLEX_PROPERTIES, L"Configuration Files", L"ini; inf; reg; cfg; properties; oem; sif; url", L"", &KeyWords_INI, {
+EDITLEXER lexINI = { SCLEX_PROPERTIES, L"Configuration Files", L"ini; inf; reg; cfg; properties; oem; sif; url; sed; theme", L"", &KeyWords_INI, {
                      { STYLE_DEFAULT, L"Default", L"", L"" },
                      //{ SCE_PROPS_DEFAULT, L"Default", L"", L"" },
                      { SCE_PROPS_COMMENT, L"Comment", L"fore:#008000", L"" },
-                     { SCE_PROPS_SECTION, L"Section", L"back:#FF8040; bold; eolfilled", L"" },
+                     { SCE_PROPS_SECTION, L"Section", L"bold; fore:#000000; back:#FFC040; eolfilled", L"" },
                      { SCE_PROPS_ASSIGNMENT, L"Assignment", L"fore:#FF0000", L"" },
                      { SCE_PROPS_DEFVAL, L"Default Value", L"fore:#FF0000", L"" },
                      { -1, L"", L"", L"" } } };
@@ -947,8 +950,9 @@ EDITLEXER lexDIFF = { SCLEX_DIFF, L"Diff Files", L"diff; patch", L"", &KeyWords_
                       { SCE_DIFF_COMMAND, L"Command", L"bold; fore:#0A246A", L"" },
                       { SCE_DIFF_HEADER, L"Source and Destination Files", L"fore:#800000; back:#FFFF80; eolfilled", L"" },
                       { SCE_DIFF_POSITION, L"Position Setting", L"fore:#FF0000", L"" },
-                      { SCE_DIFF_ADDED, L"Line Addition", L"back:#80FF80; eolfilled", L"" },
-                      { SCE_DIFF_DELETED, L"Line Removal", L"back:#FF8080; eolfilled", L"" },
+                      { SCE_DIFF_ADDED, L"Line Addition", L"fore:#200000; back:#C0FF60; eolfilled", L"" },
+                      { SCE_DIFF_DELETED, L"Line Removal", L"fore:#002000; back:#FF8060; eolfilled", L"" },
+                      { SCE_DIFF_CHANGED, L"Line Change", L"fore:#000020; back:#60C0FF; eolfilled", L"" },
                       { -1, L"", L"", L"" } } };
 
 
@@ -1075,16 +1079,15 @@ KEYWORDLIST KeyWords_CONF = {
 
 EDITLEXER lexCONF = { SCLEX_CONF, L"Apache Config Files", L"conf; htaccess", L"", &KeyWords_CONF, {
                       { STYLE_DEFAULT, L"Default", L"", L"" },
-                      //{ SCE_DIFF_DEFAULT, L"Default", L"", L"" },
-                      { SCE_CONF_COMMENT, L"Comment", L"fore:#007F00", L"" },
-                      { SCE_CONF_NUMBER, L"Number", L"fore:#007F7F", L"" },
-                      { SCE_CONF_OPERATOR, L"Operator", L"bold", L"" },
-                      { SCE_CONF_STRING, L"String", L"fore:#7F007F", L"" },
-                      { SCE_CONF_IDENTIFIER, L"Identifier", L"bold; fore:#00007F", L"" },
-                      { SCE_CONF_DIRECTIVE, L"Runtime Directive", L"bold; fore:#0A246A", L"" },
-                      { SCE_CONF_PARAMETER, L"Runtime Directive Parameter", L"fore:#000000; back:#FFE0FF", L"" },
-                      { SCE_CONF_IP, L"IP Address", L"fore:#007F7F; bold", L"" },
-                      { SCE_CONF_EXTENSION, L"Extension", L"fore:#000000; back:#FFE0FF", L"" },
+                      { SCE_CONF_COMMENT, L"Comment", L"fore:#008000", L"" },
+                      { SCE_CONF_NUMBER, L"Number", L"fore:#008080", L"" },
+// Lexer is buggy     { SCE_CONF_OPERATOR, L"Operator", L"", L"" },
+                      { SCE_CONF_STRING, L"String", L"fore:#800080", L"" },
+// Not used by lexer  { SCE_CONF_IDENTIFIER, L"Identifier", L"", L"" },
+                      { SCE_CONF_DIRECTIVE, L"Directive", L"fore:#0000FF", L"" },
+// Lexer is buggy     { SCE_CONF_PARAMETER, L"Runtime Directive Parameter", L"", L"" },
+                      { SCE_CONF_IP, L"IP Address", L"fore:#008080; bold", L"" },
+// Lexer is buggy     { SCE_CONF_EXTENSION, L"Extension", L"", L"" },
                       { -1, L"", L"", L"" } } };
 
 
@@ -1120,6 +1123,7 @@ PEDITLEXER pLexCurrent = &lexDefault;
 COLORREF crCustom[16];
 BOOL bUse2ndDefaultStyle;
 BOOL fStylesModified = FALSE;
+BOOL fWarnedNoIniFile = FALSE;
 int iBaseFontSize = 10;
 int iDefaultLexer;
 BOOL bAutoSelect;
@@ -1374,9 +1378,12 @@ void Style_SetLexer(HWND hwnd,PEDITLEXER pLexNew)
   else
     SendMessage(hwnd,SCI_SETSTYLEBITS,5,0);
 
+  if (pLexNew->iLexer == SCLEX_CPP)
+    SendMessage(hwnd,SCI_SETPROPERTY,(WPARAM)"styling.within.preprocessor",(LPARAM)"1");
+
   // Add KeyWord Lists
-  for (i = 0; i < 9; i++) {
-    SendMessage(hwnd,SCI_SETKEYWORDS,i,(LPARAM)pLexNew->pKeyWords->pszKeyWords[i]); }
+  for (i = 0; i < 9; i++)
+    SendMessage(hwnd,SCI_SETKEYWORDS,i,(LPARAM)pLexNew->pKeyWords->pszKeyWords[i]);
 
   // Use 2nd default style
   iIdx = (bUse2ndDefaultStyle) ? 12 : 0;
@@ -1396,8 +1403,8 @@ void Style_SetLexer(HWND hwnd,PEDITLEXER pLexNew)
   if (!Style_StrGetColor(FALSE,lexDefault.Styles[0+iIdx].szValue,&iValue))
     SendMessage(hwnd,SCI_STYLESETBACK,STYLE_DEFAULT,(LPARAM)GetSysColor(COLOR_WINDOW));       // default window color
 
-  if (pLexNew->iLexer != SCLEX_NULL) {
-    Style_SetStyles(hwnd,pLexNew->Styles[0].iStyle,pLexNew->Styles[0].szValue); } // lexer default
+  if (pLexNew->iLexer != SCLEX_NULL)
+    Style_SetStyles(hwnd,pLexNew->Styles[0].iStyle,pLexNew->Styles[0].szValue); // lexer default
   SendMessage(hwnd,SCI_STYLECLEARALL,0,0);
 
   Style_SetStyles(hwnd,lexDefault.Styles[1+iIdx].iStyle,lexDefault.Styles[1+iIdx].szValue); // linenumber
@@ -1520,7 +1527,8 @@ void Style_SetLexer(HWND hwnd,PEDITLEXER pLexNew)
 //    Style_StrGetCharSet(lexDefault.Styles[0+iIdx].szValue,&iValue);
 //    iDefaultCodePage = CodePageFromCharSet(iValue);
 //    if (SendMessage(hwnd,SCI_GETCODEPAGE,0,0) != SC_CP_UTF8)
-//      SendMessage(hwnd,SCI_SETCODEPAGE,(WPARAM)iDefaultCodePage,0); }
+//      SendMessage(hwnd,SCI_SETCODEPAGE,(WPARAM)iDefaultCodePage,0);
+//  }
 //}
 
 
@@ -1539,12 +1547,14 @@ void Style_SetLongLineColors(HWND hwnd)
     if (Style_StrGetColor(TRUE,lexDefault.Styles[11+iIdx].szValue,&rgb)) // edge fore
       SendMessage(hwnd,SCI_SETEDGECOLOUR,rgb,0);
     else
-      SendMessage(hwnd,SCI_SETEDGECOLOUR,GetSysColor(COLOR_3DLIGHT),0); }
+      SendMessage(hwnd,SCI_SETEDGECOLOUR,GetSysColor(COLOR_3DLIGHT),0);
+  }
   else {
     if (Style_StrGetColor(FALSE,lexDefault.Styles[11+iIdx].szValue,&rgb)) // edge back
       SendMessage(hwnd,SCI_SETEDGECOLOUR,rgb,0);
     else
-      SendMessage(hwnd,SCI_SETEDGECOLOUR,GetSysColor(COLOR_3DLIGHT),0); }
+      SendMessage(hwnd,SCI_SETEDGECOLOUR,GetSysColor(COLOR_3DLIGHT),0);
+  }
 }
 
 
@@ -1581,75 +1591,65 @@ void Style_SetCurrentLineBackground(HWND hwnd)
 
 //=============================================================================
 //
-//  Style_SetLexerFromFile()
+//  Style_SniffShebang()
 //
-extern int fNoHTMLGuess;
-extern FILEVARS fvCurFile;
+PEDITLEXER __fastcall Style_SniffShebang(char *pchText)
+{
+  if (StrCmpNA(pchText,"#!",2) == 0) {
+    char *pch = pchText + 2;
+    while (*pch && (*pch == ' ' || *pch == '\t'))
+      pch++;
+    while (*pch && *pch != ' ' && *pch != '\t' && *pch != '\r' && *pch != '\n')
+      pch++;
+    if ((pch - pchText) >= 3 && StrCmpNA(pch-3,"env",3) == 0) {
+      while (*pch && *pch == ' ')
+        pch++;
+      while (*pch && *pch != ' ' && *pch != '\t' && *pch != '\r' && *pch != '\n')
+        pch++;
+    }
+    if ((pch - pchText) >= 3 && StrCmpNIA(pch-3,"php",3) == 0)
+      return(&lexHTML);
+    else if ((pch - pchText) >= 4 && StrCmpNIA(pch-4,"perl",4) == 0)
+      return(&lexPL);
+    else if ((pch - pchText) >= 6 && StrCmpNIA(pch-6,"python",6) == 0)
+      return(&lexPY);
+  }
 
-void Style_SetLexerFromFile(HWND hwnd,LPCWSTR lpszFile,BOOL bSupersedeAutoSelect)
+  return(NULL);
+}
+
+
+//=============================================================================
+//
+//  Style_MatchLexer()
+//
+PEDITLEXER __fastcall Style_MatchLexer(LPCWSTR lpszMatch,BOOL bCheckNames)
 {
   int i;
-  LPWSTR lpszExt;
   WCHAR  tch[256+16];
   WCHAR  *p1,*p2;
-  BOOL  bFound = FALSE;
-  PEDITLEXER pLexNew = pLexArray[iDefaultLexer];
 
-  lpszExt = PathFindExtension(lpszFile);
-  if ((bSupersedeAutoSelect || bAutoSelect) && /* bAutoSelect == FALSE skips lexer search */
-      (lpszFile && lstrlen(lpszFile) > 0 && *lpszExt) || (fvCurFile.mask & FV_MODE))
-  {
-    WCHAR wchMode[32];
-    if (!bSupersedeAutoSelect &&
-        (fvCurFile.mask & FV_MODE) &&
-        fvCurFile.tchMode[0]) {
-      UINT cp = SendMessage(hwnd,SCI_GETCODEPAGE,0,0);
-      MultiByteToWideChar(cp,0,fvCurFile.tchMode,-1,wchMode,COUNTOF(wchMode));
-      lpszExt = wchMode;
-    }
+  if (!bCheckNames) {
 
-    // Skip the . (dot)
-    if (*lpszExt == L'.')
-      lpszExt++;
-
-    // check associated extensions
     for (i = 0; i < NUMLEXERS; i++) {
-      if (bFound)
-        break;
 
       ZeroMemory(tch,sizeof(WCHAR)*COUNTOF(tch));
       lstrcpy(tch,pLexArray[i]->szExtensions);
       p1 = tch;
-      while (*p1 && !bFound)
-      {
+      while (*p1) {
         if (p2 = StrChr(p1,L';'))
           *p2 = L'\0';
         else
           p2 = StrEnd(p1);
         StrTrim(p1,L" .");
-        if (lstrcmpi(p1,lpszExt) == 0) {
-          pLexNew = pLexArray[i];
-          bFound = TRUE;
-        }
+        if (lstrcmpi(p1,lpszMatch) == 0)
+          return(pLexArray[i]);
         p1 = p2+1;
       }
     }
   }
 
-  // check lexer names
-  if (!bFound && lpszFile && lstrlen(lpszFile) > 0) {
-
-    if (!bSupersedeAutoSelect &&
-        (fvCurFile.mask & FV_MODE) &&
-        fvCurFile.tchMode[0]) {
-      UINT cp = SendMessage(hwnd,SCI_GETCODEPAGE,0,0);
-      MultiByteToWideChar(cp,0,fvCurFile.tchMode,-1,tch,COUNTOF(tch));
-    }
-
-    else {
-      lstrcpy(tch,lpszFile);
-      StrTrim(tch,L" .");
-    }
+  else {
 
     if (lstrcmpi(tch,L"source") &&
         lstrcmpi(tch,L"code") &&
@@ -1658,35 +1658,126 @@ void Style_SetLexerFromFile(HWND hwnd,LPCWSTR lpszFile,BOOL bSupersedeAutoSelect
         lstrcmpi(tch,L"files")) {
 
       for (i = 0; i < NUMLEXERS; i++) {
-        if (bFound)
-          break;
+        if (StrStrI(pLexArray[i]->pszName,lpszMatch))
+          return(pLexArray[i]);
+      }
+    }
+  }
+  return(NULL);
+}
 
-        if (StrStrI(pLexArray[i]->pszName,tch)) {
-          pLexNew = pLexArray[i];
-          bFound = TRUE;
-        }
+
+//=============================================================================
+//
+//  Style_SetLexerFromFile()
+//
+extern int fNoHTMLGuess;
+extern int fNoCGIGuess;
+extern FILEVARS fvCurFile;
+
+void Style_SetLexerFromFile(HWND hwnd,LPCWSTR lpszFile)
+{
+  LPWSTR lpszExt;
+  BOOL  bFound = FALSE;
+  PEDITLEXER pLexNew = pLexArray[iDefaultLexer];
+  PEDITLEXER pLexSniffed;
+
+  if ((fvCurFile.mask & FV_MODE) && fvCurFile.tchMode[0]) {
+
+    WCHAR wchMode[32];
+    PEDITLEXER pLexMode;
+    UINT cp = SendMessage(hwnd,SCI_GETCODEPAGE,0,0);
+    MultiByteToWideChar(cp,0,fvCurFile.tchMode,-1,wchMode,COUNTOF(wchMode));
+
+    if (!fNoCGIGuess && (lstrcmpi(wchMode,L"cgi") == 0 || lstrcmpi(wchMode,L"fcgi") == 0)) {
+      char tchText[256];
+      SendMessage(hwnd,SCI_GETTEXT,(WPARAM)COUNTOF(tchText)-1,(LPARAM)tchText);
+      StrTrimA(tchText," \t\n\r");
+      if (pLexSniffed = Style_SniffShebang(tchText)) {
+        pLexNew = pLexSniffed;
+        bFound = TRUE;
+      }
+    }
+
+    if (!bFound) {
+      if (pLexMode = Style_MatchLexer(wchMode,FALSE)) {
+        pLexNew = pLexMode;
+        bFound = TRUE;
+      }
+      else if (pLexMode = Style_MatchLexer(wchMode,TRUE)) {
+        pLexNew = pLexMode;
+        bFound = TRUE;
       }
     }
   }
 
-  if (!bFound && (bSupersedeAutoSelect || bAutoSelect) &&
+  lpszExt = PathFindExtension(lpszFile);
+  if (!bFound && bAutoSelect && /* bAutoSelect == FALSE skips lexer search */
+      (lpszFile && lstrlen(lpszFile) > 0 && *lpszExt)) {
+
+    if (*lpszExt == L'.')
+      lpszExt++;
+
+    if (!fNoCGIGuess && (lstrcmpi(lpszExt,L"cgi") == 0 || lstrcmpi(lpszExt,L"fcgi") == 0)) {
+      char tchText[256];
+      SendMessage(hwnd,SCI_GETTEXT,(WPARAM)COUNTOF(tchText)-1,(LPARAM)tchText);
+      StrTrimA(tchText," \t\n\r");
+      if (pLexSniffed = Style_SniffShebang(tchText)) {
+        pLexNew = pLexSniffed;
+        bFound = TRUE;
+      }
+    }
+
+    // check associated extensions
+    if (!bFound) {
+      if (pLexSniffed = Style_MatchLexer(lpszExt,FALSE)) {
+        pLexNew = pLexSniffed;
+        bFound = TRUE;
+      }
+    }
+  }
+
+  if (!bFound && bAutoSelect &&
        lstrcmpi(PathFindFileName(lpszFile),L"makefile") == 0) {
     pLexNew = &lexMAK;
     bFound = TRUE;
   }
 
-  if (!bFound && (bSupersedeAutoSelect || bAutoSelect) && !fNoHTMLGuess) {
-    char tchText[256];
+  if (!bFound && bAutoSelect && (!fNoHTMLGuess || !fNoCGIGuess)) {
+    char tchText[512];
     SendMessage(hwnd,SCI_GETTEXT,(WPARAM)COUNTOF(tchText)-1,(LPARAM)tchText);
     StrTrimA(tchText," \t\n\r");
-    if (tchText[0] == '<') {
-      pLexNew = &lexHTML;
+    if (!fNoHTMLGuess && tchText[0] == '<') {
+      if (StrStrIA(tchText,"<html"))
+        pLexNew = &lexHTML;
+      else
+        pLexNew = &lexXML;
+      bFound = TRUE;
+    }
+    else if (!fNoCGIGuess && (pLexSniffed = Style_SniffShebang(tchText))) {
+      pLexNew = pLexSniffed;
       bFound = TRUE;
     }
   }
 
   // Apply the new lexer
   Style_SetLexer(hwnd,pLexNew);
+}
+
+
+//=============================================================================
+//
+//  Style_SetLexerFromName()
+//
+void Style_SetLexerFromName(HWND hwnd,LPCWSTR lpszFile,LPCWSTR lpszName)
+{
+  PEDITLEXER pLexNew;
+  if (pLexNew = Style_MatchLexer(lpszName,FALSE))
+    Style_SetLexer(hwnd,pLexNew);
+  else if (pLexNew = Style_MatchLexer(lpszName,TRUE))
+    Style_SetLexer(hwnd,pLexNew);
+  else
+    Style_SetLexerFromFile(hwnd,lpszFile);
 }
 
 
@@ -1974,10 +2065,12 @@ BOOL Style_StrGetCase(LPCWSTR lpszStyle,int *i)
     TrimString(tch);
     if (tch[0] == L'u' || tch[0] == L'U') {
       *i = SC_CASE_UPPER;
-      return TRUE; }
+      return TRUE;
+    }
     else if (tch[0] == L'l' || tch[0] == L'L') {
       *i = SC_CASE_LOWER;
-      return TRUE; }
+      return TRUE;
+    }
   }
   return FALSE;
 }
@@ -2145,7 +2238,8 @@ BOOL Style_StrGetAlpha(LPCWSTR lpszStyle,int *i)
     if (lstrlen(szNewStyle))
       lstrcat(szNewStyle,L"; ");
     lstrcat(szNewStyle,L"case:");
-    lstrcat(szNewStyle,(iValue == SC_CASE_UPPER) ? L"u" : L""); }
+    lstrcat(szNewStyle,(iValue == SC_CASE_UPPER) ? L"u" : L"");
+  }
 
   lstrcpyn(lpszStyle,szNewStyle,cchStyle);
   return TRUE;
@@ -2199,6 +2293,7 @@ BOOL Style_SelectFont(HWND hwnd,LPWSTR lpszStyle,int cchStyle,BOOL bDefaultStyle
   lstrcat(szNewStyle,lf.lfFaceName);
   if (bDefaultStyle &&
       lf.lfCharSet != DEFAULT_CHARSET &&
+      lf.lfCharSet != ANSI_CHARSET &&
       lf.lfCharSet != iDefaultCharSet) {
     lstrcat(szNewStyle,L"; charset:");
     wsprintf(tch,L"%i",lf.lfCharSet);
@@ -2238,12 +2333,14 @@ BOOL Style_SelectFont(HWND hwnd,LPWSTR lpszStyle,int cchStyle,BOOL bDefaultStyle
 
   if (Style_StrGetCase(lpszStyle,&iValue)) {
     lstrcat(szNewStyle,L"; case:");
-    lstrcat(szNewStyle,(iValue == SC_CASE_UPPER) ? L"u" : L""); }
+    lstrcat(szNewStyle,(iValue == SC_CASE_UPPER) ? L"u" : L"");
+  }
 
   if (Style_StrGetAlpha(lpszStyle,&iValue)) {
     lstrcat(szNewStyle,L"; alpha:");
     wsprintf(tch,L"%i",iValue);
-    lstrcat(szNewStyle,tch); }
+    lstrcat(szNewStyle,tch);
+  }
 
   lstrcpyn(lpszStyle,szNewStyle,cchStyle);
   return TRUE;
@@ -2361,12 +2458,14 @@ BOOL Style_SelectColor(HWND hwnd,BOOL bFore,LPWSTR lpszStyle,int cchStyle)
 
   if (Style_StrGetCase(lpszStyle,&iValue)) {
     lstrcat(szNewStyle,L"; case:");
-    lstrcat(szNewStyle,(iValue == SC_CASE_UPPER) ? L"u" : L""); }
+    lstrcat(szNewStyle,(iValue == SC_CASE_UPPER) ? L"u" : L"");
+  }
 
   if (Style_StrGetAlpha(lpszStyle,&iValue)) {
     lstrcat(szNewStyle,L"; alpha:");
     wsprintf(tch,L"%i",iValue);
-    lstrcat(szNewStyle,tch); }
+    lstrcat(szNewStyle,tch);
+  }
 
   lstrcpyn(lpszStyle,szNewStyle,cchStyle);
   return TRUE;
@@ -2606,6 +2705,7 @@ BOOL CALLBACK Style_ConfigDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lPara
         pCurrentLexer = 0;
         pCurrentStyle = 0;
 
+        //SetExplorerTheme(hwndTV);
         //TreeView_Expand(hwndTV,TreeView_GetRoot(hwndTV),TVE_EXPAND);
         TreeView_Select(hwndTV,TreeView_GetRoot(hwndTV),TVGN_CARET);
 
@@ -2615,13 +2715,15 @@ BOOL CALLBACK Style_ConfigDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lPara
         MakeBitmapButton(hwnd,IDC_NEXTSTYLE,g_hInstance,IDB_NEXT);
 
         // Setup title font
-        if (hFontTitle == NULL) {
-          if (NULL == (hFontTitle = (HFONT)SendDlgItemMessage(hwnd,IDC_TITLE,WM_GETFONT,0,0)))
-            hFontTitle = GetStockObject(DEFAULT_GUI_FONT);
-          GetObject(hFontTitle,sizeof(LOGFONT),&lf);
-          lf.lfHeight = (LONG) (lf.lfHeight * 1.2);
-          lf.lfWeight = FW_BOLD;
-          hFontTitle = CreateFontIndirect(&lf); }
+        if (hFontTitle)
+          DeleteObject(hFontTitle);
+        if (NULL == (hFontTitle = (HFONT)SendDlgItemMessage(hwnd,IDC_TITLE,WM_GETFONT,0,0)))
+          hFontTitle = GetStockObject(DEFAULT_GUI_FONT);
+        GetObject(hFontTitle,sizeof(LOGFONT),&lf);
+        lf.lfHeight = (LONG) (lf.lfHeight * 1.2);
+        lf.lfWeight = FW_BOLD;
+        hFontTitle = CreateFontIndirect(&lf);
+        SendDlgItemMessage(hwnd,IDC_TITLE,WM_SETFONT,(WPARAM)hFontTitle,TRUE);
 
         CenterDlgInParent(hwnd);
       }
@@ -2634,21 +2736,6 @@ BOOL CALLBACK Style_ConfigDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lPara
       DeleteBitmapButton(hwnd,IDC_PREVSTYLE);
       DeleteBitmapButton(hwnd,IDC_NEXTSTYLE);
       return FALSE;
-
-
-    case WM_CTLCOLORSTATIC:
-      {
-        DWORD dwId = GetWindowLong((HWND)lParam,GWL_ID);
-        HDC hdc = (HDC)wParam;
-
-        if (dwId == IDC_TITLE) {
-          SetBkMode(hdc,TRANSPARENT);
-          SetTextColor(hdc,GetSysColor(COLOR_BTNTEXT));
-          SelectObject(hdc,hFontTitle);
-          return(LONG)GetSysColorBrush(COLOR_BTNFACE);
-        }
-      }
-      break;
 
 
     case WM_NOTIFY:
@@ -2667,14 +2754,15 @@ BOOL CALLBACK Style_ConfigDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lPara
 
               else if (pCurrentLexer) {
                 if (!GetDlgItemText(hwnd,IDC_STYLEEDIT,pCurrentLexer->szExtensions,COUNTOF(pCurrentLexer->szExtensions)))
-                  lstrcpy(pCurrentLexer->szExtensions,pCurrentLexer->pszDefExt); }
+                  lstrcpy(pCurrentLexer->szExtensions,pCurrentLexer->pszDefExt);
+              }
 
               // a lexer has been selected
               if (!TreeView_GetParent(hwndTV,lpnmtv->itemNew.hItem))
               {
                 WCHAR wch[128];
 
-                GetString(IDS_STYLELABEL,wch,COUNTOF(wch));
+                GetDlgItemText(hwnd,IDC_STYLELABELS,wch,COUNTOF(wch));
                 if (StrChr(wch,L'|')) *StrChr(wch,L'|') = 0;
 
                 pCurrentStyle = 0;
@@ -2721,7 +2809,7 @@ BOOL CALLBACK Style_ConfigDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lPara
               {
                 WCHAR wch[128];
 
-                GetString(IDS_STYLELABEL,wch,COUNTOF(wch));
+                GetDlgItemText(hwnd,IDC_STYLELABELS,wch,COUNTOF(wch));
                 if (StrChr(wch,L'|')) *StrChr(wch,L'|') = 0;
 
 
@@ -3029,7 +3117,8 @@ BOOL CALLBACK Style_ConfigDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lPara
               GetDlgItemText(hwnd,IDC_STYLEEDIT,pCurrentStyle->szValue,COUNTOF(pCurrentStyle->szValue));
             else if (pCurrentLexer) {
               if (!GetDlgItemText(hwnd,IDC_STYLEEDIT,pCurrentLexer->szExtensions,COUNTOF(pCurrentLexer->szExtensions)))
-                lstrcpy(pCurrentLexer->szExtensions,pCurrentLexer->pszDefExt); }
+                lstrcpy(pCurrentLexer->szExtensions,pCurrentLexer->pszDefExt);
+            }
 
             if (Style_Import(hwnd)) {
 
@@ -3051,7 +3140,8 @@ BOOL CALLBACK Style_ConfigDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lPara
               GetDlgItemText(hwnd,IDC_STYLEEDIT,pCurrentStyle->szValue,COUNTOF(pCurrentStyle->szValue));
             else if (pCurrentLexer) {
               if (!GetDlgItemText(hwnd,IDC_STYLEEDIT,pCurrentLexer->szExtensions,COUNTOF(pCurrentLexer->szExtensions)))
-                lstrcpy(pCurrentLexer->szExtensions,pCurrentLexer->pszDefExt); }
+                lstrcpy(pCurrentLexer->szExtensions,pCurrentLexer->pszDefExt);
+            }
 
             if (Style_Export(hwnd))
               MsgBox(0,IDS_EXPORT_OK);
@@ -3068,7 +3158,8 @@ BOOL CALLBACK Style_ConfigDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lPara
               GetDlgItemText(hwnd,IDC_STYLEEDIT,pCurrentStyle->szValue,COUNTOF(pCurrentStyle->szValue));
             else if (pCurrentLexer) {
               if (!GetDlgItemText(hwnd,IDC_STYLEEDIT,pCurrentLexer->szExtensions,COUNTOF(pCurrentLexer->szExtensions)))
-                lstrcpy(pCurrentLexer->szExtensions,pCurrentLexer->pszDefExt); }
+                lstrcpy(pCurrentLexer->szExtensions,pCurrentLexer->pszDefExt);
+            }
 
             Style_SetLexer(hwndEdit,pLexCurrent);
             UpdateLineNumberWidth();
@@ -3080,7 +3171,8 @@ BOOL CALLBACK Style_ConfigDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lPara
             GetDlgItemText(hwnd,IDC_STYLEEDIT,pCurrentStyle->szValue,COUNTOF(pCurrentStyle->szValue));
           else if (pCurrentLexer) {
             if (!GetDlgItemText(hwnd,IDC_STYLEEDIT,pCurrentLexer->szExtensions,COUNTOF(pCurrentLexer->szExtensions)))
-              lstrcpy(pCurrentLexer->szExtensions,pCurrentLexer->pszDefExt); }
+              lstrcpy(pCurrentLexer->szExtensions,pCurrentLexer->pszDefExt);
+          }
           EndDialog(hwnd,IDOK);
           break;
 
@@ -3124,7 +3216,7 @@ void Style_ConfigDlg(HWND hwnd)
   }
   cItems = c;
 
-  if (IDCANCEL == DialogBoxParam(g_hInstance,
+  if (IDCANCEL == ThemedDialogBoxParam(g_hInstance,
                     MAKEINTRESOURCE(IDD_STYLECONFIG),
                     GetParent(hwnd),Style_ConfigDlgProc,
                     (LPARAM)&StyleBackup))
@@ -3141,8 +3233,13 @@ void Style_ConfigDlg(HWND hwnd)
     }
   }
 
-  else
+  else {
     fStylesModified = TRUE;
+    if (lstrlen(szIniFile) == 0 && !fWarnedNoIniFile) {
+      MsgBox(MBINFO,IDS_SETTINGSNOTSAVED);
+      fWarnedNoIniFile = TRUE;
+    }
+  }
 
   for (c = 0; c < cItems; c++)
     LocalFree(StyleBackup[c]);
@@ -3186,9 +3283,9 @@ BOOL CALLBACK Style_SelectLexerDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM 
         cxClient = rc.right - rc.left;
         cyClient = rc.bottom - rc.top;
 
-        GetWindowRect(hwnd,&rc);
-        mmiPtMaxY = rc.bottom-rc.top;
+        AdjustWindowRectEx(&rc,GetWindowLongPtr(hwnd,GWL_STYLE)|WS_THICKFRAME,FALSE,0);
         mmiPtMinX = rc.right-rc.left;
+        mmiPtMaxY = rc.bottom-rc.top;
 
         if (cxStyleSelectDlg < (rc.right-rc.left))
           cxStyleSelectDlg = rc.right-rc.left;
@@ -3196,15 +3293,15 @@ BOOL CALLBACK Style_SelectLexerDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM 
           cyStyleSelectDlg = rc.bottom-rc.top;
         SetWindowPos(hwnd,NULL,rc.left,rc.top,cxStyleSelectDlg,cyStyleSelectDlg,SWP_NOZORDER);
 
-        SetWindowLong(hwnd,GWL_STYLE,GetWindowLong(hwnd,GWL_STYLE)|WS_THICKFRAME);
+        SetWindowLongPtr(hwnd,GWL_STYLE,GetWindowLongPtr(hwnd,GWL_STYLE)|WS_THICKFRAME);
         SetWindowPos(hwnd,NULL,0,0,0,0,SWP_NOZORDER|SWP_NOMOVE|SWP_NOSIZE|SWP_FRAMECHANGED);
 
         GetMenuString(GetSystemMenu(GetParent(hwnd),FALSE),SC_SIZE,tch,COUNTOF(tch),MF_BYCOMMAND);
         InsertMenu(GetSystemMenu(hwnd,FALSE),SC_CLOSE,MF_BYCOMMAND|MF_STRING|MF_ENABLED,SC_SIZE,tch);
         InsertMenu(GetSystemMenu(hwnd,FALSE),SC_CLOSE,MF_BYCOMMAND|MF_SEPARATOR,0,NULL);
 
-        SetWindowLong(GetDlgItem(hwnd,IDC_RESIZEGRIP3),GWL_STYLE,
-          GetWindowLong(GetDlgItem(hwnd,IDC_RESIZEGRIP3),GWL_STYLE)|SBS_SIZEGRIP|WS_CLIPSIBLINGS);
+        SetWindowLongPtr(GetDlgItem(hwnd,IDC_RESIZEGRIP3),GWL_STYLE,
+          GetWindowLongPtr(GetDlgItem(hwnd,IDC_RESIZEGRIP3),GWL_STYLE)|SBS_SIZEGRIP|WS_CLIPSIBLINGS);
 
         cGrip = GetSystemMetrics(SM_CXHTHUMB);
         SetWindowPos(GetDlgItem(hwnd,IDC_RESIZEGRIP3),NULL,cxClient-cGrip,
@@ -3220,6 +3317,7 @@ BOOL CALLBACK Style_SelectLexerDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM 
           (HIMAGELIST)SHGetFileInfo(L"C:\\",0,&shfi,sizeof(SHFILEINFO),SHGFI_LARGEICON | SHGFI_SYSICONINDEX),
           LVSIL_NORMAL);
 
+        //SetExplorerTheme(hwndLV);
         ListView_SetExtendedListViewStyle(hwndLV,/*LVS_EX_FULLROWSELECT|*/LVS_EX_DOUBLEBUFFER|LVS_EX_LABELTIP);
         ListView_InsertColumn(hwndLV,0,&lvc);
 
@@ -3239,7 +3337,10 @@ BOOL CALLBACK Style_SelectLexerDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM 
             ListView_SetItemState(hwndLV,i,LVIS_FOCUSED|LVIS_SELECTED,LVIS_FOCUSED|LVIS_SELECTED);
             ListView_EnsureVisible(hwndLV,i,FALSE);
             if (iDefaultLexer == i) {
-              CheckDlgButton(hwnd,IDC_DEFAULTSCHEME,BST_CHECKED); } } }
+              CheckDlgButton(hwnd,IDC_DEFAULTSCHEME,BST_CHECKED);
+            }
+          }
+        }
 
         iInternalDefault = iDefaultLexer;
 
@@ -3332,8 +3433,12 @@ BOOL CALLBACK Style_SelectLexerDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM 
           else
             CheckDlgButton(hwnd,IDC_DEFAULTSCHEME,BST_UNCHECKED);
           EnableWindow(GetDlgItem(hwnd,IDC_DEFAULTSCHEME),i != -1);
-          EnableWindow(GetDlgItem(hwnd,IDOK),i != -1); }
-          break; } } }
+          EnableWindow(GetDlgItem(hwnd,IDOK),i != -1);
+          }
+          break;
+        }
+      }
+    }
 
       return TRUE;
 
@@ -3361,7 +3466,8 @@ BOOL CALLBACK Style_SelectLexerDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM 
               pLexCurrent = (PEDITLEXER)lvi.lParam;
               iDefaultLexer = iInternalDefault;
               bAutoSelect = (IsDlgButtonChecked(hwnd,IDC_AUTOSELECT) == BST_CHECKED) ? 1 : 0;
-              EndDialog(hwnd,IDOK); }
+              EndDialog(hwnd,IDOK);
+            }
           }
           break;
 
@@ -3387,7 +3493,7 @@ BOOL CALLBACK Style_SelectLexerDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM 
 //
 void Style_SelectLexerDlg(HWND hwnd)
 {
-  if (IDOK == DialogBoxParam(g_hInstance,
+  if (IDOK == ThemedDialogBoxParam(g_hInstance,
                 MAKEINTRESOURCE(IDD_STYLESELECT),
                 GetParent(hwnd),Style_SelectLexerDlgProc,0))
 
