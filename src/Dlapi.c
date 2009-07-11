@@ -430,8 +430,6 @@ int DirList_Fill(HWND hwnd,LPCWSTR lpszDir,DWORD grfFlags,LPCWSTR lpszFileSpec,
 //
 //  Thread to extract file icons in the background
 //
-typedef struct IShellIcon *LPSHELLICON;
-
 DWORD WINAPI DirList_IconThread(LPVOID lpParam)
 {
 

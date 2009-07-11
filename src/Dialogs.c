@@ -55,15 +55,12 @@ int MsgBox(int iType,UINT uIdMsg,...)
   WCHAR szBuf  [256*2];
   WCHAR szTitle[64];
   int iIcon = 0;
-  va_list args;
   HWND hwnd;
 
   if (!GetString(uIdMsg,szBuf,COUNTOF(szBuf)))
     return(0);
 
-  va_start(args, uIdMsg);
-  wvsprintf(szText,szBuf,args);
-  va_end(args);
+  wvsprintf(szText,szBuf,(LPVOID)((PUINT_PTR)&uIdMsg + 1));
 
   GetString(IDS_APPTITLE,szTitle,COUNTOF(szTitle));
 
@@ -2176,7 +2173,6 @@ int InfoBox(int iType,LPCWSTR lpstrSetting,int uidMessage,...)
   int idDlg = IDD_INFOBOX;
   INFOBOX ib;
   WCHAR wchFormat[512];
-  va_list args;
 
   if (IniGetInt(L"Suppressed Messages",lpstrSetting,0))
     return (iType == MBYESNO) ? IDYES : IDOK;
@@ -2185,9 +2181,7 @@ int InfoBox(int iType,LPCWSTR lpstrSetting,int uidMessage,...)
     return(-1);
 
   ib.lpstrMessage = LocalAlloc(LPTR,1024 * sizeof(WCHAR));
-  va_start(args, uidMessage);
-  wvsprintf(ib.lpstrMessage,wchFormat,args);
-  va_end(args);
+  wvsprintf(ib.lpstrMessage,wchFormat,(LPVOID)((PUINT_PTR)&uidMessage + 1));
 
   ib.lpstrSetting = (LPWSTR)lpstrSetting;
 
