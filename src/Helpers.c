@@ -145,88 +145,6 @@ void EndWaitCursor()
 
 //=============================================================================
 //
-//  KeepWindowsAlive()
-//
-/*void KeepWindowsAlive()
-{
-  MSG msg;
-  if (PeekMessage(&msg,NULL,0,0,PM_REMOVE))
-  {
-    TranslateMessage(&msg);
-    DispatchMessage(&msg);
-  }
-}*/
-
-
-//=============================================================================
-//
-//  Is2k()
-//
-BOOL Is2k()
-{
-  static BOOL bIs2k;
-  static BOOL bCachedResult;
-  if (bCachedResult)
-    return(bIs2k);
-  else {
-    OSVERSIONINFO osvi;
-    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-    GetVersionEx(&osvi);
-    bIs2k =
-       (osvi.dwMajorVersion >= 5);
-    bCachedResult = TRUE;
-    return(bIs2k);
-  }
-}
-
-
-//=============================================================================
-//
-//  IsXP()
-//
-//BOOL IsXP()
-//{
-//  static BOOL bIsXP;
-//  static BOOL bCachedResult;
-//  if (bCachedResult)
-//    return(bIsXP);
-//  else {
-//    OSVERSIONINFO osvi;
-//    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-//    GetVersionEx(&osvi);
-//    bIsXP =
-//       ((osvi.dwMajorVersion > 5) ||
-//       ((osvi.dwMajorVersion == 5) && (osvi.dwMinorVersion >= 1)));
-//    bCachedResult = TRUE;
-//    return(bIsXP);
-//  }
-//}
-
-
-//=============================================================================
-//
-//  IsVista()
-//
-BOOL IsVista()
-{
-  static BOOL bIsVista;
-  static BOOL bCachedResult;
-  if (bCachedResult)
-    return(bIsVista);
-  else {
-    OSVERSIONINFO osvi;
-    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-    GetVersionEx(&osvi);
-    bIsVista =
-       (osvi.dwMajorVersion >= 6);
-    bCachedResult = TRUE;
-    return(bIsVista);
-  }
-}
-
-
-//=============================================================================
-//
 //  PrivateIsAppThemed()
 //
 extern HMODULE hModUxTheme;
@@ -477,6 +395,103 @@ void SetDlgPos(HWND hDlg,int xDlg,int yDlg)
 
   SetWindowPos(hDlg,NULL,max(xMin,min(xMax,x)),max(yMin,min(yMax,y)),0,0,SWP_NOZORDER|SWP_NOSIZE);
 
+}
+
+
+//=============================================================================
+//
+//  Resize Dialog Helpers()
+//
+typedef struct _resizedlg {
+  int cxClient;
+  int cyClient;
+  int cxFrame;
+  int cyFrame;
+  int mmiPtMinX;
+  int mmiPtMinY;
+} RESIZEDLG, *PRESIZEDLG;
+
+void ResizeDlg_Init(HWND hwnd,int cxFrame,int cyFrame,int nIdGrip)
+{
+  RECT rc;
+  WCHAR wch[64];
+  int cGrip;
+  RESIZEDLG *pm = LocalAlloc(LPTR,sizeof(RESIZEDLG));
+
+  GetClientRect(hwnd,&rc);
+  pm->cxClient = rc.right - rc.left;
+  pm->cyClient = rc.bottom - rc.top;
+
+  pm->cxFrame = cxFrame;
+  pm->cyFrame = cyFrame;
+
+  AdjustWindowRectEx(&rc,GetWindowLongPtr(hwnd,GWL_STYLE)|WS_THICKFRAME,FALSE,0);
+  pm->mmiPtMinX = rc.right-rc.left;
+  pm->mmiPtMinY = rc.bottom-rc.top;
+
+  if (pm->cxFrame < (rc.right-rc.left))
+    pm->cxFrame = rc.right-rc.left;
+  if (pm->cyFrame < (rc.bottom-rc.top))
+    pm->cyFrame = rc.bottom-rc.top;
+
+  SetProp(hwnd,L"ResizeDlg",(HANDLE)pm);
+
+  SetWindowPos(hwnd,NULL,rc.left,rc.top,pm->cxFrame,pm->cyFrame,SWP_NOZORDER);
+
+  SetWindowLongPtr(hwnd,GWL_STYLE,GetWindowLongPtr(hwnd,GWL_STYLE)|WS_THICKFRAME);
+  SetWindowPos(hwnd,NULL,0,0,0,0,SWP_NOZORDER|SWP_NOMOVE|SWP_NOSIZE|SWP_FRAMECHANGED);
+  GetMenuString(GetSystemMenu(GetParent(hwnd),FALSE),SC_SIZE,wch,COUNTOF(wch),MF_BYCOMMAND);
+  InsertMenu(GetSystemMenu(hwnd,FALSE),SC_CLOSE,MF_BYCOMMAND|MF_STRING|MF_ENABLED,SC_SIZE,wch);
+  InsertMenu(GetSystemMenu(hwnd,FALSE),SC_CLOSE,MF_BYCOMMAND|MF_SEPARATOR,0,NULL);
+
+  SetWindowLongPtr(GetDlgItem(hwnd,nIdGrip),GWL_STYLE,
+    GetWindowLongPtr(GetDlgItem(hwnd,nIdGrip),GWL_STYLE)|SBS_SIZEGRIP|WS_CLIPSIBLINGS);
+  cGrip = GetSystemMetrics(SM_CXHTHUMB);
+  SetWindowPos(GetDlgItem(hwnd,nIdGrip),NULL,pm->cxClient-cGrip,pm->cyClient-cGrip,cGrip,cGrip,SWP_NOZORDER);
+}
+
+void ResizeDlg_Destroy(HWND hwnd,int *cxFrame,int *cyFrame)
+{
+  RECT rc;
+  PRESIZEDLG pm = GetProp(hwnd,L"ResizeDlg");
+
+  GetWindowRect(hwnd,&rc);
+  *cxFrame = rc.right-rc.left;
+  *cyFrame = rc.bottom-rc.top;
+
+  RemoveProp(hwnd,L"ResizeDlg");
+  LocalFree(pm);
+}
+
+void ResizeDlg_Size(HWND hwnd,LPARAM lParam,int *cx,int *cy)
+{
+  PRESIZEDLG pm = GetProp(hwnd,L"ResizeDlg");
+
+  *cx = LOWORD(lParam) - pm->cxClient;
+  *cy = HIWORD(lParam) - pm->cyClient;
+  pm->cxClient = LOWORD(lParam);
+  pm->cyClient = HIWORD(lParam);
+}
+
+void ResizeDlg_GetMinMaxInfo(HWND hwnd,LPARAM lParam)
+{
+  PRESIZEDLG pm = GetProp(hwnd,L"ResizeDlg");
+
+  LPMINMAXINFO lpmmi = (LPMINMAXINFO)lParam;
+  lpmmi->ptMinTrackSize.x = pm->mmiPtMinX;
+  lpmmi->ptMinTrackSize.y = pm->mmiPtMinY;
+}
+
+HDWP DeferCtlPos(HDWP hdwp,HWND hwndDlg,int nCtlId,int dx,int dy,UINT uFlags)
+{
+  RECT rc;
+  HWND hwndCtl = GetDlgItem(hwndDlg,nCtlId);
+  GetWindowRect(hwndCtl,&rc);
+  MapWindowPoints(NULL,hwndDlg,(LPPOINT)&rc,2);
+  if (uFlags & SWP_NOSIZE)
+    return(DeferWindowPos(hdwp,hwndCtl,NULL,rc.left+dx,rc.top+dy,0,0,SWP_NOZORDER|SWP_NOSIZE));
+  else
+    return(DeferWindowPos(hdwp,hwndCtl,NULL,0,0,rc.right-rc.left+dx,rc.bottom-rc.top+dy,SWP_NOZORDER|SWP_NOMOVE));
 }
 
 

@@ -262,6 +262,11 @@ extern "C" BOOL EditPrint(HWND hwnd,LPCWSTR pszDocTitle,LPCWSTR pszPageFormat)
   di.lpszDatatype = 0;
   di.fwType = 0;
   if (StartDoc(hdc, &di) < 0) {
+    DeleteDC(hdc);
+    if (fontHeader)
+      DeleteObject(fontHeader);
+    if (fontFooter)
+      DeleteObject(fontFooter);
     return FALSE;
   }
 
@@ -424,12 +429,10 @@ extern "C" BOOL EditPrint(HWND hwnd,LPCWSTR pszDocTitle,LPCWSTR pszPageFormat)
 
   EndDoc(hdc);
   DeleteDC(hdc);
-  if (fontHeader) {
+  if (fontHeader)
     DeleteObject(fontHeader);
-  }
-  if (fontFooter) {
+  if (fontFooter)
     DeleteObject(fontFooter);
-  }
 
   // Reset Statusbar to default mode
   StatusSetSimple(hwndStatus,FALSE);

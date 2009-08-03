@@ -126,7 +126,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="0"
 				EnableIntrinsicFunctions="true"
-				OmitFramePointers="true"
+				OmitFramePointers="false"
 				WholeProgramOptimization="true"
 				AdditionalIncludeDirectories="Scintilla\include;Scintilla\src;Scintilla\win32"
 				PreprocessorDefinitions="STATIC_BUILD;SCI_LEXER;NDEBUG;_CRT_SECURE_NO_WARNINGS;_CRT_NON_CONFORMING_SWPRINTFS"
@@ -271,6 +271,10 @@
 			>
 			<File
 				RelativePath="res\Copy.cur"
+				>
+			</File>
+			<File
+				RelativePath=".\res\Encoding.bmp"
 				>
 			</File>
 			<File
@@ -473,6 +477,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\scintilla\src\LexCOBOL.cxx"
+					>
+				</File>
+				<File
 					RelativePath="Scintilla\src\LexConf.cxx"
 					>
 				</File>
@@ -489,6 +497,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\scintilla\src\LexNimrod.cxx"
+					>
+				</File>
+				<File
 					RelativePath="Scintilla\src\LexOthers.cxx"
 					>
 				</File>
@@ -501,11 +513,31 @@
 					>
 				</File>
 				<File
+					RelativePath=".\scintilla\src\LexPowerPro.cxx"
+					>
+				</File>
+				<File
 					RelativePath="Scintilla\src\LexPython.cxx"
 					>
 				</File>
 				<File
+					RelativePath=".\scintilla\src\LexSML.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\scintilla\src\LexSorcus.cxx"
+					>
+				</File>
+				<File
 					RelativePath="Scintilla\src\LexSQL.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\scintilla\src\LexTACL.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\scintilla\src\LexTAL.cxx"
 					>
 				</File>
 				<File
@@ -522,6 +554,14 @@
 				</File>
 				<File
 					RelativePath="Scintilla\src\Partitioning.h"
+					>
+				</File>
+				<File
+					RelativePath=".\scintilla\src\PerLine.cxx"
+					>
+				</File>
+				<File
+					RelativePath=".\scintilla\src\PerLine.h"
 					>
 				</File>
 				<File

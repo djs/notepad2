@@ -5,7 +5,7 @@
 =   Notepad2 - light-weight Scintilla-based text editor for Windows   =
 =                                                                     =
 =                                                                     =
-=                                                   Notepad2 3.1.21   =
+=                                                   Notepad2 4.0.22   =
 =                                      (c) Florian Balmer 2004-2009   =
 =                                       http://www.flos-freeware.ch   =
 =                                                                     =
@@ -35,6 +35,44 @@ Features
   - Support for Unicode, UTF-8, Unix and Mac text files
   - Open shell links
   - Mostly adjustable
+
+
+New in Version 4.0.22 (released July 28, 2009)
+
+  - Support for numerous Windows, DOS, ISO, Mac and EBCDIC encodings
+  - Enhanced encoding selection dialog (F9)
+  - "Recode" (F8) to reload file with different source encoding
+  - "Recode file as system default ANSI" (Ctrl+Shift+A)
+  - "Recode file as system default OEM" (Ctrl+Shift+O)
+  - "Recode 7-bit ASCII file as UTF-8" (Shift+F8)
+  - Option to load 7-bit ASCII files as UTF-8 (File, Encoding, Default)
+  - Option to disable encoding tag parsing (File, Encoding, Default)
+  - Issue warning if data can't be converted to selected file encoding
+  - Fix loading of (invalid) Unicode files with embedded null bytes
+  - /e command line switch to specify file source encoding
+  - "Insert Encoding Identifier" (Ctrl+F8)
+  - "Tabify Indent" (Ctrl+Alt+T) and "Untabify Indent" (Ctrl+Alt+S)
+  - "Increase Number" (Ctrl+Alt++) and "Decrease Number" (Ctrl+Alt+-)
+  - Option to auto-reload unmodified files changed by external programs
+  - Hotkey (Alt+F5) and auto-reset option for file change notification
+  - Manual and automatic reloading of files keeps current encoding
+  - Scroll find matches and jump positions away from bottom border
+  - Enabled new Scintilla indent modes for wrapped lines
+  - Option to set any characters as boundaries for word wrap
+  - Allow bigger tab-/indent-widths (256) and long line limit (4096)
+  - Allow setting extra line spacing (through "Default Text" scheme)
+  - Dropping directories displays file open dialog
+  - Consolidated styles to simplify configuration (patch by Kai Liu)
+  - Ensure cursor visibility on any background color (patch by Kai Liu)
+  - Enabled improved Scintilla Pascal lexing module (patch by Kai Liu)
+  - Updated HTML keywords to version 5.0
+  - Remapped "Manage Favorites" hotkey to Alt+F9
+  - Remapped "Invert Case" hotkey to Ctrl+Alt+U
+  - Remapped "Title Case" hotkey to Ctrl+Alt+I
+  - Remapped "Sentence Case" hotkey to Ctrl+Alt+O
+  - Fixed various minor bugs
+  - Notepad2.exe program file no longer compressed with UPX
+  - Updated Scintilla library to 1.79
 
 
 New in Version 3.1.21 (released June 21, 2009)
@@ -239,7 +277,7 @@ New in Version 2.0.13 (not released to the public)
   - Encoding conversion notification message can be deactivated
   - Encoding selection dialog displays info about system ANSI code page
   - Downgraded ANSI code page support to system default only
-  - Big file wanring message can be deactivated
+  - Big file warning message can be deactivated
   - "Wrap Text To Column" command (Ctrl+Shift+W)
   - "Modify Lines" command to prefix and append text to lines (Alt+M)
   - "Duplicate Selection" command (Alt+D)
@@ -407,9 +445,10 @@ Keyboard Shortcuts for Notepad2
     Ctrl+F4               Close file, identical with Ctrl+N.
     Ctrl+O                Open file.
     F5                    Reload file.
-    F8                    Reload file without encoding detection.
-    Ctrl+F8               Reload file with Unicode detection toggled.
-    Shift+F8              Reload file with ANSI/UTF-8 defaults toggled.
+    F8                    Recode.
+    Ctrl+Shift+A          Recode file as system default ANSI.
+    Ctrl+Shift+O          Recode file as system default OEM.
+    Shift+F8              Recode 7-bit ASCII file as UTF-8.
     Alt+F8                Reload file without file variable parsing.
     Ctrl+S                Save file.
     F6                    Save file as.
@@ -430,7 +469,7 @@ Keyboard Shortcuts for Notepad2
 
     Alt+I                 Open favorites.
     Alt+K                 Add to favorites.
-    F9                    Manage favorites.
+    Alt+F9                Manage favorites.
 
   Edit
 
@@ -496,17 +535,18 @@ Keyboard Shortcuts for Notepad2
 
     Ctrl+Shift+U          Make uppercase.
     Ctrl+U                Make lowercase.
-    Ctrl+Alt+I            Invert case.
-    Ctrl+Alt+T            Title case.
-    Ctrl+Alt+S            Sentence case.
+    Ctrl+Alt+U            Invert case.
+    Ctrl+Alt+I            Title case.
+    Ctrl+Alt+O            Sentence case.
     Ctrl+Shift+S          Convert tabs to spaces.
     Ctrl+Shift+T          Convert spaces to tabs.
-    Ctrl+Shift+A          Convert to ANSI.
-    Ctrl+Shift+O          Convert to OEM.
+    Ctrl+Alt+S            Convert indenting tabs to spaces.
+    Ctrl+Alt+T            Convert indenting spaces to tabs.
 
   Insert
 
     Alt+X                 HTML/XML tag.
+    Ctrl+F8               Encoding identifier.
     Ctrl+F5               Time/date (short form).
     Ctrl+Shift+F5         Time/date (long form).
     Ctrl+F9               Filename.
@@ -520,6 +560,8 @@ Keyboard Shortcuts for Notepad2
     Ctrl+Shift+R          URL Decode.
     Ctrl+Alt+E            Escape C Special Chars.
     Ctrl+Alt+U            Unescape C Special Chars.
+    Ctrl+Alt++            Increase number.
+    Ctrl+Alt+-            Decrease number.
     Ctrl+B                Find matching brace.
     Ctrl+Shift+B          Select to matching brace.
     Ctrl+1                Enclose within ''.
@@ -582,6 +624,7 @@ Keyboard Shortcuts for Notepad2
     Alt+-                 Decrease limit for long lines.
     Ctrl+Shift+H          Toggle auto close HTML/XML.
     Alt+T                 Always on top.
+    Alt+F5                File change notification settings.
     Ctrl+0                Transparent mode.
     Ctrl+9                Display text excerpt in title.
     F7                    Save settings now.
@@ -595,6 +638,10 @@ Keyboard Shortcuts for Notepad2
 
 
 Regular Expression Syntax
+
+  Note: the Scintilla source code editing component supports only a
+  basic subset of regular expression syntax, and searches are limited
+  to single lines.
 
   .      Matches any character
 
@@ -654,7 +701,7 @@ Regular Expression Syntax
 
 Command Line Switches
 
-  Notepad2.exe [(encoding)] [(line ending mode)] [/g ln[,col]]
+  Notepad2.exe [(encoding)] [(line ending mode)] [/e id] [/g ln[,col]]
                [/m[-][r|b] text] [/q] [/s ext] [/d] [/h] [/x] [/c]
                [/b] [/n|/ns] [/r|/rs]
                [/p x,y,cx,cy[,max]|/p0|/ps|/pf,l,t,r,b,m]
@@ -667,6 +714,7 @@ Command Line Switches
     ...   Desired file encoding (can be one of /ansi, /unicode,
           /unicodebe, /utf8 or /utf8sig).
     ...   Desired line ending mode (either /crlf, /lf, or /cr).
+    /e    Specify file source encoding.
     /g    Jump to specified position, /g -1 means end of file.
     /m    Match specified text (/m- last, /mr regex, /mb backslash).
     /q    Force creation of new files without prompt.
@@ -736,7 +784,7 @@ Credits and Special Thanks
 
   [2] http://www.roland-weigelt.de
   [3] http://www.TimoSoft-Software.de
-  [4] http://www.kailiu.com/notepad2/
+  [4] http://code.kliu.org/misc/notepad2/
 
 
 Copyright

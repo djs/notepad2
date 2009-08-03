@@ -26,7 +26,7 @@
 
 
 //==== Data Type for WM_COPYDATA ==============================================
-#define DATA_NOTEPAD2_PARAMS 0xDE71
+#define DATA_NOTEPAD2_PARAMS 0xFB09
 typedef struct np2params {
 
   int   flagFileSpecified;
@@ -36,6 +36,7 @@ typedef struct np2params {
   int   flagJumpTo;
   int   iInitialLine;
   int   iInitialColumn;
+  int   iSrcEncoding;
   int   flagSetEncoding;
   int   flagSetEOLMode;
   int   flagTitleExcerpt;
@@ -123,7 +124,7 @@ void UpdateToolbar();
 void UpdateLineNumberWidth();
 
 
-BOOL FileIO(BOOL,LPCWSTR,BOOL,int*,int*,BOOL*,BOOL*,BOOL);
+BOOL FileIO(BOOL,LPCWSTR,BOOL,int*,int*,BOOL*,BOOL*,BOOL*,BOOL);
 BOOL FileLoad(BOOL,BOOL,BOOL,BOOL,LPCWSTR);
 BOOL FileSave(BOOL,BOOL,BOOL,BOOL);
 BOOL OpenFileDlg(HWND,LPWSTR,int,LPCWSTR);

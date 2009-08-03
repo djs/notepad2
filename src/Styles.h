@@ -21,7 +21,11 @@
 
 typedef struct _editstyle
 {
-  int   iStyle;
+  union
+  {
+    INT32 iStyle;
+    UINT8 iStyle8[4];
+  };
   WCHAR* pszName;
   WCHAR* pszDefault;
   WCHAR  szValue[128];
