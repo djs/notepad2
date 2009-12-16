@@ -21,6 +21,7 @@
 
 
 extern HINSTANCE g_hInstance;
+extern UINT16 g_uWinVer;
 
 
 #define COUNTOF(ar) (sizeof(ar)/sizeof(ar[0]))
@@ -54,12 +55,12 @@ void BeginWaitCursor();
 void EndWaitCursor();
 
 
-//void KeepWindowsAlive();
+#define Is2k()    (g_uWinVer >= 0x0500)
+#define IsXP()    (g_uWinVer >= 0x0501)
+#define IsVista() (g_uWinVer >= 0x0600)
+#define IsW7()    (g_uWinVer >= 0x0601)
 
 
-BOOL Is2k();
-//BOOL IsXP();
-BOOL IsVista();
 BOOL PrivateIsAppThemed();
 //BOOL SetExplorerTheme(HWND);
 
@@ -71,6 +72,11 @@ void SetWindowTransparentMode(HWND,BOOL);
 void CenterDlgInParent(HWND);
 void GetDlgPos(HWND,LPINT,LPINT);
 void SetDlgPos(HWND,int,int);
+void ResizeDlg_Init(HWND,int,int,int);
+void ResizeDlg_Destroy(HWND,int*,int*);
+void ResizeDlg_Size(HWND,LPARAM,int*,int*);
+void ResizeDlg_GetMinMaxInfo(HWND,LPARAM);
+HDWP DeferCtlPos(HDWP,HWND,int,int,int,UINT);
 void MakeBitmapButton(HWND,int,HINSTANCE,UINT);
 void MakeColorPickButton(HWND,int,HINSTANCE,COLORREF);
 void DeleteBitmapButton(HWND,int);

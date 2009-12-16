@@ -27,24 +27,23 @@
 #define MBOKCANCEL     8
 
 int MsgBox(int,UINT,...);
-
 void DisplayCmdLineHelp();
-
 BOOL GetDirectory(HWND,int,LPWSTR,LPCWSTR,BOOL);
-
 BOOL CALLBACK AboutDlgProc(HWND,UINT,WPARAM,LPARAM);
-
 void RunDlg(HWND,LPCWSTR);
 BOOL OpenWithDlg(HWND,LPCWSTR);
 BOOL FavoritesDlg(HWND,LPWSTR);
 BOOL AddToFavDlg(HWND,LPCWSTR,LPCWSTR);
 BOOL FileMRUDlg(HWND,LPWSTR);
+BOOL ChangeNotifyDlg(HWND);
 BOOL ColumnWrapDlg(HWND,UINT,int *);
 BOOL WordWrapSettingsDlg(HWND,UINT,int *);
 BOOL LongLineSettingsDlg(HWND,UINT,int *);
 BOOL TabSettingsDlg(HWND,UINT,int *);
+BOOL SelectDefEncodingDlg(HWND,int *);
 BOOL SelectEncodingDlg(HWND,int *);
-BOOL SelectLineEndingDlg(HWND,int *);
+BOOL RecodeDlg(HWND,int *);
+BOOL SelectDefLineEndingDlg(HWND,int *);
 int  InfoBox(int,LPCWSTR,int,...);
 
 

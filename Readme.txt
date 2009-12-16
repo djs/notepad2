@@ -5,7 +5,7 @@
 =   Notepad2 - light-weight Scintilla-based text editor for Windows   =
 =                                                                     =
 =                                                                     =
-=                                                   Notepad2 3.1.21   =
+=                                                   Notepad2 4.0.23   =
 =                                      (c) Florian Balmer 2004-2009   =
 =                                       http://www.flos-freeware.ch   =
 =                                                                     =
@@ -15,7 +15,7 @@
 
 The Notepad2 Source Code
 
-  This package contains the full source code of Notepad2 3.1.21 for
+  This package contains the full source code of Notepad2 4.0.23 for
   Windows. Project files for Visual C++ 7.0 are included. Chances are
   that Notepad2 can be rebuilt with other development tools, including
   the free Visual C++ Express Edition, but I haven't tested this.
@@ -29,7 +29,7 @@ Rebuilding from the Source Code
 
   [1] http://www.scintilla.org
 
-  Notepad2 3.1.21 has been created with Scintilla 1.77. The following
+  Notepad2 4.0.23 has been created with Scintilla 1.79. The following
   modification to the Scintilla source code is necessary:
 
   Scintilla/src/KeyWords.cxx:
@@ -41,7 +41,7 @@ Rebuilding from the Source Code
       #define LINK_LEXER(lexer) void(0)
 
 
-Shrinking the Executable Program File
+Creating a Compact Executable Program File
 
   To reduce the size of the Notepad2.exe program file, dynamic linking
   to the Visual C++ runtime library is enabled. To use the system C
@@ -56,14 +56,16 @@ Shrinking the Executable Program File
   need to be adapted to your system. The first LIB path has to be the
   directory containing msvcrt.lib version 6.0.
 
+  As of Scintilla version 1.79, building with msvcrt.lib version 6.0
+  also requires the <new> header file from Visual C++ 6.0.
+  Alternatively, the #include <new> statement could be removed from
+  ScintillaWin.cxx, along with the parameter-less catch clauses.
+
   Special thanks to Kai Liu [3] for providing useful information about
   using the system C runtime library!
 
-  The resulting executable file is compressed with UPX [4].
-
   [2] http://www.google.ch/search?q=Visual+Studio+6.0+Service+Pack+6
-  [3] http://www.kailiu.com/notepad2/
-  [4] http://upx.sourceforge.net
+  [3] http://code.kliu.org/misc/notepad2/
 
 
 How to add or modify Syntax Schemes

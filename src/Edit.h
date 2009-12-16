@@ -52,11 +52,12 @@ typedef struct _editfindreplace
 HWND  EditCreate(HWND);
 void  EditSetNewText(HWND,char*,DWORD);
 BOOL  EditConvertText(HWND,UINT,UINT,BOOL);
+BOOL  EditSetNewEncoding(HWND,int,int,BOOL,BOOL);
 char* EditGetClipboardText(HWND);
 BOOL  EditCopyAppend(HWND);
 int   EditDetectEOLMode(HWND,char*,DWORD);
 BOOL  EditLoadFile(HWND,LPCWSTR,BOOL,int*,int*,BOOL*,BOOL*);
-BOOL  EditSaveFile(HWND,LPCWSTR,int,BOOL);
+BOOL  EditSaveFile(HWND,LPCWSTR,int,BOOL*,BOOL);
 
 void  EditMakeUppercase(HWND);
 void  EditMakeLowercase(HWND);
@@ -68,9 +69,10 @@ void  EditURLEncode(HWND);
 void  EditURLDecode(HWND);
 void  EditEscapeCChars(HWND);
 void  EditUnescapeCChars(HWND);
+void  EditModifyNumber(HWND,BOOL);
 
-void  EditTabsToSpaces(HWND,int);
-void  EditSpacesToTabs(HWND,int);
+void  EditTabsToSpaces(HWND,int,BOOL);
+void  EditSpacesToTabs(HWND,int,BOOL);
 
 void  EditMoveUp(HWND);
 void  EditMoveDown(HWND);
@@ -106,13 +108,47 @@ BOOL  EditPrint(HWND,LPCWSTR,LPCWSTR);
 void  EditPrintSetup(HWND);
 void  EditPrintInit();
 
-// New codepage detection functions from Textview 6.0
-#define NCP_DEFAULT            0
-#define NCP_UTF8               1
-#define NCP_UTF8_SIGN          2
-#define NCP_UNICODE            4
-#define NCP_UNICODE_REVERSE    8
-#define NCP_UNICODE_BOM       16
+#define NCP_DEFAULT            1
+#define NCP_UTF8               2
+#define NCP_UTF8_SIGN          4
+#define NCP_UNICODE            8
+#define NCP_UNICODE_REVERSE   16
+#define NCP_UNICODE_BOM       32
+#define NCP_8BIT              64
+#define NCP_INTERNAL          (NCP_DEFAULT|NCP_UTF8|NCP_UTF8_SIGN|NCP_UNICODE|NCP_UNICODE_REVERSE|NCP_UNICODE_BOM)
+#define NCP_RECODE           128
+#define CPI_NONE              -1
+#define CPI_DEFAULT            0
+#define CPI_OEM                1
+#define CPI_UNICODEBOM         2
+#define CPI_UNICODEBEBOM       3
+#define CPI_UNICODE            4
+#define CPI_UNICODEBE          5
+#define CPI_UTF8               6
+#define CPI_UTF8SIGN           7
+#define CPI_UTF7               8
+
+#define IDS_ENCODINGNAME0  61000
+#define IDS_EOLMODENAME0   62000
+
+typedef struct _np2encoding {
+  UINT    uFlags;
+  UINT    uCodePage;
+  char*   pszParseNames;
+  int     idsName;
+  WCHAR   wchLabel[32];
+} NP2ENCODING;
+
+void Encoding_InitDefaults();
+int  Encoding_MapIniSetting(BOOL,int);
+void Encoding_GetLabel(int);
+int  Encoding_MatchW(LPCWSTR);
+int  Encoding_MatchA(char*);
+BOOL Encoding_IsValid(int);
+void Encoding_AddToListView(HWND,int,BOOL);
+BOOL Encoding_GetFromListView(HWND,int *);
+void Encoding_AddToComboboxEx(HWND,int,BOOL);
+BOOL Encoding_GetFromComboboxEx(HWND,int *);
 
 BOOL IsUnicode(const char*,int,LPBOOL,LPBOOL);
 BOOL IsUTF8(const char*,int);
@@ -138,6 +174,7 @@ typedef struct _filevars {
   BOOL bTabsAsSpaces;
   int iLongLinesLimit;
   char tchEncoding[32];
+  int  iEncoding;
   char tchMode[32];
 
 } FILEVARS, *LPFILEVARS;
@@ -147,7 +184,10 @@ BOOL FileVars_Apply(HWND,LPFILEVARS);
 BOOL FileVars_ParseInt(char*,char*,int*);
 BOOL FileVars_ParseStr(char*,char*,char*,int);
 BOOL FileVars_IsUTF8(LPFILEVARS);
-BOOL FileVars_IsANSI(LPFILEVARS);
+BOOL FileVars_IsNonUTF8(LPFILEVARS);
+BOOL FileVars_IsValidEncoding(LPFILEVARS);
+int  FileVars_GetEncoding(LPFILEVARS);
+
 
 
 ///   End of Edit.h   \\\
