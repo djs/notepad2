@@ -250,6 +250,11 @@ HWND EditCreate(HWND hwndParent)
   SendMessage(hwnd,SCI_SETYCARETPOLICY,CARET_EVEN,0);
   SendMessage(hwnd,SCI_SETTABINDENTS,TRUE,0);
   SendMessage(hwnd,SCI_SETBACKSPACEUNINDENTS,FALSE,0);
+  //SCI_2.x SendMessage(hwnd,SCI_SETMULTIPLESELECTION,FALSE,0);
+  //SCI_2.x SendMessage(hwnd,SCI_SETADDITIONALSELECTIONTYPING,FALSE,0);
+  //SCI_2.x SendMessage(hwnd,SCI_SETVIRTUALSPACEOPTIONS,SCVS_NONE,0);
+  //SCI_2.x SendMessage(hwnd,SCI_SETADDITIONALCARETSBLINK,FALSE,0);
+  //SCI_2.x SendMessage(hwnd,SCI_SETADDITIONALCARETSVISIBLE,FALSE,0);
 
   SendMessage(hwnd,SCI_ASSIGNCMDKEY,(SCK_NEXT + (SCMOD_CTRL << 16)),SCI_PARADOWN);
   SendMessage(hwnd,SCI_ASSIGNCMDKEY,(SCK_PRIOR + (SCMOD_CTRL << 16)),SCI_PARAUP);
@@ -372,19 +377,29 @@ BOOL EditConvertText(HWND hwnd,UINT cpSource,UINT cpDest,BOOL bSetSavePoint)
 //
 //  EditSetNewEncoding()
 //
-void EditSetNewEncoding(HWND hwnd,int iCurrentEncoding,int iNewEncoding,BOOL bNoUI,BOOL bSetSavePoint) {
+BOOL EditSetNewEncoding(HWND hwnd,int iCurrentEncoding,int iNewEncoding,BOOL bNoUI,BOOL bSetSavePoint) {
 
   if (iCurrentEncoding != iNewEncoding) {
+
+    if ((iCurrentEncoding == CPI_DEFAULT && iNewEncoding == CPI_DEFAULT) ||
+        (iCurrentEncoding != CPI_DEFAULT && iNewEncoding != CPI_DEFAULT))
+      return(TRUE);
 
     if (SendMessage(hwnd,SCI_GETLENGTH,0,0) == 0) {
 
       if ((iCurrentEncoding == CPI_DEFAULT || iNewEncoding == CPI_DEFAULT) &&
-          (bNoUI || InfoBox(MBYESNO,L"MsgConv2",IDS_ASK_ENCODING2) == IDYES))
+          (bNoUI || InfoBox(MBYESNO,L"MsgConv2",IDS_ASK_ENCODING2) == IDYES)) {
 
         EditConvertText(hwnd,
           (mEncoding[iCurrentEncoding].uFlags & NCP_DEFAULT) ? iDefaultCodePage : SC_CP_UTF8,
           (mEncoding[iNewEncoding].uFlags & NCP_DEFAULT) ? iDefaultCodePage : SC_CP_UTF8,
           bSetSavePoint);
+
+        return(TRUE);
+      }
+
+      else
+        return(FALSE);
     }
 
     else if ((iCurrentEncoding == CPI_DEFAULT || iNewEncoding == CPI_DEFAULT) &&
@@ -398,8 +413,16 @@ void EditSetNewEncoding(HWND hwnd,int iCurrentEncoding,int iNewEncoding,BOOL bNo
         FALSE);
 
       EndWaitCursor();
+
+      return(TRUE);
     }
+
+    else
+      return(FALSE);
   }
+
+  else
+    return(FALSE);
 }
 
 
@@ -3058,6 +3081,11 @@ void EditPadWithSpaces(HWND hwnd)
   int iLineStart;
   int iLineEnd;
 
+//SCI_2.x   int iRcCurLine;
+//SCI_2.x   int iRcAnchorLine;
+//SCI_2.x   int iRcCurCol;
+//SCI_2.x   int iRcAnchorCol;
+
   if (SC_SEL_RECTANGLE != SendMessage(hwnd,SCI_GETSELECTIONMODE,0,0)) {
 
     iSelStart = SendMessage(hwnd,SCI_GETSELECTIONSTART,0,0);
@@ -3078,6 +3106,15 @@ void EditPadWithSpaces(HWND hwnd)
     }
   }
   else {
+
+//SCI_2.x     int iCurPos = SendMessage(hwnd,SCI_GETCURRENTPOS,0,0);
+//SCI_2.x     int iAnchorPos = SendMessage(hwnd,SCI_GETANCHOR,0,0);
+
+//SCI_2.x     iRcCurLine = SendMessage(hwnd,SCI_LINEFROMPOSITION,(WPARAM)iCurPos,0);
+//SCI_2.x     iRcAnchorLine = SendMessage(hwnd,SCI_LINEFROMPOSITION,(WPARAM)iAnchorPos,0);
+
+//SCI_2.x     iRcCurCol = SendMessage(hwnd,SCI_GETCOLUMN,(WPARAM)iCurPos,0);
+//SCI_2.x     iRcAnchorCol = SendMessage(hwnd,SCI_GETCOLUMN,(WPARAM)iAnchorPos,0);
 
     bIsRectangular = TRUE;
 
@@ -3138,6 +3175,13 @@ void EditPadWithSpaces(HWND hwnd)
     }
     SendMessage(hwnd,SCI_SETSEL,(WPARAM)iAnchorPos,(LPARAM)iCurPos);
   }
+
+//SCI_2.x   else if (bIsRectangular) {
+//SCI_2.x     int iCurPos = SendMessage(hwnd,SCI_FINDCOLUMN,(WPARAM)iRcCurLine,(LPARAM)iRcCurCol);
+//SCI_2.x     int iAnchorPos = SendMessage(hwnd,SCI_FINDCOLUMN,(WPARAM)iRcAnchorLine,(LPARAM)iRcAnchorCol);
+//SCI_2.x     SendMessage(hwnd,SCI_SETRECTANGULARSELECTIONCARET,(WPARAM)iCurPos,0);
+//SCI_2.x     SendMessage(hwnd,SCI_SETRECTANGULARSELECTIONANCHOR,(WPARAM)iAnchorPos,0);
+//SCI_2.x   }
 }
 
 

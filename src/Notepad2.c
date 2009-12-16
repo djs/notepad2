@@ -1779,7 +1779,7 @@ void MsgInitMenu(HWND hwnd,WPARAM wParam,LPARAM lParam)
   EnableCmd(hmenu,IDM_EDIT_STREAMCOMMENT,
     !(i == SCLEX_NULL || i == SCLEX_VBSCRIPT || i == SCLEX_MAKEFILE || i == SCLEX_VB || i == SCLEX_ASM ||
       i == SCLEX_SQL || i == SCLEX_PERL || i == SCLEX_PYTHON || i == SCLEX_PROPERTIES ||i == SCLEX_CONF ||
-      i == SCLEX_BATCH || i == SCLEX_DIFF));
+      i == SCLEX_POWERSHELL || i == SCLEX_BATCH || i == SCLEX_DIFF));
 
   EnableCmd(hmenu,IDM_EDIT_INSERT_ENCODING,*mEncoding[iEncoding].pszParseNames);
 
@@ -2005,7 +2005,7 @@ LRESULT MsgCommand(HWND hwnd,WPARAM wParam,LPARAM lParam)
         ZeroMemory(&sei,sizeof(SHELLEXECUTEINFO));
 
         sei.cbSize = sizeof(SHELLEXECUTEINFO);
-        sei.fMask = SEE_MASK_FLAG_NO_UI;
+        sei.fMask = SEE_MASK_FLAG_NO_UI | /*SEE_MASK_NOZONECHECKS*/0x00800000;
         sei.hwnd = hwnd;
         sei.lpVerb = NULL;
         sei.lpFile = tchExeFile;
@@ -2024,6 +2024,7 @@ LRESULT MsgCommand(HWND hwnd,WPARAM wParam,LPARAM lParam)
     case IDM_FILE_NEWWINDOW:
     case IDM_FILE_NEWWINDOW2:
       {
+        SHELLEXECUTEINFO sei;
         WCHAR szModuleName[MAX_PATH];
         WCHAR szFileName[MAX_PATH];
         WCHAR szParameters[2*MAX_PATH+64];
@@ -2081,7 +2082,18 @@ LRESULT MsgCommand(HWND hwnd,WPARAM wParam,LPARAM lParam)
           lstrcat(szParameters,szFileName);
         }
 
-        ShellExecute(hwnd,NULL,szModuleName,szParameters,NULL,SW_SHOWNORMAL);
+        ZeroMemory(&sei,sizeof(SHELLEXECUTEINFO));
+
+        sei.cbSize = sizeof(SHELLEXECUTEINFO);
+        sei.fMask = /*SEE_MASK_NOZONECHECKS*/0x00800000;
+        sei.hwnd = hwnd;
+        sei.lpVerb = NULL;
+        sei.lpFile = szModuleName;
+        sei.lpParameters = szParameters;
+        sei.lpDirectory = NULL;
+        sei.nShow = SW_SHOWNORMAL;
+
+        ShellExecuteEx(&sei);
       }
       break;
 
@@ -2287,26 +2299,28 @@ LRESULT MsgCommand(HWND hwnd,WPARAM wParam,LPARAM lParam)
             case IDM_ENCODING_ANSI:       iNewEncoding = CPI_DEFAULT; break;
           }
         }
-        EditSetNewEncoding(hwndEdit,
+
+        if (EditSetNewEncoding(hwndEdit,
           iEncoding,iNewEncoding,
-          (flagSetEncoding),lstrlen(szCurFile) == 0);
+          (flagSetEncoding),lstrlen(szCurFile) == 0)) {
 
-        if (SendMessage(hwndEdit,SCI_GETLENGTH,0,0) == 0) {
-          iEncoding = iNewEncoding;
-          iOriginalEncoding = iNewEncoding;
+          if (SendMessage(hwndEdit,SCI_GETLENGTH,0,0) == 0) {
+            iEncoding = iNewEncoding;
+            iOriginalEncoding = iNewEncoding;
+          }
+          else {
+            if (iEncoding == CPI_DEFAULT || iNewEncoding == CPI_DEFAULT)
+              iOriginalEncoding = -1;
+            iEncoding = iNewEncoding;
+          }
+
+          UpdateToolbar();
+          UpdateStatusbar();
+
+          SetWindowTitle(hwnd,uidsAppTitle,IDS_UNTITLED,szCurFile,
+            iPathNameFormat,bModified || iEncoding != iOriginalEncoding,
+            IDS_READONLY,bReadOnly,szTitleExcerpt);
         }
-        else {
-          if (iEncoding == CPI_DEFAULT || iNewEncoding == CPI_DEFAULT)
-            iOriginalEncoding = -1;
-          iEncoding = iNewEncoding;
-        }
-
-        UpdateToolbar();
-        UpdateStatusbar();
-
-        SetWindowTitle(hwnd,uidsAppTitle,IDS_UNTITLED,szCurFile,
-          iPathNameFormat,bModified || iEncoding != iOriginalEncoding,
-          IDS_READONLY,bReadOnly,szTitleExcerpt);
       }
       break;
 
@@ -2455,7 +2469,10 @@ LRESULT MsgCommand(HWND hwnd,WPARAM wParam,LPARAM lParam)
       }
       break;
 
+
     case IDM_EDIT_SELECTALL:
+      //SCI_2.x SendMessage(hwndEdit,SCI_CLEARSELECTIONS,0,0);
+      SendMessage(hwndEdit,SCI_GOTOPOS,0,0);
       SendMessage(hwndEdit,SCI_SELECTALL,0,0);
       //SendMessage(hwndEdit,SCI_SETSEL,0,(LPARAM)-1);
       break;
@@ -2917,6 +2934,7 @@ LRESULT MsgCommand(HWND hwnd,WPARAM wParam,LPARAM lParam)
         case SCLEX_PERL:
         case SCLEX_PYTHON:
         case SCLEX_CONF:
+        case SCLEX_POWERSHELL:
           SendMessage(hwndEdit,SCI_SETCURSOR,SC_CURSORWAIT,0);
           EditToggleLineComments(hwndEdit,L"#",TRUE);
           SendMessage(hwndEdit,SCI_SETCURSOR,SC_CURSORNORMAL,0);
@@ -2953,6 +2971,7 @@ LRESULT MsgCommand(HWND hwnd,WPARAM wParam,LPARAM lParam)
         case SCLEX_PYTHON:
         case SCLEX_PROPERTIES:
         case SCLEX_CONF:
+        case SCLEX_POWERSHELL:
         case SCLEX_BATCH:
         case SCLEX_DIFF:
           break;
@@ -3332,7 +3351,14 @@ LRESULT MsgCommand(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
     case IDM_VIEW_MATCHBRACES:
       bMatchBraces = (bMatchBraces) ? FALSE : TRUE;
-      if (!bMatchBraces)
+      if (bMatchBraces) {
+        NMHDR nmhdr;
+        nmhdr.hwndFrom = hwndEdit;
+        nmhdr.idFrom = IDC_EDIT;
+        nmhdr.code = SCN_UPDATEUI;
+        SendMessage(hwnd,WM_NOTIFY,IDC_EDIT,(LPARAM)&nmhdr);
+      }
+      else
         SendMessage(hwndEdit,SCI_BRACEHIGHLIGHT,(WPARAM)-1,(LPARAM)-1);
       break;
 
@@ -3865,7 +3891,7 @@ LRESULT MsgCommand(HWND hwnd,WPARAM wParam,LPARAM lParam)
               ZeroMemory(&sei,sizeof(SHELLEXECUTEINFO));
 
               sei.cbSize = sizeof(SHELLEXECUTEINFO);
-              sei.fMask = 0;
+              sei.fMask = /*SEE_MASK_NOZONECHECKS*/0x00800000;
               sei.hwnd = NULL;
               sei.lpVerb = NULL;
               sei.lpFile = lpszCommand;
@@ -5619,8 +5645,8 @@ void UpdateStatusbar()
   WCHAR tchDocSize[256];
 
   WCHAR tchEOLMode[32];
-
   WCHAR tchOvrMode[32];
+  WCHAR tchLexerName[128];
 
   if (!bShowStatusbar)
     return;
@@ -5677,12 +5703,14 @@ void UpdateStatusbar()
   else
     lstrcpy(tchOvrMode,L"INS");
 
+  Style_GetCurrentLexerName(tchLexerName,COUNTOF(tchLexerName));
+
   StatusSetText(hwndStatus,STATUS_DOCPOS,tchDocPos);
   StatusSetText(hwndStatus,STATUS_DOCSIZE,tchDocSize);
   StatusSetText(hwndStatus,STATUS_CODEPAGE,mEncoding[iEncoding].wchLabel);
   StatusSetText(hwndStatus,STATUS_EOLMODE,tchEOLMode);
   StatusSetText(hwndStatus,STATUS_OVRMODE,tchOvrMode);
-  StatusSetText(hwndStatus,STATUS_LEXER,Style_GetCurrentLexerName());
+  StatusSetText(hwndStatus,STATUS_LEXER,tchLexerName);
 
   //InvalidateRect(hwndStatus,NULL,TRUE);
 

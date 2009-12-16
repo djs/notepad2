@@ -52,7 +52,7 @@ typedef struct _editfindreplace
 HWND  EditCreate(HWND);
 void  EditSetNewText(HWND,char*,DWORD);
 BOOL  EditConvertText(HWND,UINT,UINT,BOOL);
-void  EditSetNewEncoding(HWND,int,int,BOOL,BOOL);
+BOOL  EditSetNewEncoding(HWND,int,int,BOOL,BOOL);
 char* EditGetClipboardText(HWND);
 BOOL  EditCopyAppend(HWND);
 int   EditDetectEOLMode(HWND,char*,DWORD);

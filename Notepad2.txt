@@ -5,7 +5,7 @@
 =   Notepad2 - light-weight Scintilla-based text editor for Windows   =
 =                                                                     =
 =                                                                     =
-=                                                   Notepad2 4.0.22   =
+=                                                   Notepad2 4.0.23   =
 =                                      (c) Florian Balmer 2004-2009   =
 =                                       http://www.flos-freeware.ch   =
 =                                                                     =
@@ -26,7 +26,7 @@ Features
   - Syntax highlighting: HTML, XML, PHP, ASP (JS, VBS), CSS,
     JavaScript, VBScript, C/C++, C#, Resource Script, Makefiles, Java,
     Visual Basic, Pascal, Assembly, SQL, Perl, Python, Configuration
-    Files, Apache Config Files, Batch Files, Diff Files
+    Files, Apache Config Files, PowerShell, Batch Files, Diff Files
   - Drag & drop text editing inside and outside Notepad2
   - Basic regular expression search and replace
   - Useful word, line and block editing shortcuts
@@ -35,6 +35,18 @@ Features
   - Support for Unicode, UTF-8, Unix and Mac text files
   - Open shell links
   - Mostly adjustable
+
+
+New in Version 4.0.23 (released October 06, 2009)
+
+  - Added PowerShell Script syntax highlighting
+  - Added missing keywords to JavaScript schemes
+  - Further simplified syntax schemes by consolidating certain styles
+  - More accurate "mode" file variable matching with tightened rules
+  - Avoid repetitive zone checks when running Notepad2.exe internally
+  - Fixed choice of encoding conversion prompt being ignored
+  - Fixed recent file dialog hang with inaccessible UNC paths
+  - Internal changes to allow complete internationalization (future)
 
 
 New in Version 4.0.22 (released July 28, 2009)

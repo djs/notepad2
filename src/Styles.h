@@ -26,6 +26,7 @@ typedef struct _editstyle
     INT32 iStyle;
     UINT8 iStyle8[4];
   };
+  int rid;
   WCHAR* pszName;
   WCHAR* pszDefault;
   WCHAR  szValue[128];
@@ -42,7 +43,8 @@ typedef struct _keywordlist
 
 typedef struct _editlexer
 {
-  int   iLexer;
+  int iLexer;
+  int rid;
   WCHAR* pszName;
   WCHAR* pszDefExt;
   WCHAR  szExtensions[128];
@@ -53,7 +55,7 @@ typedef struct _editlexer
 
 
 // Number of Lexers in pLexArray
-#define NUMLEXERS 21
+#define NUMLEXERS 22
 
 
 void   Style_Load();
@@ -87,7 +89,7 @@ BOOL   Style_StrGetAlpha(LPCWSTR,int*);
 BOOL   Style_SelectFont(HWND,LPWSTR,int,BOOL);
 BOOL   Style_SelectColor(HWND,BOOL,LPWSTR,int);
 void   Style_SetStyles(HWND,int,LPCWSTR);
-LPCWSTR Style_GetCurrentLexerName();
+void   Style_GetCurrentLexerName(LPWSTR,int);
 int    Style_GetLexerIconId(PEDITLEXER);
 void   Style_AddLexerToTreeView(HWND,PEDITLEXER);
 BOOL CALLBACK Styles_ConfigDlgProc(HWND,UINT,WPARAM,LPARAM);

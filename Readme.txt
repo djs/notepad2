@@ -5,7 +5,7 @@
 =   Notepad2 - light-weight Scintilla-based text editor for Windows   =
 =                                                                     =
 =                                                                     =
-=                                                   Notepad2 4.0.22   =
+=                                                   Notepad2 4.0.23   =
 =                                      (c) Florian Balmer 2004-2009   =
 =                                       http://www.flos-freeware.ch   =
 =                                                                     =
@@ -15,7 +15,7 @@
 
 The Notepad2 Source Code
 
-  This package contains the full source code of Notepad2 4.0.22 for
+  This package contains the full source code of Notepad2 4.0.23 for
   Windows. Project files for Visual C++ 7.0 are included. Chances are
   that Notepad2 can be rebuilt with other development tools, including
   the free Visual C++ Express Edition, but I haven't tested this.
@@ -29,7 +29,7 @@ Rebuilding from the Source Code
 
   [1] http://www.scintilla.org
 
-  Notepad2 4.0.22 has been created with Scintilla 1.79. The following
+  Notepad2 4.0.23 has been created with Scintilla 1.79. The following
   modification to the Scintilla source code is necessary:
 
   Scintilla/src/KeyWords.cxx:

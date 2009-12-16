@@ -192,7 +192,7 @@ BOOL GetDirectory(HWND hwndParent,int iTitle,LPWSTR pszFolder,LPCWSTR pszBase,BO
 //
 static const DWORD  dwVerMajor    = 4;
 static const DWORD  dwVerMinor    = 0;
-static const DWORD  dwBuildNumber = 22;
+static const DWORD  dwBuildNumber = 23;
 static const WCHAR* szRevision    = L"";
 static const WCHAR* szExtra       = L"";
 static const BOOL   bReleaseBuild = TRUE;
@@ -414,6 +414,7 @@ BOOL CALLBACK RunDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
               sei.nShow = SW_SHOWNORMAL;
 
               if (bQuickExit) {
+                sei.fMask |= /*SEE_MASK_NOZONECHECKS*/0x00800000;
                 EndDialog(hwnd,IDOK);
                 ShellExecuteEx(&sei);
               }
@@ -984,7 +985,7 @@ DWORD WINAPI FileMRUIconThread(LPVOID lpParam) {
     lvi.iItem = iItem;
     if (ListView_GetItem(hwnd,&lvi)) {
 
-      if (!PathFileExists(tch)) {
+      if (PathIsUNC(tch) || !PathFileExists(tch)) {
         dwFlags |= SHGFI_USEFILEATTRIBUTES;
         dwAttr = FILE_ATTRIBUTE_NORMAL;
         shfi.dwAttributes = 0;
@@ -1013,7 +1014,10 @@ DWORD WINAPI FileMRUIconThread(LPVOID lpParam) {
         lvi.state |= INDEXTOOVERLAYMASK(1);
       }
 
-      dwAttr = GetFileAttributes(tch);
+      if (PathIsUNC(tch))
+        dwAttr = FILE_ATTRIBUTE_NORMAL;
+      else
+        dwAttr = GetFileAttributes(tch);
 
       if (!flagNoFadeHidden &&
           dwAttr != INVALID_FILE_ATTRIBUTES &&
