@@ -11,7 +11,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2009
+*                                              (c) Florian Balmer 1996-2010
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -62,10 +62,15 @@ void EndWaitCursor();
 
 
 BOOL PrivateIsAppThemed();
+HRESULT PrivateSetCurrentProcessExplicitAppUserModelID(PCWSTR);
+BOOL IsElevated();
 //BOOL SetExplorerTheme(HWND);
 
 
-BOOL SetWindowTitle(HWND,UINT,UINT,LPCWSTR,int,BOOL,UINT,BOOL,LPCWSTR);
+BOOL VerifyContrast();
+
+
+BOOL SetWindowTitle(HWND,UINT,BOOL,UINT,LPCWSTR,int,BOOL,UINT,BOOL,LPCWSTR);
 void SetWindowTransparentMode(HWND,BOOL);
 
 
@@ -108,7 +113,7 @@ BOOL IsCmdEnabled(HWND, UINT);
 int FormatString(LPWSTR,int,UINT,...);
 
 
-void PathRelativeToApp(LPWSTR,LPWSTR,int,BOOL,BOOL);
+void PathRelativeToApp(LPWSTR,LPWSTR,int,BOOL,BOOL,BOOL);
 void PathAbsoluteFromApp(LPWSTR,LPWSTR,int,BOOL);
 
 
@@ -165,13 +170,14 @@ typedef struct _mrulist {
 LPMRULIST MRU_Create(LPCWSTR,int,int);
 BOOL      MRU_Destroy(LPMRULIST);
 BOOL      MRU_Add(LPMRULIST,LPCWSTR);
-BOOL      MRU_AddFile(LPMRULIST,LPCWSTR,BOOL);
+BOOL      MRU_AddFile(LPMRULIST,LPCWSTR,BOOL,BOOL);
 BOOL      MRU_Delete(LPMRULIST,int);
+BOOL      MRU_DeleteFileFromStore(LPMRULIST,LPCWSTR);
 BOOL      MRU_Empty(LPMRULIST);
 int       MRU_Enum(LPMRULIST,int,LPWSTR,int);
 BOOL      MRU_Load(LPMRULIST);
 BOOL      MRU_Save(LPMRULIST);
-BOOL      MRU_MergeSave(LPMRULIST,BOOL,BOOL);
+BOOL      MRU_MergeSave(LPMRULIST,BOOL,BOOL,BOOL);
 
 
 //==== Themed Dialogs =========================================================

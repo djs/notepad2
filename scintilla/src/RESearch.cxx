@@ -198,6 +198,8 @@
  *  matches:    foo-foo fo-fo fob-fob foobar-foobar ...
  */
 
+#include <stdlib.h>
+
 #include "CharClassify.h"
 #include "RESearch.h"
 
@@ -416,6 +418,7 @@ int RESearch::GetBackslashExpression(
 				ChSet(static_cast<unsigned char>(c));
 			}
 		}
+		break;
 	case 'w':
 		for (c = 0; c < MAXCHR; c++) {
 			if (iswordc(static_cast<unsigned char>(c))) {
@@ -449,11 +452,12 @@ const char *RESearch::Compile(const char *pattern, int length, bool caseSensitiv
 	char mask;             /* xor mask -CCL/NCL */
 	int c1, c2, prevChar;
 
-	if (!pattern || !length)
+	if (!pattern || !length) {
 		if (sta)
 			return 0;
 		else
 			return badpat("No previous regular expression");
+	}
 	sta = NOP;
 
 	const char *p=pattern;     /* pattern pointer   */
@@ -875,7 +879,7 @@ int RESearch::PMatch(CharacterIndexer &ci, int lp, int endp, char *ap) {
 			eopat[*ap++] = lp;
 			break;
  		case BOW:
-			if (lp!=bol && iswordc(ci.CharAt(lp-1)) || !iswordc(ci.CharAt(lp)))
+			if ((lp!=bol && iswordc(ci.CharAt(lp-1))) || !iswordc(ci.CharAt(lp)))
 				return NOTFOUND;
 			break;
 		case EOW:

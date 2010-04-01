@@ -11,7 +11,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2009
+*                                              (c) Florian Balmer 1996-2010
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -22,7 +22,6 @@
 
 //==== Main Window ============================================================
 #define WC_NOTEPAD2 L"Notepad2"
-#define WC_NOTEPAD2PASTEBOARD L"Notepad2PasteBoard"
 
 
 //==== Data Type for WM_COPYDATA ==============================================
@@ -99,7 +98,8 @@ typedef struct np2params {
 BOOL InitApplication(HINSTANCE);
 HWND InitInstance(HINSTANCE,LPSTR,int);
 BOOL ActivatePrevInst();
-BOOL ActivateMultiInst();
+BOOL RelaunchMultiInst();
+BOOL RelaunchElevated();
 void ShowNotifyIcon(HWND,BOOL);
 void SetNotifyIconTitle(HWND);
 void InstallFileWatching(LPCWSTR);

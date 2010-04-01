@@ -11,7 +11,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2009
+*                                              (c) Florian Balmer 1996-2010
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -38,6 +38,7 @@ extern HWND  hwndMain;
 extern HWND  hwndEdit;
 extern HINSTANCE g_hInstance;
 extern LPMALLOC  g_lpMalloc;
+extern DWORD dwLastIOError;
 extern BOOL bSkipUnicodeDetection;
 extern BOOL bLoadASCIIasUTF8;
 extern int fNoFileVariables;
@@ -54,8 +55,8 @@ extern WCHAR szCurFile[MAX_PATH+40];
 int MsgBox(int iType,UINT uIdMsg,...)
 {
 
-  WCHAR szText [256*2];
-  WCHAR szBuf  [256*2];
+  WCHAR szText [1024];
+  WCHAR szBuf  [1024];
   WCHAR szTitle[64];
   int iIcon = 0;
   HWND hwnd;
@@ -64,6 +65,27 @@ int MsgBox(int iType,UINT uIdMsg,...)
     return(0);
 
   wvsprintf(szText,szBuf,(LPVOID)((PUINT_PTR)&uIdMsg + 1));
+
+  if (uIdMsg == IDS_ERR_LOADFILE || uIdMsg == IDS_ERR_SAVEFILE ||
+      uIdMsg == IDS_CREATEINI_FAIL || uIdMsg == IDS_WRITEINI_FAIL) {
+    LPVOID lpMsgBuf;
+    WCHAR wcht;
+    FormatMessage(
+      FORMAT_MESSAGE_ALLOCATE_BUFFER|FORMAT_MESSAGE_FROM_SYSTEM|FORMAT_MESSAGE_IGNORE_INSERTS,
+      NULL,
+      dwLastIOError,
+      MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),
+      (LPTSTR)&lpMsgBuf,
+      0,
+      NULL);
+    StrTrim(lpMsgBuf,L" \a\b\f\n\r\t\v");
+    StrCatBuff(szText,L"\n",COUNTOF(szText));
+    StrCatBuff(szText,lpMsgBuf,COUNTOF(szText));
+    LocalFree(lpMsgBuf);
+    wcht = *CharPrev(szText,StrEnd(szText));
+    if (IsCharAlphaNumeric(wcht) || wcht == '"' || wcht == '\'')
+      StrCatBuff(szText,L".",COUNTOF(szText));
+  }
 
   GetString(IDS_APPTITLE,szTitle,COUNTOF(szTitle));
 
@@ -188,8 +210,8 @@ BOOL GetDirectory(HWND hwndParent,int iTitle,LPWSTR pszFolder,LPCWSTR pszBase,BO
 //  AboutDlgProc()
 //
 static const DWORD  dwVerMajor    = 4;
-static const DWORD  dwVerMinor    = 0;
-static const DWORD  dwBuildNumber = 23;
+static const DWORD  dwVerMinor    = 1;
+static const DWORD  dwBuildNumber = 24;
 static const WCHAR* szRevision    = L"";
 static const WCHAR* szExtra       = L"";
 static const BOOL   bReleaseBuild = TRUE;
@@ -1299,6 +1321,7 @@ BOOL CALLBACK FileMRUDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
                 if (IDYES == MsgBox(MBYESNO,IDS_ERR_MRUDLG)) {
 
                     MRU_Delete(pFileMRU,lvi.iItem);
+                    MRU_DeleteFileFromStore(pFileMRU,tch);
 
                     //SendDlgItemMessage(hwnd,IDC_FILEMRU,LB_DELETESTRING,(WPARAM)iItem,0);
                     //ListView_DeleteItem(GetDlgItem(hwnd,IDC_FILEMRU),lvi.iItem);
@@ -1515,11 +1538,13 @@ BOOL ColumnWrapDlg(HWND hwnd,UINT uidDlg,int *iNumber)
 //  WordWrapSettingsDlgProc()
 //
 //  Controls: 100 Combo
-//            101 Text
+//            101 Combo
 //            102 Combo
-//            103 Text
-//            104 Combo
-//            105 Text
+//            103 Combo
+//            200 Text
+//            201 Text
+//            202 Text
+//            203 Text
 //
 extern int  iWordWrapMode;
 extern int  iWordWrapIndent;
@@ -1537,45 +1562,26 @@ BOOL CALLBACK WordWrapSettingsDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
 
         WCHAR tch[512];
         WCHAR *p1, *p2;
+        int i;
 
-        GetDlgItemText(hwnd,101,tch,COUNTOF(tch));
-        lstrcat(tch,L"|");
-        p1 = tch;
-        while (p2 = StrChr(p1,L'|')) {
-          *p2++ = L'\0';
-          if (*p1)
-            SendDlgItemMessage(hwnd,100,CB_ADDSTRING,0,(LPARAM)p1);
-          p1 = p2;
+        for (i = 0; i < 4; i++) {
+          GetDlgItemText(hwnd,200+i,tch,COUNTOF(tch));
+          lstrcat(tch,L"|");
+          p1 = tch;
+          while (p2 = StrChr(p1,L'|')) {
+            *p2++ = L'\0';
+            if (*p1)
+              SendDlgItemMessage(hwnd,100+i,CB_ADDSTRING,0,(LPARAM)p1);
+            p1 = p2;
+          }
+
+          SendDlgItemMessage(hwnd,100+i,CB_SETEXTENDEDUI,TRUE,0);
         }
 
         SendDlgItemMessage(hwnd,100,CB_SETCURSEL,(WPARAM)iWordWrapIndent,0);
-        SendDlgItemMessage(hwnd,100,CB_SETEXTENDEDUI,TRUE,0);
-
-        GetDlgItemText(hwnd,103,tch,COUNTOF(tch));
-        lstrcat(tch,L"|");
-        p1 = tch;
-        while (p2 = StrChr(p1,L'|')) {
-          *p2++ = L'\0';
-          if (*p1)
-            SendDlgItemMessage(hwnd,102,CB_ADDSTRING,0,(LPARAM)p1);
-          p1 = p2;
-        }
-
-        SendDlgItemMessage(hwnd,102,CB_SETCURSEL,(WPARAM)(bShowWordWrapSymbols) ? iWordWrapSymbols+1 : 0,0);
-        SendDlgItemMessage(hwnd,102,CB_SETEXTENDEDUI,TRUE,0);
-
-        GetDlgItemText(hwnd,105,tch,COUNTOF(tch));
-        lstrcat(tch,L"|");
-        p1 = tch;
-        while (p2 = StrChr(p1,L'|')) {
-          *p2++ = L'\0';
-          if (*p1)
-            SendDlgItemMessage(hwnd,104,CB_ADDSTRING,0,(LPARAM)p1);
-          p1 = p2;
-        }
-
-        SendDlgItemMessage(hwnd,104,CB_SETCURSEL,(WPARAM)iWordWrapMode,0);
-        SendDlgItemMessage(hwnd,104,CB_SETEXTENDEDUI,TRUE,0);
+        SendDlgItemMessage(hwnd,101,CB_SETCURSEL,(WPARAM)(bShowWordWrapSymbols) ? iWordWrapSymbols%10 : 0,0);
+        SendDlgItemMessage(hwnd,102,CB_SETCURSEL,(WPARAM)(bShowWordWrapSymbols) ? ((iWordWrapSymbols%100)-(iWordWrapSymbols%10))/10 : 0,0);
+        SendDlgItemMessage(hwnd,103,CB_SETCURSEL,(WPARAM)iWordWrapMode,0);
 
         CenterDlgInParent(hwnd);
 
@@ -1590,21 +1596,20 @@ BOOL CALLBACK WordWrapSettingsDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
 
         case IDOK: {
 
-            int iSel;
+            int iSel, iSel2;
 
             iSel = SendDlgItemMessage(hwnd,100,CB_GETCURSEL,0,0);
             iWordWrapIndent = iSel;
 
-            iSel = SendDlgItemMessage(hwnd,102,CB_GETCURSEL,0,0);
-            if (iSel > 0) {
+            bShowWordWrapSymbols = FALSE;
+            iSel = SendDlgItemMessage(hwnd,101,CB_GETCURSEL,0,0);
+            iSel2 = SendDlgItemMessage(hwnd,102,CB_GETCURSEL,0,0);
+            if (iSel > 0 || iSel2 > 0) {
               bShowWordWrapSymbols = TRUE;
-              iWordWrapSymbols = iSel-1;
-            }
-            else {
-              bShowWordWrapSymbols = FALSE;
+              iWordWrapSymbols = iSel + iSel2*10;
             }
 
-            iSel = SendDlgItemMessage(hwnd,104,CB_GETCURSEL,0,0);
+            iSel = SendDlgItemMessage(hwnd,103,CB_GETCURSEL,0,0);
             iWordWrapMode = iSel;
 
             EndDialog(hwnd,IDOK);
@@ -1753,10 +1758,12 @@ BOOL LongLineSettingsDlg(HWND hwnd,UINT uidDlg,int *iNumber)
 //  Controls: 100 Edit
 //            101 Edit
 //            102 Check
+//            103 Check
 //
 extern int iTabWidth;
 extern int iIndentWidth;
 extern BOOL bTabsAsSpaces;
+extern BOOL bTabIndents;
 
 BOOL CALLBACK TabSettingsDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
 {
@@ -1775,6 +1782,9 @@ BOOL CALLBACK TabSettingsDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam
 
         if (bTabsAsSpaces)
           CheckDlgButton(hwnd,102,BST_CHECKED);
+
+        if (bTabIndents)
+          CheckDlgButton(hwnd,103,BST_CHECKED);
 
         CenterDlgInParent(hwnd);
 
@@ -1800,6 +1810,8 @@ BOOL CALLBACK TabSettingsDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam
             iIndentWidth = iNewIndentWidth;
 
             bTabsAsSpaces = (IsDlgButtonChecked(hwnd,102)) ? TRUE : FALSE;
+
+            bTabIndents = (IsDlgButtonChecked(hwnd,103)) ? TRUE : FALSE;
 
             EndDialog(hwnd,IDOK);
           }
