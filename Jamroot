@@ -1,0 +1,22 @@
+project Notepad2
+    : requirements
+		<include>src
+		<include>scintilla/include
+		<include>scintilla/src
+		<link>static
+		<runtime-link>static
+		<define>UNICODE
+		<toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
+		<toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
+		<toolset>msvc:<define>_SECURE_SCL=0
+    : build-dir bin.v2
+	;
+
+exe Notepad2
+	: src/Notepad2.rc
+	  [ glob src/*.c ]
+	  [ glob src/*.cpp ]
+	  [ glob scintilla/src/*.cxx ]
+	  [ glob scintilla/win32/*.cxx ]
+	: <user-interface>gui
+	;
