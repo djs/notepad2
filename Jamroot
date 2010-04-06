@@ -9,6 +9,8 @@ project Notepad2
 		<toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
 		<toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
 		<toolset>msvc:<define>_SECURE_SCL=0
+		<define>STATIC_BUILD
+		<define>SCI_LEXER
     : build-dir bin.v2
 	;
 
