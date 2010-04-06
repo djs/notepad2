@@ -6,11 +6,16 @@ project Notepad2
 		<link>static
 		<runtime-link>static
 		<define>UNICODE
-		<toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
-		<toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
-		<toolset>msvc:<define>_SECURE_SCL=0
 		<define>STATIC_BUILD
 		<define>SCI_LEXER
+		<define>_CRT_SECURE_NO_DEPRECATE
+		<define>_SCL_SECURE_NO_DEPRECATE
+		<define>_SECURE_SCL=0
+		<variant>release:<cflags>/GL
+		<variant>release:<linkflags>/LTCG
+		<variant>release:<linkflags>/OPT:REF
+		<variant>release:<linkflags>/OPT:ICF
+		<variant>release:<linkflags>/MERGE:.rdata=.text
     : build-dir bin.v2
 	;
 
