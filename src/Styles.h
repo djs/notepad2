@@ -11,7 +11,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2009
+*                                              (c) Florian Balmer 1996-2010
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -63,7 +63,6 @@ void   Style_Save();
 BOOL   Style_Import(HWND);
 BOOL   Style_Export(HWND);
 void   Style_SetLexer(HWND,PEDITLEXER);
-//void   Style_SetACPfromCharSet(HWND);
 void   Style_SetLongLineColors(HWND);
 void   Style_SetCurrentLineBackground(HWND);
 void   Style_SetLexerFromFile(HWND,LPCWSTR);
@@ -78,17 +77,17 @@ BOOL   Style_GetUse2ndDefault(HWND);
 void   Style_SetIndentGuides(HWND,BOOL);
 BOOL   Style_GetOpenDlgFilterStr(LPWSTR,int);
 BOOL   Style_StrGetFont(LPCWSTR,LPWSTR,int);
+BOOL   Style_StrGetFontQuality(LPCWSTR,LPWSTR,int);
 BOOL   Style_StrGetCharSet(LPCWSTR,int*);
 BOOL   Style_StrGetSize(LPCWSTR,int*);
 BOOL   Style_StrGetSizeStr(LPCWSTR,LPWSTR,int);
 BOOL   Style_StrGetColor(BOOL,LPCWSTR,int*);
 BOOL   Style_StrGetCase(LPCWSTR,int*);
 BOOL   Style_StrGetAlpha(LPCWSTR,int*);
-//BOOL   Style_StrGetAttribute(LPCWSTR,LPCWSTR);
-//BOOL   Style_StrSetAttribute(LPWSTR,int,LPCWSTR,BOOL);
 BOOL   Style_SelectFont(HWND,LPWSTR,int,BOOL);
 BOOL   Style_SelectColor(HWND,BOOL,LPWSTR,int);
 void   Style_SetStyles(HWND,int,LPCWSTR);
+void   Style_SetFontQuality(HWND,LPCWSTR);
 void   Style_GetCurrentLexerName(LPWSTR,int);
 int    Style_GetLexerIconId(PEDITLEXER);
 void   Style_AddLexerToTreeView(HWND,PEDITLEXER);

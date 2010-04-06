@@ -7,12 +7,11 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "winresrc.h"
-
-#ifndef IDC_STATIC
-#define IDC_STATIC (-1)
-#endif
-
+#include "winresrc.h"
+
+#ifndef IDC_STATIC
+#define IDC_STATIC (-1)
+#endif
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -228,9 +227,6 @@ BEGIN
             MENUITEM "Esca&pe C Chars\tCtrl+Alt+E", IDM_EDIT_ESCAPECCHARS
             MENUITEM "&Unescape C Chars\tCtrl+Alt+U", 
                                                     IDM_EDIT_UNESCAPECCHARS
-            MENUITEM SEPARATOR
-            MENUITEM "&Increase Number\tCtrl+Alt++", IDM_EDIT_INCREASENUM
-            MENUITEM "Decrease &Number\tCtrl+Alt+-", IDM_EDIT_DECREASENUM
             MENUITEM SEPARATOR
             MENUITEM "&Find Matching Brace\tCtrl+B", 
                                                     IDM_EDIT_FINDMATCHINGBRACE
@@ -467,7 +463,7 @@ BEGIN
                                                     NOINVERT
     VK_ADD,         IDM_VIEW_ZOOMIN,        VIRTKEY, CONTROL, NOINVERT
     VK_ADD,         CMD_INCLINELIMIT,       VIRTKEY, ALT, NOINVERT
-    VK_ADD,         IDM_EDIT_INCREASENUM,   VIRTKEY, CONTROL, ALT, NOINVERT
+    VK_ADD,         CMD_INCREASENUM,        VIRTKEY, CONTROL, ALT, NOINVERT
     VK_BACK,        CMD_CTRLBACK,           VIRTKEY, CONTROL, NOINVERT
     VK_BACK,        IDM_EDIT_UNDO,          VIRTKEY, ALT, NOINVERT
     VK_BACK,        IDM_EDIT_DELETELINELEFT, VIRTKEY, SHIFT, CONTROL, 
@@ -517,22 +513,23 @@ BEGIN
     VK_F9,          IDM_ENCODING_SELECT,    VIRTKEY, NOINVERT
     VK_F9,          IDM_EDIT_INSERT_FILENAME, VIRTKEY, CONTROL, NOINVERT
     VK_F9,          IDM_FILE_MANAGEFAV,     VIRTKEY, ALT, NOINVERT
+    VK_F9,          CMD_COPYPATHNAME,       VIRTKEY, SHIFT, NOINVERT
     VK_F9,          IDM_EDIT_INSERT_PATHNAME, VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
     VK_OEM_2,       IDM_VIEW_RESETZOOM,     VIRTKEY, CONTROL, NOINVERT
     VK_OEM_COMMA,   CMD_JUMP2SELSTART,      VIRTKEY, CONTROL, NOINVERT
     VK_OEM_MINUS,   IDM_VIEW_ZOOMOUT,       VIRTKEY, CONTROL, NOINVERT
-    VK_OEM_MINUS,   IDM_EDIT_DECREASENUM,   VIRTKEY, CONTROL, ALT, NOINVERT
+    VK_OEM_MINUS,   CMD_DECREASENUM,        VIRTKEY, CONTROL, ALT, NOINVERT
     VK_OEM_PERIOD,  CMD_JUMP2SELEND,        VIRTKEY, CONTROL, NOINVERT
     VK_OEM_PLUS,    IDM_VIEW_ZOOMIN,        VIRTKEY, CONTROL, NOINVERT
-    VK_OEM_PLUS,    IDM_EDIT_INCREASENUM,   VIRTKEY, CONTROL, ALT, NOINVERT
+    VK_OEM_PLUS,    CMD_INCREASENUM,        VIRTKEY, CONTROL, ALT, NOINVERT
     VK_RETURN,      CMD_CTRLENTER,          VIRTKEY, CONTROL, NOINVERT
     VK_SPACE,       IDM_EDIT_SELECTWORD,    VIRTKEY, CONTROL, NOINVERT
     VK_SPACE,       IDM_EDIT_SELECTLINE,    VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
     VK_SUBTRACT,    IDM_VIEW_ZOOMOUT,       VIRTKEY, CONTROL, NOINVERT
     VK_SUBTRACT,    CMD_DECLINELIMIT,       VIRTKEY, ALT, NOINVERT
-    VK_SUBTRACT,    IDM_EDIT_DECREASENUM,   VIRTKEY, CONTROL, ALT, NOINVERT
+    VK_SUBTRACT,    CMD_DECREASENUM,        VIRTKEY, CONTROL, ALT, NOINVERT
     VK_TAB,         CMD_CTRLTAB,            VIRTKEY, CONTROL, NOINVERT
     VK_UP,          IDM_EDIT_MOVELINEUP,    VIRTKEY, SHIFT, CONTROL, 
                                                     NOINVERT
@@ -576,7 +573,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,169,49,50,14
     ICON            IDR_MAINWND,IDC_STATIC,7,7,20,20
     LTEXT           "",IDC_VERSION,45,7,174,8
-    LTEXT           "Copyright © 1996-2009",IDC_STATIC,45,19,174,8
+    LTEXT           "Copyright © 2004-2010",IDC_STATIC,45,19,174,8
     LTEXT           "flo's freeware - http://www.flos-freeware.ch",
                     IDC_WEBPAGE2,45,31,174,8,NOT WS_VISIBLE | WS_DISABLED
     CONTROL         "",IDC_WEBPAGE,"SysLink",WS_TABSTOP,45,31,174,10
@@ -824,7 +821,7 @@ BEGIN
                     IDC_STYLELABELS,315,230,152,8,NOT WS_VISIBLE
 END
 
-IDD_TABSETTINGS DIALOGEX 0, 0, 174, 63
+IDD_TABSETTINGS DIALOGEX 0, 0, 174, 76
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Tab Settings"
@@ -836,6 +833,8 @@ BEGIN
     EDITTEXT        101,67,27,30,14,ES_AUTOHSCROLL
     CONTROL         "Insert tabs as &spaces.",102,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,47,87,10
+    CONTROL         "Tab &key reformats indentation.",103,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,59,115,10
     DEFPUSHBUTTON   "OK",IDOK,117,7,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,117,24,50,14
 END
@@ -856,29 +855,33 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,127,24,50,14
 END
 
-IDD_WORDWRAP DIALOGEX 0, 0, 170, 86
+IDD_WORDWRAP DIALOGEX 0, 0, 196, 126
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Word Wrap Settings"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    LTEXT           "Subline &indent:",IDC_STATIC,7,9,48,8
-    COMBOBOX        100,63,7,100,196,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    LTEXT           "&Subline indent:",IDC_STATIC,7,7,48,8
+    COMBOBOX        100,7,17,182,196,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "Visual &symbols:",IDC_STATIC,7,25,49,8
-    COMBOBOX        102,63,23,100,196,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    LTEXT           "&Visual indicators:",IDC_STATIC,7,33,54,8
+    COMBOBOX        101,7,43,182,196,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    LTEXT           "&Boundaries:",IDC_STATIC,7,41,39,8
-    COMBOBOX        104,63,39,100,196,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        102,7,57,182,196,CBS_DROPDOWNLIST | WS_VSCROLL | 
                     WS_TABSTOP
-    DEFPUSHBUTTON   "OK",IDOK,58,65,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,113,65,50,14
-    LTEXT           "None|1 character|2 characters|1 indent level|2 indent levels|As first subline| + 1 indent level",
-                    101,0,77,298,8,NOT WS_VISIBLE
-    LTEXT           "None|Before wrap|After wrap|Before and after wrap|Near borders",
-                    103,0,77,216,8,NOT WS_VISIBLE
-    LTEXT           "Between words|Between any characters",105,0,77,131,8,
-                    NOT WS_VISIBLE
+    LTEXT           "Break &mode:",IDC_STATIC,7,73,41,8
+    COMBOBOX        103,7,83,182,196,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,83,105,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,139,105,50,14
+    LTEXT           "None|1 character|2 characters|1 indent level|2 indent levels|As first subline|1 level more than first subline",
+                    200,0,0,340,8,NOT WS_VISIBLE
+    LTEXT           "No indicators before wrap|Show indicators before wrap (near text)|Show indicators before wrap (near borders)",
+                    201,0,0,358,8,NOT WS_VISIBLE
+    LTEXT           "No indicators after wrap|Show indicators after wrap (near text)|Show indicators after wrap (near borders)",
+                    202,0,0,342,8,NOT WS_VISIBLE
+    LTEXT           "Wrap text between words|Wrap text between any characters",
+                    203,0,0,200,8,NOT WS_VISIBLE
 END
 
 IDD_PAGESETUP DIALOGEX 5, 5, 356, 260
@@ -1214,7 +1217,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 167
         TOPMARGIN, 7
-        BOTTOMMARGIN, 56
+        BOTTOMMARGIN, 69
     END
 
     IDD_LONGLINES, DIALOG
@@ -1228,9 +1231,9 @@ BEGIN
     IDD_WORDWRAP, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 163
+        RIGHTMARGIN, 189
         TOPMARGIN, 7
-        BOTTOMMARGIN, 79
+        BOTTOMMARGIN, 119
     END
 
     IDD_PAGESETUP, DIALOG
@@ -1346,8 +1349,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,0,23,0
- PRODUCTVERSION 4,0,23,0
+ FILEVERSION 4,1,24,0
+ PRODUCTVERSION 4,1,24,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x29L
@@ -1363,9 +1366,9 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "FileDescription", "Notepad2"
-            VALUE "FileVersion", "4.0.23"
+            VALUE "FileVersion", "4.1.24"
             VALUE "InternalName", "Notepad2"
-            VALUE "LegalCopyright", "© Florian Balmer 2004-2009"
+            VALUE "LegalCopyright", "© Florian Balmer 2004-2010"
             VALUE "OriginalFilename", "Notepad2.exe"
         END
     END
@@ -1384,6 +1387,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_APPTITLE            "Notepad2"
+    IDS_APPTITLE_ELEVATED   "%s (Administrator)"
     IDS_APPTITLE_PASTEBOARD "Notepad2 : Paste Board"
     IDS_UNTITLED            "Untitled"
     IDS_TITLEEXCERPT        """%s"""
@@ -1396,15 +1400,8 @@ BEGIN
     IDS_PRINTFILE           "Printing page %i..."
     IDS_SAVINGSETTINGS      "Saving settings..."
     IDS_LINKDESCRIPTION     "Edit with Notepad2"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_FILTER_ALL          "All files (*.*)|*.*|"
-    IDS_FILTER_EXE          "Executable files (*.exe;*.com;*.bat;*.lnk;*.pif)|*.exe;*.com;*.bat;*.lnk;*.pif|All files (*.*)|*.*|"
-    IDS_FILTER_INI          "Configuration files (*.ini)|*.ini|All files (*.*)|*.*|"
-    IDS_OPENWITH            "Select the directory with links to your favorite applications."
-    IDS_FAVORITES           "Select the directory with links to your favorite files."
+    IDS_FILTER_EXE          "Executable files (*.exe;*.com;*.bat;*.cmd;*.lnk;*.pif)|*.exe;*.com;*.bat;*.cmd;*.lnk;*.pif|All files (*.*)|*.*|"
 END
 
 STRINGTABLE 
@@ -1444,8 +1441,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ERR_LOADFILE        "Error loading ""%s""!\nMake sure the file is not locked by another application."
-    IDS_ERR_SAVEFILE        "Error saving ""%s""!\nProbably the file is locked by another application."
+    IDS_ERR_LOADFILE        "Error loading ""%s""."
+    IDS_ERR_SAVEFILE        "Error saving ""%s""."
     IDS_ERR_BROWSE          "No file browser plugin was found.\nThe metapath file browser plugin can be downloaded from http://www.flos-freeware.ch."
     IDS_ERR_MRUDLG          "No access to the selected file!\nWould you like to remove it from the list?"
     IDS_ERR_CREATELINK      "Error creating the Desktop link."
@@ -1464,7 +1461,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CMDLINEHELP         "Command Line Help\n\nfile\tMust be the last argument, no quoted spaces by default.\n+\tAccept multiple file arguments (with quoted spaces).\n-\tAccept single file argument (without quoted spaces).\n…\tEncoding (/ansi, /unicode, /unicodebe, /utf8, /utf8sig).\n…\tLine ending mode (/crlf, /lf, /cr).\n/e\tFile source encoding.\n/g\tJump to specified position (/g -1 end of file).\n/m\tMatch specified text (/m- last, /mr regex, /mb backslash).\n/q\tForce creation of new files without prompt.\n/s\tSelect specified syntax scheme.\n/d\tSelect default text scheme.\n/h\tSelect Web Source Code scheme.\n/x\tSelect XML Document scheme.\n/c\tOpen new window and paste clipboard contents.\n/b\tOpen new paste board to collect clipboard entries.\n/n\tAlways open a new window (/ns single file instance).\n/r\tReuse window (/rs single file instance).\n/p\tSet window position and size (/p0, /ps, /pf,l,t,r,b,m).\n/t\tSet window title.\n/i\tStart as tray icon.\n/f\tSpecify ini-file (/f0 no ini-file)."
+    IDS_CMDLINEHELP         "Command Line Help\n\nfile\tMust be the last argument, no quoted spaces by default.\n+\tAccept multiple file arguments (with quoted spaces).\n-\tAccept single file argument (without quoted spaces).\n…\tEncoding (/ansi, /unicode, /unicodebe, /utf8, /utf8sig).\n…\tLine ending mode (/crlf, /lf, /cr).\n/e\tFile source encoding.\n/g\tJump to specified position (/g -1 end of file).\n/m\tMatch specified text (/m- last, /mr regex, /mb backslash).\n/q\tForce creation of new files without prompt.\n/s\tSelect specified syntax scheme.\n/d\tSelect default text scheme.\n/h\tSelect Web Source Code scheme.\n/x\tSelect XML Document scheme.\n/c\tOpen new window and paste clipboard contents.\n/b\tOpen new paste board to collect clipboard entries.\n/n\tAlways open a new window (/ns single file instance).\n/r\tReuse window (/rs single file instance).\n/p\tSet window position and size (/p0, /ps, /pf,l,t,r,b,m).\n/t\tSet window title.\n/i\tStart as tray icon.\n/f\tSpecify ini-file (/f0 no ini-file).\n/u\tLaunch with elevated privileges.\n/z\tSkip next (usable for registry-based Notepad replacement)."
 END
 
 STRINGTABLE 
@@ -1494,7 +1491,7 @@ BEGIN
     IDS_STICKYWINPOS        "Sticky Window Position is enabled. Any new Notepad2 windows will use the current window placement settings."
     IDS_SAVEDSETTINGS       "The current program settings have been saved."
     IDS_CREATEINI_FAIL      "Error creating configuration file."
-    IDS_WRITEINI_FAIL       "Settings not saved!\nNo write access to configuration file."
+    IDS_WRITEINI_FAIL       "Error writing settings to configuration file."
     IDS_SETTINGSNOTSAVED    "No existing configuration file was found.\nTo keep your style modifications, save settings now (F7) or go back to scheme configuration (Ctrl+F12) and export your styles."
     IDS_IMPORT_OK           "The style settings have been successfully imported from the specified file."
     IDS_EXPORT_OK           "The style settings have been successfully exported to the specified file."
@@ -1650,31 +1647,31 @@ END
 
 STRINGTABLE 
 BEGIN
-    63104                   "Control Characters (Font only)"
-    63105                   "Indentation Guide (Color only)"
-    63106                   "Selected Text (Colors only)"
-    63107                   "Whitespace (Colors only)"
-    63108                   "Current Line Background (Color only)"
-    63109                   "Caret Foreground (Color only)"
-    63110                   "Caret Width (Size from 1 to 3)"
-    63111                   "Long Line Marker (Colors only)"
+    63104                   "Control Characters (Font)"
+    63105                   "Indentation Guide (Color)"
+    63106                   "Selected Text (Colors)"
+    63107                   "Whitespace (Colors, Size 0-5)"
+    63108                   "Current Line Background (Color)"
+    63109                   "Caret Foreground (Color)"
+    63110                   "Caret Width (Size 1-3)"
+    63111                   "Long Line Marker (Colors)"
     63112                   "Extra Line Spacing (Size)"
     63113                   "2nd Default Style"
     63114                   "2nd Margins and Line Numbers"
     63115                   "2nd Matching Braces"
     63116                   "2nd Matching Braces Error"
-    63117                   "2nd Control Characters (Font only)"
-    63118                   "2nd Indentation Guide (Color only)"
-    63119                   "2nd Selected Text (Colors only)"
+    63117                   "2nd Control Characters (Font)"
+    63118                   "2nd Indentation Guide (Color)"
+    63119                   "2nd Selected Text (Colors)"
 END
 
 STRINGTABLE 
 BEGIN
-    63120                   "2nd Whitespace (Colors only)"
-    63121                   "2nd Current Line Background (Color only)"
-    63122                   "2nd Caret Foreground (Color only)"
-    63123                   "2nd Caret Width (Size from 1 to 3)"
-    63124                   "2nd Long Line Marker (Colors only)"
+    63120                   "2nd Whitespace (Colors, Size 0-5)"
+    63121                   "2nd Current Line Background (Color)"
+    63122                   "2nd Caret Foreground (Color)"
+    63123                   "2nd Caret Width (Size 1-3)"
+    63124                   "2nd Long Line Marker (Colors)"
     63125                   "2nd Extra Line Spacing (Size)"
     63126                   "Default"
     63127                   "Comment"
@@ -1774,7 +1771,7 @@ BEGIN
     63201                   "Value"
     63202                   "Important"
     63203                   "Directive"
-    63204                   "Constant"
+    63204                   "Target"
     63205                   "Inline Asm"
     63206                   "CPU Instruction"
     63207                   "FPU Instruction"
@@ -1838,7 +1835,15 @@ BEGIN
     63253                   "Prototype"
     63254                   "Format identifier"
     63255                   "Format body"
-    63256                   "Target"
+    63256                   "HTML Element Text"
+    63257                   "XML Element Text"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_FILTER_INI          "Configuration files (*.ini)|*.ini|All files (*.*)|*.*|"
+    IDS_OPENWITH            "Select the directory with links to your favorite applications."
+    IDS_FAVORITES           "Select the directory with links to your favorite files."
 END
 
 #endif    // English (U.S.) resources
@@ -1867,7 +1872,7 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
-    "#include ""afxres.h""\0"
+    "#include ""winres.h""\0"
 END
 
 3 TEXTINCLUDE 

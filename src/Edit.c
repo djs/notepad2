@@ -11,7 +11,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2009
+*                                              (c) Florian Balmer 1996-2010
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -39,6 +39,7 @@ extern HWND  hwndMain;
 extern HWND  hwndEdit;
 extern HINSTANCE g_hInstance;
 extern LPMALLOC  g_lpMalloc;
+extern DWORD dwLastIOError;
 extern HWND hDlgFindReplace;
 extern UINT cpLastFind;
 extern BOOL bReplaceInitialized;
@@ -248,13 +249,12 @@ HWND EditCreate(HWND hwndParent)
   SendMessage(hwnd,SCI_SETCARETSTICKY,FALSE,0);
   SendMessage(hwnd,SCI_SETXCARETPOLICY,CARET_SLOP|CARET_EVEN,50);
   SendMessage(hwnd,SCI_SETYCARETPOLICY,CARET_EVEN,0);
-  SendMessage(hwnd,SCI_SETTABINDENTS,TRUE,0);
   SendMessage(hwnd,SCI_SETBACKSPACEUNINDENTS,FALSE,0);
-  //SCI_2.x SendMessage(hwnd,SCI_SETMULTIPLESELECTION,FALSE,0);
-  //SCI_2.x SendMessage(hwnd,SCI_SETADDITIONALSELECTIONTYPING,FALSE,0);
-  //SCI_2.x SendMessage(hwnd,SCI_SETVIRTUALSPACEOPTIONS,SCVS_NONE,0);
-  //SCI_2.x SendMessage(hwnd,SCI_SETADDITIONALCARETSBLINK,FALSE,0);
-  //SCI_2.x SendMessage(hwnd,SCI_SETADDITIONALCARETSVISIBLE,FALSE,0);
+  SendMessage(hwnd,SCI_SETMULTIPLESELECTION,FALSE,0);
+  SendMessage(hwnd,SCI_SETADDITIONALSELECTIONTYPING,FALSE,0);
+  SendMessage(hwnd,SCI_SETVIRTUALSPACEOPTIONS,SCVS_NONE,0);
+  SendMessage(hwnd,SCI_SETADDITIONALCARETSBLINK,FALSE,0);
+  SendMessage(hwnd,SCI_SETADDITIONALCARETSVISIBLE,FALSE,0);
 
   SendMessage(hwnd,SCI_ASSIGNCMDKEY,(SCK_NEXT + (SCMOD_CTRL << 16)),SCI_PARADOWN);
   SendMessage(hwnd,SCI_ASSIGNCMDKEY,(SCK_PRIOR + (SCMOD_CTRL << 16)),SCI_PARAUP);
@@ -387,8 +387,11 @@ BOOL EditSetNewEncoding(HWND hwnd,int iCurrentEncoding,int iNewEncoding,BOOL bNo
 
     if (SendMessage(hwnd,SCI_GETLENGTH,0,0) == 0) {
 
+      BOOL bIsEmptyUndoHistory =
+        (SendMessage(hwnd,SCI_CANUNDO,0,0) == 0 && SendMessage(hwnd,SCI_CANREDO,0,0) == 0);
+
       if ((iCurrentEncoding == CPI_DEFAULT || iNewEncoding == CPI_DEFAULT) &&
-          (bNoUI || InfoBox(MBYESNO,L"MsgConv2",IDS_ASK_ENCODING2) == IDYES)) {
+          (bNoUI || bIsEmptyUndoHistory || InfoBox(MBYESNO,L"MsgConv2",IDS_ASK_ENCODING2) == IDYES)) {
 
         EditConvertText(hwnd,
           (mEncoding[iCurrentEncoding].uFlags & NCP_DEFAULT) ? iDefaultCodePage : SC_CP_UTF8,
@@ -407,7 +410,7 @@ BOOL EditSetNewEncoding(HWND hwnd,int iCurrentEncoding,int iNewEncoding,BOOL bNo
 
       BeginWaitCursor();
 
-      EditConvertText(hwndEdit,
+      EditConvertText(hwnd,
         (mEncoding[iCurrentEncoding].uFlags & NCP_DEFAULT) ? iDefaultCodePage : SC_CP_UTF8,
         (mEncoding[iNewEncoding].uFlags & NCP_DEFAULT) ? iDefaultCodePage : SC_CP_UTF8,
         FALSE);
@@ -1229,6 +1232,7 @@ BOOL EditLoadFile(
                      OPEN_EXISTING,
                      FILE_ATTRIBUTE_NORMAL,
                      NULL);
+  dwLastIOError = GetLastError();
 
   if (hFile == INVALID_HANDLE_VALUE) {
     iSrcEncoding = -1;
@@ -1254,6 +1258,7 @@ BOOL EditLoadFile(
 
   lpData = GlobalAlloc(GPTR,dwBufSize);
   bReadSuccess = ReadFile(hFile,lpData,GlobalSize(lpData)-2,&cbData,NULL);
+  dwLastIOError = GetLastError();
   CloseHandle(hFile);
 
   if (!bReadSuccess) {
@@ -1448,6 +1453,7 @@ BOOL EditSaveFile(
                      OPEN_ALWAYS,
                      FILE_ATTRIBUTE_NORMAL,
                      NULL);
+  dwLastIOError = GetLastError();
 
   // failure could be due to missing attributes (2k/XP)
   if (hFile == INVALID_HANDLE_VALUE)
@@ -1463,6 +1469,7 @@ BOOL EditSaveFile(
                         OPEN_ALWAYS,
                         FILE_ATTRIBUTE_NORMAL | dwAttributes,
                         NULL);
+      dwLastIOError = GetLastError();
     }
   }
 
@@ -1482,27 +1489,34 @@ BOOL EditSaveFile(
   lpData = GlobalAlloc(GPTR,cbData + 1);
   SendMessage(hwnd,SCI_GETTEXT,GlobalSize(lpData),(LPARAM)lpData);
 
-  if (cbData == 0)
+  if (cbData == 0) {
     bWriteSuccess = SetEndOfFile(hFile);
+    dwLastIOError = GetLastError();
+  }
 
   else {
 
+  // FIXME: move checks in front of disk file access
   /*if ((mEncoding[iEncoding].uFlags & NCP_UNICODE) == 0 && (mEncoding[iEncoding].uFlags & NCP_UTF8_SIGN) == 0) {
       BOOL bEncodingMismatch = TRUE;
       FILEVARS fv;
       FileVars_Init(lpData,cbData,&fv);
       if (fv.mask & FV_ENCODING) {
+        int iAltEncoding;
         if (FileVars_IsValidEncoding(&fv)) {
-          int iAltEncoding = FileVars_GetEncoding(&fv);
+          iAltEncoding = FileVars_GetEncoding(&fv);
           if (iAltEncoding == iEncoding)
             bEncodingMismatch = FALSE;
           else if ((mEncoding[iAltEncoding].uFlags & NCP_UTF8) && (mEncoding[iEncoding].uFlags & NCP_UTF8))
             bEncodingMismatch = FALSE;
         }
-        if (bEncodingMismatch)
+        if (bEncodingMismatch) {
+          Encoding_GetLabel(iAltEncoding);
+          Encoding_GetLabel(iEncoding);
           InfoBox(0,L"MsgEncodingMismatch",IDS_ENCODINGMISMATCH,
-            mEncoding[1].pwszLabelName,
-            mEncoding[2].pwszLabelName);
+            mEncoding[iAltEncoding].wchLabel,
+            mEncoding[iEncoding].wchLabel);
+        }
       }
     }*/
 
@@ -1521,12 +1535,13 @@ BOOL EditSaveFile(
           WriteFile(hFile,(LPCVOID)"\xFE\xFF",2,&dwBytesWritten,NULL);
         else
           WriteFile(hFile,(LPCVOID)"\xFF\xFE",2,&dwBytesWritten,NULL);
-        }
+      }
 
       if (mEncoding[iEncoding].uFlags & NCP_UNICODE_REVERSE)
         _swab((char*)lpDataWide,(char*)lpDataWide,cbDataWide * sizeof(WCHAR));
 
       bWriteSuccess = WriteFile(hFile,lpDataWide,cbDataWide * sizeof(WCHAR),&dwBytesWritten,NULL);
+      dwLastIOError = GetLastError();
 
       GlobalFree(lpDataWide);
       GlobalFree(lpData);
@@ -1540,6 +1555,7 @@ BOOL EditSaveFile(
         WriteFile(hFile,(LPCVOID)"\xEF\xBB\xBF",3,&dwBytesWritten,NULL);
 
       bWriteSuccess = WriteFile(hFile,lpData,cbData,&dwBytesWritten,NULL);
+      dwLastIOError = GetLastError();
 
       GlobalFree(lpData);
     }
@@ -1574,6 +1590,7 @@ BOOL EditSaveFile(
       if (!bCancelDataLoss || InfoBox(MBOKCANCEL,L"MsgConv3",IDS_ERR_UNICODE2) == IDOK) {
         SetEndOfFile(hFile);
         bWriteSuccess = WriteFile(hFile,lpData,cbData,&dwBytesWritten,NULL);
+        dwLastIOError = GetLastError();
       }
       else {
         bWriteSuccess = FALSE;
@@ -1586,6 +1603,7 @@ BOOL EditSaveFile(
     else {
       SetEndOfFile(hFile);
       bWriteSuccess = WriteFile(hFile,lpData,cbData,&dwBytesWritten,NULL);
+      dwLastIOError = GetLastError();
       GlobalFree(lpData);
     }
   }
@@ -3081,10 +3099,10 @@ void EditPadWithSpaces(HWND hwnd)
   int iLineStart;
   int iLineEnd;
 
-//SCI_2.x   int iRcCurLine;
-//SCI_2.x   int iRcAnchorLine;
-//SCI_2.x   int iRcCurCol;
-//SCI_2.x   int iRcAnchorCol;
+  int iRcCurLine;
+  int iRcAnchorLine;
+  int iRcCurCol;
+  int iRcAnchorCol;
 
   if (SC_SEL_RECTANGLE != SendMessage(hwnd,SCI_GETSELECTIONMODE,0,0)) {
 
@@ -3107,14 +3125,14 @@ void EditPadWithSpaces(HWND hwnd)
   }
   else {
 
-//SCI_2.x     int iCurPos = SendMessage(hwnd,SCI_GETCURRENTPOS,0,0);
-//SCI_2.x     int iAnchorPos = SendMessage(hwnd,SCI_GETANCHOR,0,0);
+    int iCurPos = SendMessage(hwnd,SCI_GETCURRENTPOS,0,0);
+    int iAnchorPos = SendMessage(hwnd,SCI_GETANCHOR,0,0);
 
-//SCI_2.x     iRcCurLine = SendMessage(hwnd,SCI_LINEFROMPOSITION,(WPARAM)iCurPos,0);
-//SCI_2.x     iRcAnchorLine = SendMessage(hwnd,SCI_LINEFROMPOSITION,(WPARAM)iAnchorPos,0);
+    iRcCurLine = SendMessage(hwnd,SCI_LINEFROMPOSITION,(WPARAM)iCurPos,0);
+    iRcAnchorLine = SendMessage(hwnd,SCI_LINEFROMPOSITION,(WPARAM)iAnchorPos,0);
 
-//SCI_2.x     iRcCurCol = SendMessage(hwnd,SCI_GETCOLUMN,(WPARAM)iCurPos,0);
-//SCI_2.x     iRcAnchorCol = SendMessage(hwnd,SCI_GETCOLUMN,(WPARAM)iAnchorPos,0);
+    iRcCurCol = SendMessage(hwnd,SCI_GETCOLUMN,(WPARAM)iCurPos,0);
+    iRcAnchorCol = SendMessage(hwnd,SCI_GETCOLUMN,(WPARAM)iAnchorPos,0);
 
     bIsRectangular = TRUE;
 
@@ -3176,12 +3194,12 @@ void EditPadWithSpaces(HWND hwnd)
     SendMessage(hwnd,SCI_SETSEL,(WPARAM)iAnchorPos,(LPARAM)iCurPos);
   }
 
-//SCI_2.x   else if (bIsRectangular) {
-//SCI_2.x     int iCurPos = SendMessage(hwnd,SCI_FINDCOLUMN,(WPARAM)iRcCurLine,(LPARAM)iRcCurCol);
-//SCI_2.x     int iAnchorPos = SendMessage(hwnd,SCI_FINDCOLUMN,(WPARAM)iRcAnchorLine,(LPARAM)iRcAnchorCol);
-//SCI_2.x     SendMessage(hwnd,SCI_SETRECTANGULARSELECTIONCARET,(WPARAM)iCurPos,0);
-//SCI_2.x     SendMessage(hwnd,SCI_SETRECTANGULARSELECTIONANCHOR,(WPARAM)iAnchorPos,0);
-//SCI_2.x   }
+  else if (bIsRectangular) {
+    int iCurPos = SendMessage(hwnd,SCI_FINDCOLUMN,(WPARAM)iRcCurLine,(LPARAM)iRcCurCol);
+    int iAnchorPos = SendMessage(hwnd,SCI_FINDCOLUMN,(WPARAM)iRcAnchorLine,(LPARAM)iRcAnchorCol);
+    SendMessage(hwnd,SCI_SETRECTANGULARSELECTIONCARET,(WPARAM)iCurPos,0);
+    SendMessage(hwnd,SCI_SETRECTANGULARSELECTIONANCHOR,(WPARAM)iAnchorPos,0);
+  }
 }
 
 
@@ -4215,6 +4233,7 @@ BOOL CALLBACK EditFindReplaceDlgProcW(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
 
           if (cchSelection <= 500)
           {
+            cchSelection = SendMessage(lpefr->hwnd,SCI_GETSELTEXT,0,0);
             lpszSelection = GlobalAlloc(GPTR,cchSelection+2);
             SendMessage(lpefr->hwnd,SCI_GETSELTEXT,0,(LPARAM)lpszSelection);
 

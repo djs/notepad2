@@ -109,23 +109,24 @@
 #define IDACC_SAVEPOS                   202
 #define IDACC_RESETPOS                  203
 #define IDS_APPTITLE                    10000
-#define IDS_APPTITLE_PASTEBOARD         10001
-#define IDS_UNTITLED                    10002
-#define IDS_TITLEEXCERPT                10003
-#define IDS_READONLY                    10004
-#define IDS_DOCPOS                      10005
-#define IDS_DOCPOS2                     10006
-#define IDS_DOCSIZE                     10007
-#define IDS_LOADFILE                    10008
-#define IDS_SAVEFILE                    10009
-#define IDS_PRINTFILE                   10010
-#define IDS_SAVINGSETTINGS              10011
-#define IDS_LINKDESCRIPTION             10012
-#define IDS_FILTER_ALL                  11000
-#define IDS_FILTER_EXE                  11001
-#define IDS_FILTER_INI                  11002
-#define IDS_OPENWITH                    11003
-#define IDS_FAVORITES                   11004
+#define IDS_APPTITLE_ELEVATED           10001
+#define IDS_APPTITLE_PASTEBOARD         10002
+#define IDS_UNTITLED                    10003
+#define IDS_TITLEEXCERPT                10004
+#define IDS_READONLY                    10005
+#define IDS_DOCPOS                      10006
+#define IDS_DOCPOS2                     10007
+#define IDS_DOCSIZE                     10008
+#define IDS_LOADFILE                    10009
+#define IDS_SAVEFILE                    10010
+#define IDS_PRINTFILE                   10011
+#define IDS_SAVINGSETTINGS              10012
+#define IDS_LINKDESCRIPTION             10013
+#define IDS_FILTER_ALL                  10014
+#define IDS_FILTER_EXE                  10015
+#define IDS_FILTER_INI                  10016
+#define IDS_OPENWITH                    10017
+#define IDS_FAVORITES                   10018
 #define CMD_ESCAPE                      20000
 #define CMD_SHIFTESC                    20001
 #define CMD_CTRLENTER                   20002
@@ -152,10 +153,13 @@
 #define CMD_EMBRACE2                    20023
 #define CMD_EMBRACE3                    20024
 #define CMD_EMBRACE4                    20025
-#define CMD_TOGGLETITLE                 20026
-#define CMD_JUMP2SELSTART               20027
-#define CMD_JUMP2SELEND                 20028
-#define CMD_OPENINIFILE                 20029
+#define CMD_INCREASENUM                 20026
+#define CMD_DECREASENUM                 20027
+#define CMD_TOGGLETITLE                 20028
+#define CMD_JUMP2SELSTART               20029
+#define CMD_JUMP2SELEND                 20030
+#define CMD_COPYPATHNAME                20031
+#define CMD_OPENINIFILE                 20032
 #define IDM_FILE_NEW                    40000
 #define IDM_FILE_OPEN                   40001
 #define IDM_FILE_REVERT                 40002
@@ -248,19 +252,17 @@
 #define IDM_EDIT_URLDECODE              40355
 #define IDM_EDIT_ESCAPECCHARS           40356
 #define IDM_EDIT_UNESCAPECCHARS         40357
-#define IDM_EDIT_INCREASENUM            40358
-#define IDM_EDIT_DECREASENUM            40359
-#define IDM_EDIT_FINDMATCHINGBRACE      40360
-#define IDM_EDIT_SELTOMATCHINGBRACE     40361
-#define IDM_EDIT_FIND                   40362
-#define IDM_EDIT_SAVEFIND               40363
-#define IDM_EDIT_FINDNEXT               40364
-#define IDM_EDIT_FINDPREV               40365
-#define IDM_EDIT_SELTONEXT              40366
-#define IDM_EDIT_SELTOPREV              40367
-#define IDM_EDIT_REPLACE                40368
-#define IDM_EDIT_REPLACENEXT            40369
-#define IDM_EDIT_GOTOLINE               40370
+#define IDM_EDIT_FINDMATCHINGBRACE      40358
+#define IDM_EDIT_SELTOMATCHINGBRACE     40359
+#define IDM_EDIT_FIND                   40360
+#define IDM_EDIT_SAVEFIND               40361
+#define IDM_EDIT_FINDNEXT               40362
+#define IDM_EDIT_FINDPREV               40363
+#define IDM_EDIT_SELTONEXT              40364
+#define IDM_EDIT_SELTOPREV              40365
+#define IDM_EDIT_REPLACE                40366
+#define IDM_EDIT_REPLACENEXT            40367
+#define IDM_EDIT_GOTOLINE               40368
 #define IDM_VIEW_SCHEME                 40400
 #define IDM_VIEW_USE2NDDEFAULT          40401
 #define IDM_VIEW_SCHEMECONFIG           40402
@@ -378,13 +380,13 @@
 #define IDS_CMDLINEHELP                 60000
 
 // Next default values for new objects
-//
+// 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        361
 #define _APS_NEXT_COMMAND_VALUE         40238
 #define _APS_NEXT_CONTROL_VALUE         1152
-#define _APS_NEXT_SYMED_VALUE           177
+#define _APS_NEXT_SYMED_VALUE           180
 #endif
 #endif

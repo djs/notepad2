@@ -13,7 +13,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2009
+*                                              (c) Florian Balmer 1996-2010
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -165,6 +165,61 @@ BOOL PrivateIsAppThemed()
 
 //=============================================================================
 //
+//  PrivateSetCurrentProcessExplicitAppUserModelID()
+//
+HRESULT PrivateSetCurrentProcessExplicitAppUserModelID(PCWSTR AppID)
+{
+  FARPROC pfnSetCurrentProcessExplicitAppUserModelID;
+
+  if (lstrlen(AppID) == 0)
+    return(S_OK);
+
+  if (lstrcmpi(AppID,L"(default)") == 0)
+    return(S_OK);
+
+  pfnSetCurrentProcessExplicitAppUserModelID =
+    GetProcAddress(GetModuleHandleA("shell32.dll"),"SetCurrentProcessExplicitAppUserModelID");
+
+  if (pfnSetCurrentProcessExplicitAppUserModelID)
+    return(pfnSetCurrentProcessExplicitAppUserModelID(AppID));
+
+  else
+    return(S_OK);
+}
+
+
+//=============================================================================
+//
+//  IsElevated()
+//
+BOOL IsElevated() {
+
+  BOOL bIsElevated = FALSE;
+  HANDLE hToken = NULL;
+
+  if (!IsVista())
+    return(FALSE);
+
+  if (OpenProcessToken(GetCurrentProcess(),TOKEN_QUERY,&hToken)) {
+
+    struct {
+      DWORD TokenIsElevated;
+    } /*TOKEN_ELEVATION*/te;
+    DWORD dwReturnLength = 0;
+
+    if (GetTokenInformation(hToken,/*TokenElevation*/20,&te,sizeof(te),&dwReturnLength)) {
+        if (dwReturnLength == sizeof(te))
+          bIsElevated = te.TokenIsElevated;
+    }
+    CloseHandle( hToken );
+  }
+  return bIsElevated;
+}
+
+
+
+//=============================================================================
+//
 //  SetExplorerTheme()
 //
 //BOOL SetExplorerTheme(HWND hwnd)
@@ -185,11 +240,31 @@ BOOL PrivateIsAppThemed()
 
 //=============================================================================
 //
+//  VerifyContrast()
+//  Check if two colors can be distinguished
+//
+BOOL VerifyContrast(COLORREF cr1,COLORREF cr2)
+{
+  BYTE r1 = GetRValue(cr1);
+  BYTE g1 = GetGValue(cr1);
+  BYTE b1 = GetBValue(cr1);
+  BYTE r2 = GetRValue(cr2);
+  BYTE g2 = GetGValue(cr2);
+  BYTE b2 = GetBValue(cr2);
+
+  return(
+    ((abs((3*r1 + 5*g1 + 1*b1) - (3*r2 + 6*g2 + 1*b2))) >= 400) ||
+    ((abs(r1-r2) + abs(b1-b2) + abs(g1-g2)) >= 400));
+}
+
+
+//=============================================================================
+//
 //  SetWindowTitle()
 //
 BOOL bFreezeAppTitle = FALSE;
 
-BOOL SetWindowTitle(HWND hwnd,UINT uIDAppName,UINT uIDUntitled,
+BOOL SetWindowTitle(HWND hwnd,UINT uIDAppName,BOOL bIsElevated,UINT uIDUntitled,
                     LPCWSTR lpszFile,int iFormat,BOOL bModified,
                     UINT uIDReadOnly,BOOL bReadOnly,LPCWSTR lpszExcerpt)
 {
@@ -198,6 +273,7 @@ BOOL SetWindowTitle(HWND hwnd,UINT uIDAppName,UINT uIDUntitled,
   WCHAR szExcrptQuot[256];
   WCHAR szExcrptFmt[32];
   WCHAR szAppName[128];
+  WCHAR szElevatedAppName[128];
   WCHAR szReadOnly[32];
   WCHAR szTitle[512];
   static const WCHAR *pszSep = L" - ";
@@ -209,6 +285,11 @@ BOOL SetWindowTitle(HWND hwnd,UINT uIDAppName,UINT uIDUntitled,
   if (!GetString(uIDAppName,szAppName,COUNTOF(szAppName)) ||
       !GetString(uIDUntitled,szUntitled,COUNTOF(szUntitled)))
     return FALSE;
+
+  if (bIsElevated) {
+    FormatString(szElevatedAppName,COUNTOF(szElevatedAppName),IDS_APPTITLE_ELEVATED,szAppName);
+    StrCpyN(szAppName,szElevatedAppName,COUNTOF(szAppName));
+  }
 
   if (bModified)
     lstrcpy(szTitle,pszMod);
@@ -767,10 +848,13 @@ int FormatString(LPWSTR lpOutput,int nOutput,UINT uIdFormat,...)
 //
 //  PathRelativeToApp()
 //
-void PathRelativeToApp(LPWSTR lpszSrc,LPWSTR lpszDest,int cchDest,BOOL bSrcIsFile,BOOL bUnexpandEnv) {
+void PathRelativeToApp(
+  LPWSTR lpszSrc,LPWSTR lpszDest,int cchDest,BOOL bSrcIsFile,
+  BOOL bUnexpandEnv,BOOL bUnexpandMyDocs) {
 
   WCHAR wchAppPath[MAX_PATH];
   WCHAR wchWinDir[MAX_PATH];
+  WCHAR wchUserFiles[MAX_PATH];
   WCHAR wchPath[MAX_PATH];
   WCHAR wchResult[MAX_PATH];
   DWORD dwAttrTo = (bSrcIsFile) ? 0 : FILE_ATTRIBUTE_DIRECTORY;
@@ -778,8 +862,18 @@ void PathRelativeToApp(LPWSTR lpszSrc,LPWSTR lpszDest,int cchDest,BOOL bSrcIsFil
   GetModuleFileName(NULL,wchAppPath,COUNTOF(wchAppPath));
   PathRemoveFileSpec(wchAppPath);
   GetWindowsDirectory(wchWinDir,COUNTOF(wchWinDir));
+  SHGetFolderPath(NULL,CSIDL_PERSONAL,NULL,SHGFP_TYPE_CURRENT,wchUserFiles);
 
-  if (PathCommonPrefix(wchAppPath,wchWinDir,NULL) || PathIsRelative(lpszSrc))
+  if (bUnexpandMyDocs &&
+      !PathIsRelative(lpszSrc) &&
+      !PathIsPrefix(wchUserFiles,wchAppPath) &&
+       PathIsPrefix(wchUserFiles,lpszSrc) &&
+       PathRelativePathTo(wchPath,wchUserFiles,FILE_ATTRIBUTE_DIRECTORY,lpszSrc,dwAttrTo)) {
+    lstrcpy(wchUserFiles,L"%CSIDL:MYDOCUMENTS%");
+    PathAppend(wchUserFiles,wchPath);
+    lstrcpy(wchPath,wchUserFiles);
+  }
+  else if (PathIsRelative(lpszSrc) || PathCommonPrefix(wchAppPath,wchWinDir,NULL))
     lstrcpyn(wchPath,lpszSrc,COUNTOF(wchPath));
   else {
     if (!PathRelativePathTo(wchPath,wchAppPath,FILE_ATTRIBUTE_DIRECTORY,lpszSrc,dwAttrTo))
@@ -809,7 +903,13 @@ void PathAbsoluteFromApp(LPWSTR lpszSrc,LPWSTR lpszDest,int cchDest,BOOL bExpand
   WCHAR wchPath[MAX_PATH];
   WCHAR wchResult[MAX_PATH];
 
-  lstrcpyn(wchPath,lpszSrc,COUNTOF(wchPath));
+  if (StrCmpNI(lpszSrc,L"%CSIDL:MYDOCUMENTS%",COUNTOF("%CSIDL:MYDOCUMENTS%")-1) == 0) {
+    SHGetFolderPath(NULL,CSIDL_PERSONAL,NULL,SHGFP_TYPE_CURRENT,wchPath);
+    PathAppend(wchPath,lpszSrc+COUNTOF("%CSIDL:MYDOCUMENTS%")-1);
+  }
+  else
+    lstrcpyn(wchPath,lpszSrc,COUNTOF(wchPath));
+
   if (bExpandEnv)
     ExpandEnvironmentStringsEx(wchPath,COUNTOF(wchPath));
 
@@ -1453,7 +1553,7 @@ BOOL MRU_Add(LPMRULIST pmru,LPCWSTR pszNew) {
   return(1);
 }
 
-BOOL MRU_AddFile(LPMRULIST pmru,LPCWSTR pszFile,BOOL bRelativePath) {
+BOOL MRU_AddFile(LPMRULIST pmru,LPCWSTR pszFile,BOOL bRelativePath,BOOL bUnexpandMyDocs) {
 
   int i;
   for (i = 0; i < pmru->iSize; i++) {
@@ -1476,7 +1576,7 @@ BOOL MRU_AddFile(LPMRULIST pmru,LPCWSTR pszFile,BOOL bRelativePath) {
 
   if (bRelativePath) {
     WCHAR wchFile[MAX_PATH];
-    PathRelativeToApp((LPWSTR)pszFile,wchFile,COUNTOF(wchFile),TRUE,TRUE);
+    PathRelativeToApp((LPWSTR)pszFile,wchFile,COUNTOF(wchFile),TRUE,TRUE,bUnexpandMyDocs);
     pmru->pszItems[0] = StrDup(wchFile);
   }
   else
@@ -1495,6 +1595,28 @@ BOOL MRU_Delete(LPMRULIST pmru,int iIndex) {
     pmru->pszItems[i] = pmru->pszItems[i+1];
     pmru->pszItems[i+1] = NULL;
   }
+  return(1);
+}
+
+BOOL MRU_DeleteFileFromStore(LPMRULIST pmru,LPCWSTR pszFile) {
+
+  int i = 0;
+  LPMRULIST pmruStore;
+  WCHAR wchItem[256];
+
+  pmruStore = MRU_Create(pmru->szRegKey,pmru->iFlags,pmru->iSize);
+  MRU_Load(pmruStore);
+
+  while (MRU_Enum(pmruStore,i,wchItem,COUNTOF(wchItem)) != -1) {
+    PathAbsoluteFromApp(wchItem,wchItem,COUNTOF(wchItem),TRUE);
+    if (lstrcmpi(wchItem,pszFile) == 0)
+      MRU_Delete(pmruStore,i);
+    else
+      i++;
+  }
+
+  MRU_Save(pmruStore);
+  MRU_Destroy(pmruStore);
   return(1);
 }
 
@@ -1519,7 +1641,7 @@ int MRU_Enum(LPMRULIST pmru,int iIndex,LPWSTR pszItem,int cchItem) {
     return(i);
   }
   else {
-    if (iIndex < 0 || iIndex > pmru->iSize-1)
+    if (iIndex < 0 || iIndex > pmru->iSize-1 || !pmru->pszItems[iIndex])
       return(-1);
     else {
       lstrcpyn(pszItem,pmru->pszItems[iIndex],cchItem);
@@ -1583,7 +1705,7 @@ BOOL MRU_Save(LPMRULIST pmru) {
 }
 
 
-BOOL MRU_MergeSave(LPMRULIST pmru,BOOL bAddFiles,BOOL bRelativePath) {
+BOOL MRU_MergeSave(LPMRULIST pmru,BOOL bAddFiles,BOOL bRelativePath,BOOL bUnexpandMyDocs) {
 
   int i;
   LPMRULIST pmruBase;
@@ -1596,7 +1718,7 @@ BOOL MRU_MergeSave(LPMRULIST pmru,BOOL bAddFiles,BOOL bRelativePath) {
       if (pmru->pszItems[i]) {
         WCHAR wchItem[MAX_PATH];
         PathAbsoluteFromApp(pmru->pszItems[i],wchItem,COUNTOF(wchItem),TRUE);
-        MRU_AddFile(pmruBase,wchItem,bRelativePath);
+        MRU_AddFile(pmruBase,wchItem,bRelativePath,bUnexpandMyDocs);
       }
     }
   }

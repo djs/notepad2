@@ -11,13 +11,18 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2009
+*                                              (c) Florian Balmer 1996-2010
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
 *
 ******************************************************************************/
 
+
+
+// extern "C" declarations of Scintilla functions
+BOOL Scintilla_RegisterClasses(HINSTANCE);
+BOOL Scintilla_ReleaseResources();
 
 
 typedef struct _editfindreplace

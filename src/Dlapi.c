@@ -11,7 +11,7 @@
 *
 * See License.txt for details about distribution and modification.
 *
-*                                              (c) Florian Balmer 1996-2009
+*                                              (c) Florian Balmer 1996-2010
 *                                                  florian.balmer@gmail.com
 *                                               http://www.flos-freeware.ch
 *
@@ -430,8 +430,6 @@ int DirList_Fill(HWND hwnd,LPCWSTR lpszDir,DWORD grfFlags,LPCWSTR lpszFileSpec,
 //
 //  Thread to extract file icons in the background
 //
-typedef struct IShellIcon *LPSHELLICON;
-
 DWORD WINAPI DirList_IconThread(LPVOID lpParam)
 {
 
@@ -442,7 +440,7 @@ DWORD WINAPI DirList_IconThread(LPVOID lpParam)
   LPLV_ITEMDATA lplvid;
 
   LPMALLOC lpMalloc;
-  LPSHELLICON lpshi;
+  IShellIcon* lpshi;
 
   int iItem = 0;
   int iMaxItem;
