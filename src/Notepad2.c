@@ -34,6 +34,7 @@
 #include "helpers.h"
 #include "dialogs.h"
 #include "notepad2.h"
+#include "scicall.h"
 #include "resource.h"
 
 
@@ -253,6 +254,7 @@ WCHAR     wchWndClass[16] = WC_NOTEPAD2;
 
 LPMALLOC  g_lpMalloc;
 HINSTANCE g_hInstance;
+HANDLE    g_hScintilla;
 UINT16    g_uWinVer;
 WCHAR     g_wchAppUserModelID[64];
 
@@ -1236,6 +1238,7 @@ LRESULT MsgCreate(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
   // Setup edit control
   hwndEdit = EditCreate(hwnd);
+  InitScintillaHandle(hwndEdit);
 
   // Tabs
   SendMessage(hwndEdit,SCI_SETUSETABS,!bTabsAsSpaces,0);
