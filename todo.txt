@@ -1,0 +1,6 @@
+TODO
+================================================================================
+
+* Run manifest tool inside Makefile
+* Add nsis Makefile target
+
