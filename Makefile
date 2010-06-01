@@ -173,3 +173,5 @@ $(DIR_O)\Notepad2.res : src\Notepad2.rc
 
 $(EXE): $(OBJS)
 	$(LD) $(LDFLAGS) -OUT:$@ $** $(LIBS)
+	@if exist "$@.manifest" \
+	    mt.exe -manifest "$@.manifest" -outputresource:$@;1
