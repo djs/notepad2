@@ -90,7 +90,12 @@ int MsgBox(int iType,UINT uIdMsg,...)
   GetString(IDS_APPTITLE,szTitle,COUNTOF(szTitle));
 
   switch (iType) {
+#ifdef BOOKMARK_EDITION
+	// seems more suitable with an info-bubble icon in info boxes, instead of the exclamation icon... bug/miss?
+	case MBINFO: iIcon = MB_ICONINFORMATION; break;
+#else
     case MBINFO: iIcon = MB_ICONEXCLAMATION; break;
+#endif
     case MBWARN: iIcon = MB_ICONEXCLAMATION; break;
     case MBYESNO: iIcon = MB_ICONEXCLAMATION | MB_YESNO; break;
     case MBYESNOCANCEL: iIcon = MB_ICONEXCLAMATION | MB_YESNOCANCEL; break;
@@ -232,8 +237,17 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
         LOGFONT lf;
 
         if (bReleaseBuild) {
+
+#ifdef BOOKMARK_EDITION
+		  // About dialog
+          wsprintf(szVersion,L"Notepad2 %u.%u.%0.2u%s (Bookmark Edition R1)",
+            dwVerMajor,dwVerMinor,dwBuildNumber,szRevision);
+#else
           wsprintf(szVersion,L"Notepad2 %u.%u.%0.2u%s",
             dwVerMajor,dwVerMinor,dwBuildNumber,szRevision);
+#endif
+
+
           SetDlgItemText(hwnd,IDC_VERSION,szVersion);
         }
         else {
@@ -269,6 +283,16 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
           SetDlgItemText(hwnd,IDC_EMAIL,szLinkCode);
         }
 
+#ifdef BOOKMARK_EDITION
+        if (GetDlgItem(hwnd,BME_RLV_LINK) == NULL)
+          ShowWindow(GetDlgItem(hwnd,BME_RLV_LINK2),SW_SHOWNORMAL);
+        else {
+          GetDlgItemText(hwnd,BME_RLV_LINK2,szLink,COUNTOF(szLink));
+          wsprintf(szLinkCode,L"<A>%s</A>",szLink);
+          SetDlgItemText(hwnd,BME_RLV_LINK,szLinkCode);
+        }
+#endif
+
         CenterDlgInParent(hwnd);
       }
       return TRUE;
@@ -287,6 +311,12 @@ BOOL CALLBACK AboutDlgProc(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM lParam)
               else if (pnmhdr->idFrom == IDC_EMAIL) {
                 ShellExecute(hwnd,L"open",L"mailto:florian.balmer@gmail.com",NULL,NULL,SW_SHOWNORMAL);
               }
+#ifdef BOOKMARK_EDITION
+			  // Shameless homepage promotion link :-)
+              else if (pnmhdr->idFrom == BME_RLV_LINK) {
+				  ShellExecute(hwnd,L"open",L"http://www.rlvision.com",NULL,NULL,SW_SHOWNORMAL);
+              }
+#endif
             }
             break;
         }
