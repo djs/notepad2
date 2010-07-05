@@ -64,6 +64,8 @@
 #define IDC_FINDREGEXP                  105
 #define IDC_STYLEFONT                   105
 #define IDB_ENCODING                    105
+#define BME_RLVLINK2                    105
+#define BME_RLV_LINK2                   105
 #define IDD_DEFEOLMODE                  106
 #define IDC_FINDTRANSFORMBS             106
 #define IDC_PREVIEW                     106
@@ -104,6 +106,12 @@
 #define IDD_INFOBOX                     125
 #define IDD_INFOBOX2                    126
 #define IDD_INFOBOX3                    127
+#define IDC_RLV                         150
+#define BME_RLV_LINK                    150
+#define IDC_BACKSLASHHELP               151
+#define IDC_REGEXPHELP                  152
+#define IDC_WILDCARDHELP                153
+#define IDC_WILDCARDSEARCH              154
 #define IDACC_FIND                      200
 #define IDACC_REPLACE                   201
 #define IDACC_SAVEPOS                   202
@@ -127,6 +135,9 @@
 #define IDS_FILTER_INI                  10016
 #define IDS_OPENWITH                    10017
 #define IDS_FAVORITES                   10018
+#define IDS_BACKSLASHHELP               10019
+#define IDS_REGEXPHELP                  10020
+#define IDS_WILDCARDHELP                10021
 #define CMD_ESCAPE                      20000
 #define CMD_SHIFTESC                    20001
 #define CMD_CTRLENTER                   20002
@@ -194,6 +205,34 @@
 #define IDM_LINEENDINGS_LF              40201
 #define IDM_LINEENDINGS_CR              40202
 #define IDM_LINEENDINGS_SETDEFAULT      40203
+#define IDM_EDIT_BOOKMARKTOGGLE         40250
+#define IDM_EDIT_BOOKMARKNEXT           40251
+#define IMD_EDIT_BOOKMARKPREV           40252
+#define ID_EDIT_BOOKMARKS               40253
+#define ID_BOOKMARK_TOGGLE              40254
+#define ID_BOOKMARK_GOTONEXT            40255
+#define BME_EDIT_BOOKMARKTOGGLE         40255
+#define ID_BOOKMARK_GOTOPREVIOUS        40256
+#define BME_BOOKMARK_GOTONEXT           40256
+#define ID_BOOKMARKS_CLEARALL           40257
+#define BME_BOOKMARK_GOTOPREVIOUS       40257
+#define ID_BOOKMARKS_CLEARALL40248      40258
+#define BME_BOOKMARKS_CLEARALL          40258
+#define IDM_EDIT_BOOKMARKCLEAR          40259
+#define IDM_EDIT_BOOKMARKPREV           40260
+#define BME_EDIT_BOOKMARK_GOTONEXT      40260
+#define IDM_FILE_SAVEAS2                40261
+#define BME_EDIT_BOOKMARK_GOTOPREVIOUS  40261
+#define BME_EDIT_BOOKMARKS_CLEARALL     40262
+#define BME_EDIT_BOOKMARK_NEXT          40263
+#define BME_EDIT_BOOKMARK_PREVIOUS      40264
+#define BME_EDIT_BOOKMARKS_CLEAR        40265
+#define BME_EDIT_BOOKMARKNEXT           40266
+#define BME_EDIT_BOOKMARKPREVIOUS       40267
+#define BME_EDIT_BOOKMARKSCLEAR         40268
+#define BME_EDIT_BOOKMARKCLEAR          40269
+#define BME_EDIT_BOOKMARKPREV           40270
+#define BME_SAVEAS2                     40271
 #define IDM_EDIT_UNDO                   40300
 #define IDM_EDIT_REDO                   40301
 #define IDM_EDIT_CUT                    40302
@@ -385,7 +424,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        361
-#define _APS_NEXT_COMMAND_VALUE         40238
+#define _APS_NEXT_COMMAND_VALUE         40273
 #define _APS_NEXT_CONTROL_VALUE         1152
 #define _APS_NEXT_SYMED_VALUE           180
 #endif

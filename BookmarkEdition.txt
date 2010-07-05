@@ -1,0 +1,92 @@
+
+ ---- Notepad2 Bookmark Edition (Release 1) -------------------------
+
+      Coded by RL Vision - www.rlvision.com
+
+ --------------------------------------------------------------------
+ 
+ Bookmark Edition is a modification to Notepad2 that adds bookmark 
+ functionality plus some other tweaks and enhancements:
+
+  - Bookmark feature:
+  
+		Ctrl+F2: toggle bookmark on/off for for current line
+		F2: jump to next bookmark
+		Shift+F2: jump to previous bookmark
+		Alt+F2: clear all bookmarks
+		
+		Bookmarked lines are coloured light green. If the "Selection 
+		margin" is enabled, a green icon is displayed there instead.
+
+  - Re-Mapped "Save as" to F12 (F6 still works though)
+
+  - Number of selected lines is reported in the statusbar together 
+    with the other statistics ("Sel Ln")
+
+  - Added wildcard search mode to the Find/Replace dialogs.
+    Use * and ? as wildcards.
+
+  - Added help buttons [?] to the Find/Replace dialogs with quick 
+    syntaxt help for Regular Expressions, Backslash transformations 
+    and Wildcard search.
+
+  - "Convert to Title Case" has been tweaked to work better with 
+    some apostrophes situations
+
+  - The Find/Replace dialogs will automatically paste the clipboard 
+    content first time it is opened (but only if nothing is selected 
+    in the editor)
+
+  - Some hotkeys have been reassigned or removed in order to accomodate 
+    changes above:
+
+		Select to next: Alt+Ctrl+F3 (Previously F2)
+		Select to prev: Alt+Shift+F3 (Previously Ctrl+F2)
+		
+		Select syntax scheme: Shift+F12 (Previously F12)
+		Customize schemes: Removed (Previously Ctrl+F12)
+
+
+
+ ---- Source Code ---------------------------------------------------
+
+ Source code for Bookmark Edition is available at www.rlvision.com
+
+ This archive contains the complete source code project, including 
+ Scintilla and my modifications. (It was tricky to get it to compile, 
+ so I'm distributing everything in case someone else needs it.)
+
+ All source code changes have been coded within BOOKMARK_EDITION
+ #ifdef sections and most of them comments on what it does. Changes
+ in the resource files are not documented since it is a generated file.
+
+
+
+---- Notes on Compiling ---------------------------------------------
+
+ It can be tricky to get compile Notepad2 the first time. Here are 
+ some things I stumbled upon:
+ 
+  * In the src\Notepad2.rs file, I had to remove this line:
+    
+    IDR_RT_MANIFEST         RT_MANIFEST             "..\\res\\Notepad2.exe.manifest"
+ 
+  * One time Visual Studio replaced "winres.h" with "afxres.h" in
+    "Notepad2.rc" and I had to change it back manually to ge the 
+    "wdkbuild" script to compile.
+ 
+  * It is possible to compile with Visual C++ Express Edition, but
+    since it does not have a resource editor you can not easily change
+    dialogs, hotkeys etc. There are 3rd part editors that might work
+    though. (The built in resource editor is a påain toi work with 
+    anyway...)
+  
+  * The final step in compiling is to run the "wdkbuild" script. In 
+    order to get it working I had to modify the X86 paths slightly
+    to work with my (default) installation: "\x86" to "\x86\x86"
+    
+  * "wdkbuild" refused the embed the Manifest file when linking. I 
+    finally solved it by adding the manifest manually using 
+    "XNResourceEditor.exe"
+
+ --------------------------------------------------------------------

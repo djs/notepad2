@@ -1,7 +1,6 @@
 @echo off
 
-rem set WDKBASEDIR=C:\WinDDK\7600.16385.1
-set WDKBASEDIR=D:\Programme\Microsoft wdk7
+set WDKBASEDIR=W:
 
 set INCLUDE=%WDKBASEDIR%\inc\crt;%WDKBASEDIR%\inc\api;%WDKBASEDIR%\inc\api\crt\stl60;%WDKBASEDIR%\inc\ddk
 set LIB=%WDKBASEDIR%\lib\crt\i386;%WDKBASEDIR%\lib\win7\i386

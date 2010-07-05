@@ -19,6 +19,12 @@
 ******************************************************************************/
 
 
+//==== Bookmark Edition ============================================================
+#define BOOKMARK_EDITION
+// Most changes to the source code are within a BOOKMARK_EDITION #ifdef
+// Other changes:
+//   Resources: No #ifdef's since it is a generated file.
+
 
 //==== Main Window ============================================================
 #define WC_NOTEPAD2 L"Notepad2"

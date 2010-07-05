@@ -1838,6 +1838,11 @@ void EditTitleCase(HWND hwnd)
   BOOL bNewWord = TRUE;
   BOOL bChanged = FALSE;
 
+#ifdef BOOKMARK_EDITION
+  BOOL bPrevWasSpace = FALSE;
+#endif
+
+
   iCurPos    = SendMessage(hwnd,SCI_GETCURRENTPOS,0,0);
   iAnchorPos = SendMessage(hwnd,SCI_GETANCHOR,0,0);
 
@@ -1863,6 +1868,31 @@ void EditTitleCase(HWND hwnd)
 
       cchTextW = MultiByteToWideChar(cpEdit,0,pszText,iSelCount,pszTextW,GlobalSize(pszTextW)/sizeof(WCHAR));
 
+#ifdef BOOKMARK_EDITION
+	  //Slightly enhanced function to make Title Case: Added some '-characters and bPrevWasSpace makes it better (for example "'Don't'" will now work)
+	  bPrevWasSpace = TRUE;
+      for (i = 0; i < cchTextW; i++) {
+        if (!IsCharAlphaNumericW(pszTextW[i]) && (!StrChr(L"'`´''’",pszTextW[i]) ||  bPrevWasSpace ) ) {
+          bNewWord = TRUE;
+        }
+        else {
+          if (bNewWord) {
+            if (IsCharLowerW(pszTextW[i])) {
+              pszTextW[i] = LOWORD(CharUpperW((LPWSTR)MAKELONG(pszTextW[i],0)));
+              bChanged = TRUE;
+            }
+          }
+          else {
+            if (IsCharUpperW(pszTextW[i])) {
+              pszTextW[i] = LOWORD(CharLowerW((LPWSTR)MAKELONG(pszTextW[i],0)));
+              bChanged = TRUE;
+            }
+          }
+          bNewWord = FALSE;
+        }
+		if( StrChr(L" \r\n\t",pszTextW[i]) ) bPrevWasSpace = TRUE; else bPrevWasSpace = FALSE;
+      }
+#else
       for (i = 0; i < cchTextW; i++) {
         if (!IsCharAlphaNumericW(pszTextW[i]) && !StrChr(L"'’",pszTextW[i])) {
           bNewWord = TRUE;
@@ -1883,6 +1913,7 @@ void EditTitleCase(HWND hwnd)
           bNewWord = FALSE;
         }
       }
+#endif
 
       if (bChanged) {
 
@@ -4208,6 +4239,11 @@ BOOL CALLBACK EditFindReplaceDlgProcW(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
         char *lpszSelection;
         char *lpsz;
 
+#ifdef BOOKMARK_EDITION
+		static BOOL bFirstTime = TRUE;
+#endif
+
+
         WCHAR tch[128];
         HMENU hmenu;
 
@@ -4236,6 +4272,22 @@ BOOL CALLBACK EditFindReplaceDlgProcW(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
             cchSelection = SendMessage(lpefr->hwnd,SCI_GETSELTEXT,0,0);
             lpszSelection = GlobalAlloc(GPTR,cchSelection+2);
             SendMessage(lpefr->hwnd,SCI_GETSELTEXT,0,(LPARAM)lpszSelection);
+
+#ifdef BOOKMARK_EDITION
+			// First time you bring up find/replace dialog, copy content from clipboard to find box (but only if nothing is selected in the editor)
+			if (lstrcmpA( lpszSelection , "" ) == 0  &&  bFirstTime )
+			{
+				char *pClip = EditGetClipboardText(hwndEdit);
+				if( lstrlenA( pClip ) > 0  &&  lstrlenA( pClip ) <= 500 )
+				{
+					GlobalFree(lpszSelection);
+					lpszSelection = GlobalAlloc(GPTR,lstrlenA( pClip )+2);
+					lstrcpynA( lpszSelection , pClip , 500 );
+				}
+			}
+			bFirstTime = FALSE;
+#endif
+
 
             // Check lpszSelection and truncate bad chars
             lpsz = StrChrA(lpszSelection,13);
@@ -4279,6 +4331,11 @@ BOOL CALLBACK EditFindReplaceDlgProcW(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
 
         if (lpefr->bTransformBS)
           CheckDlgButton(hwnd,IDC_FINDTRANSFORMBS,BST_CHECKED);
+
+#ifdef BOOKMARK_EDITION
+		if (lpefr->bWildcardSearch) CheckDlgButton(hwnd,IDC_WILDCARDSEARCH,BST_CHECKED);
+#endif
+
 
         if (lpefr->bNoFindWrap)
           CheckDlgButton(hwnd,IDC_NOWRAP,BST_CHECKED);
@@ -4356,13 +4413,28 @@ BOOL CALLBACK EditFindReplaceDlgProcW(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
 
         case IDC_FINDREGEXP:
           if (IsDlgButtonChecked(hwnd,IDC_FINDREGEXP) == BST_CHECKED)
+          {
             CheckDlgButton(hwnd,IDC_FINDTRANSFORMBS,BST_UNCHECKED);
+#ifdef BOOKMARK_EDITION
+			CheckDlgButton(hwnd,IDC_WILDCARDSEARCH,BST_UNCHECKED); // Can not use wildcard search together with regexp
+#endif
+			}
           break;
 
         case IDC_FINDTRANSFORMBS:
           if (IsDlgButtonChecked(hwnd,IDC_FINDTRANSFORMBS) == BST_CHECKED)
             CheckDlgButton(hwnd,IDC_FINDREGEXP,BST_UNCHECKED);
           break;
+
+#ifdef BOOKMARK_EDITION
+		  // handle wildcard search checkbox
+        case IDC_WILDCARDSEARCH:
+				CheckDlgButton(hwnd,IDC_FINDREGEXP,BST_UNCHECKED);
+          //if (IsDlgButtonChecked(hwnd,IDC_FINDWILDCARDS) == BST_CHECKED)
+          //  CheckDlgButton(hwnd,IDC_FINDREGEXP,BST_UNCHECKED);
+          break;
+#endif
+
 
         case IDOK:
         case IDC_FINDPREV:
@@ -4404,6 +4476,11 @@ BOOL CALLBACK EditFindReplaceDlgProcW(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
 
           if (GetDlgItem(hwnd,IDC_REPLACETEXT))
             GetDlgItemTextA2W(uCPEdit,hwnd,IDC_REPLACETEXT,lpefr->szReplace,COUNTOF(lpefr->szReplace));
+
+#ifdef BOOKMARK_EDITION
+		  lpefr->bWildcardSearch = (IsDlgButtonChecked(hwnd,IDC_WILDCARDSEARCH) == BST_CHECKED) ? TRUE : FALSE;
+#endif
+
 
           lpefr->fuFlags = 0;
 
@@ -4522,6 +4599,12 @@ BOOL CALLBACK EditFindReplaceDlgProcW(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
               EditReplaceAllInSelection(lpefr->hwnd,lpefr,TRUE);
               break;
           }
+          
+#ifdef BOOKMARK_EDITION
+		  // Wildcard search will enable regexp, so I turn it off again otherwise it will be on in the gui
+		  if( lpefr->bWildcardSearch  &&  (lpefr->fuFlags & SCFIND_REGEXP) ) lpefr->fuFlags ^= SCFIND_REGEXP;
+#endif
+
           break;
 
 
@@ -4578,6 +4661,22 @@ BOOL CALLBACK EditFindReplaceDlgProcW(HWND hwnd,UINT umsg,WPARAM wParam,LPARAM l
               else
                 PostMessage(GetParent(hwnd),WM_COMMAND,MAKELONG(IDM_EDIT_REPLACE,1),0);
             }
+#ifdef BOOKMARK_EDITION
+			// Display help messages in the find/replace windows
+            else if (pnmhdr->idFrom == IDC_BACKSLASHHELP)
+			{
+				MsgBox(MBINFO,IDS_BACKSLASHHELP);
+            }
+            else if (pnmhdr->idFrom == IDC_REGEXPHELP)
+			{
+				MsgBox(MBINFO,IDS_REGEXPHELP);
+            }
+            else if (pnmhdr->idFrom == IDC_WILDCARDHELP)
+			{
+				MsgBox(MBINFO,IDS_WILDCARDHELP);
+            }
+#endif
+
             break;
         }
       }
@@ -4614,6 +4713,43 @@ HWND EditFindReplaceDlg(HWND hwnd,LPCEDITFINDREPLACE lpefr,BOOL bReplace)
 }
 
 
+
+#ifdef BOOKMARK_EDITION
+	// Wildcard search uses the regexp engine to perform a simple search with * ? as wildcards instead of more advanced and user-unfriendly regexp syntax
+	void EscapeWildcards( char* szFind2 , LPCEDITFINDREPLACE lpefr )
+	{
+		char szWildcardEscaped[512];
+		int iSource = 0;
+		int iDest = 0;
+
+		lpefr->fuFlags |= SCFIND_REGEXP;
+
+		while( szFind2[iSource] )
+		{
+			char c = szFind2[iSource];
+			if( c == '*' )
+			{
+				szWildcardEscaped[iDest++] = '.'; szWildcardEscaped[iDest] = '*';
+			}
+			else if( c == '?' )
+			{
+				szWildcardEscaped[iDest] = '.';
+			}
+			else
+			{
+				if( c == '.'  ||  c == '^'  ||  c == '$'  ||  c == '\\'  ||  c == '['  ||  c == ']'  ||  c == '+' ) szWildcardEscaped[iDest++] = '\\';
+				szWildcardEscaped[iDest] = c;
+			}
+			iSource++;
+			iDest++;
+		}
+		szWildcardEscaped[iDest] = (char)NULL;
+		lstrcpynA(szFind2,szWildcardEscaped,COUNTOF(szWildcardEscaped));
+	}
+#endif
+
+
+
 //=============================================================================
 //
 //  EditFindNext()
@@ -4639,6 +4775,11 @@ BOOL EditFindNext(HWND hwnd,LPCEDITFINDREPLACE lpefr,BOOL fExtendSelection)
     InfoBox(0,L"MsgNotFound",IDS_NOTFOUND);
     return FALSE;
   }
+
+#ifdef BOOKMARK_EDITION
+  if( lpefr->bWildcardSearch ) EscapeWildcards( szFind2 , lpefr );
+#endif
+
 
   iSelPos = SendMessage(hwnd,SCI_GETCURRENTPOS,0,0);
   iSelAnchor = SendMessage(hwnd,SCI_GETANCHOR,0,0);
@@ -4704,6 +4845,11 @@ BOOL EditFindPrev(HWND hwnd,LPCEDITFINDREPLACE lpefr,BOOL fExtendSelection)
     InfoBox(0,L"MsgNotFound",IDS_NOTFOUND);
     return FALSE;
   }
+
+#ifdef BOOKMARK_EDITION
+  if( lpefr->bWildcardSearch ) EscapeWildcards( szFind2 , lpefr );
+#endif
+
 
   iSelPos = SendMessage(hwnd,SCI_GETCURRENTPOS,0,0);
   iSelAnchor = SendMessage(hwnd,SCI_GETANCHOR,0,0);
@@ -4772,6 +4918,11 @@ BOOL EditReplace(HWND hwnd,LPCEDITFINDREPLACE lpefr)
     InfoBox(0,L"MsgNotFound",IDS_NOTFOUND);
     return FALSE;
   }
+
+#ifdef BOOKMARK_EDITION
+  if( lpefr->bWildcardSearch ) EscapeWildcards( szFind2 , lpefr );
+#endif
+
 
   if (lstrcmpA(lpefr->szReplace,"^c") == 0) {
     iReplaceMsg = SCI_REPLACETARGET;
@@ -4889,6 +5040,11 @@ BOOL EditReplaceAll(HWND hwnd,LPCEDITFINDREPLACE lpefr,BOOL bShowInfo)
     InfoBox(0,L"MsgNotFound",IDS_NOTFOUND);
     return FALSE;
   }
+
+#ifdef BOOKMARK_EDITION
+  if( lpefr->bWildcardSearch ) EscapeWildcards( szFind2 , lpefr );
+#endif
+
 
   bRegexStartOfLine =
     (szFind2[0] == '^');
@@ -5015,6 +5171,11 @@ BOOL EditReplaceAllInSelection(HWND hwnd,LPCEDITFINDREPLACE lpefr,BOOL bShowInfo
     InfoBox(0,L"MsgNotFound",IDS_NOTFOUND);
     return FALSE;
   }
+
+#ifdef BOOKMARK_EDITION
+  if( lpefr->bWildcardSearch ) EscapeWildcards( szFind2 , lpefr );
+#endif
+
 
   bRegexStartOfLine =
     (szFind2[0] == '^');
