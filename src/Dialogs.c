@@ -217,7 +217,7 @@ BOOL GetDirectory(HWND hwndParent,int iTitle,LPWSTR pszFolder,LPCWSTR pszBase,BO
 static const DWORD  dwVerMajor    = 4;
 static const DWORD  dwVerMinor    = 1;
 static const DWORD  dwBuildNumber = 24;
-static const WCHAR* szRevision    = L".1-unified";
+static const WCHAR* szRevision    = L".2-unified";
 static const WCHAR* szExtra       = L"";
 static const BOOL   bReleaseBuild = TRUE;
 
