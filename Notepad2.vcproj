@@ -19,14 +19,14 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="scintilla\include;scintilla\src;scintilla\win32"
-				PreprocessorDefinitions="STATIC_BUILD;SCI_LEXER;UNICODE;_UNICODE"
+				AdditionalIncludeDirectories="scintilla\include;scintilla\src;scintilla\lexlib;scintilla\win32"
+				PreprocessorDefinitions="STATIC_BUILD;SCI_LEXER;_DEBUG;WIN32;_WINDOWS;UNICODE;_UNICODE;_M_IX86"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="FALSE"
+				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -48,7 +48,8 @@
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG;_M_IX86"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -65,14 +66,14 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				OmitFramePointers="TRUE"
-				AdditionalIncludeDirectories="scintilla\include;scintilla\src;scintilla\win32"
-				PreprocessorDefinitions="STATIC_BUILD;SCI_LEXER;NDEBUG;UNICODE;_UNICODE"
+				AdditionalIncludeDirectories="scintilla\include;scintilla\src;scintilla\lexlib;scintilla\win32"
+				PreprocessorDefinitions="STATIC_BUILD;SCI_LEXER;NDEBUG;WIN32;_WINDOWS;UNICODE;_UNICODE;_M_IX86"
 				StringPooling="TRUE"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="FALSE"
+				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -95,7 +96,8 @@
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG;_M_IX86"/>
 			<Tool
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
@@ -152,10 +154,13 @@
 			<File
 				RelativePath="src\resource.h">
 			</File>
+			<File
+				RelativePath="src\version.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;manifest;xpm">
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;manifest;xpm;ver">
 			<File
 				RelativePath="res\Copy.cur">
 			</File>
@@ -164,9 +169,6 @@
 			</File>
 			<File
 				RelativePath="res\Hover.cur">
-			</File>
-			<File
-				RelativePath="scintilla\win32\Margin.cur">
 			</File>
 			<File
 				RelativePath="res\Next.bmp">
@@ -179,6 +181,9 @@
 			</File>
 			<File
 				RelativePath="src\Notepad2.rc">
+			</File>
+			<File
+				RelativePath="src\Notepad2.ver">
 			</File>
 			<File
 				RelativePath="res\Open.bmp">
@@ -206,19 +211,10 @@
 				Name="include"
 				Filter="">
 				<File
-					RelativePath="scintilla\include\Accessor.h">
-				</File>
-				<File
-					RelativePath="scintilla\include\KeyWords.h">
+					RelativePath="scintilla\include\ILexer.h">
 				</File>
 				<File
 					RelativePath="scintilla\include\Platform.h">
-				</File>
-				<File
-					RelativePath="scintilla\include\PropSet.h">
-				</File>
-				<File
-					RelativePath="scintilla\include\SString.h">
 				</File>
 				<File
 					RelativePath="scintilla\include\SciLexer.h">
@@ -229,8 +225,103 @@
 				<File
 					RelativePath="scintilla\include\ScintillaWidget.h">
 				</File>
+			</Filter>
+			<Filter
+				Name="lexers"
+				Filter="">
 				<File
-					RelativePath="scintilla\include\WindowAccessor.h">
+					RelativePath="scintilla\lexers\LexAsm.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexers\LexCPP.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexers\LexCSS.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexers\LexConf.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexers\LexHTML.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexers\LexOthers.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexers\LexPascal.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexers\LexPerl.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexers\LexPowerShell.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexers\LexPython.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexers\LexSQL.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexers\LexVB.cxx">
+				</File>
+			</Filter>
+			<Filter
+				Name="lexlib"
+				Filter="">
+				<File
+					RelativePath="scintilla\lexlib\Accessor.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\Accessor.h">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\CharacterSet.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\CharacterSet.h">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\LexAccessor.h">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\LexerBase.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\LexerBase.h">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\LexerModule.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\LexerModule.h">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\LexerSimple.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\LexerSimple.h">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\OptionSet.h">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\PropSetSimple.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\PropSetSimple.h">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\StyleContext.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\StyleContext.h">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\WordList.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\lexlib\WordList.h">
 				</File>
 			</Filter>
 			<Filter
@@ -249,6 +340,12 @@
 					RelativePath="scintilla\src\CallTip.h">
 				</File>
 				<File
+					RelativePath="scintilla\src\Catalogue.cxx">
+				</File>
+				<File
+					RelativePath="scintilla\src\Catalogue.h">
+				</File>
+				<File
 					RelativePath="scintilla\src\CellBuffer.cxx">
 				</File>
 				<File
@@ -259,9 +356,6 @@
 				</File>
 				<File
 					RelativePath="scintilla\src\CharClassify.h">
-				</File>
-				<File
-					RelativePath="scintilla\src\CharacterSet.h">
 				</File>
 				<File
 					RelativePath="scintilla\src\ContractionState.cxx">
@@ -282,12 +376,6 @@
 					RelativePath="scintilla\src\Document.h">
 				</File>
 				<File
-					RelativePath="scintilla\src\DocumentAccessor.cxx">
-				</File>
-				<File
-					RelativePath="scintilla\src\DocumentAccessor.h">
-				</File>
-				<File
 					RelativePath="scintilla\src\Editor.cxx">
 				</File>
 				<File
@@ -300,6 +388,9 @@
 					RelativePath="scintilla\src\ExternalLexer.h">
 				</File>
 				<File
+					RelativePath="scintilla\src\FontQuality.h">
+				</File>
+				<File
 					RelativePath="scintilla\src\Indicator.cxx">
 				</File>
 				<File
@@ -310,45 +401,6 @@
 				</File>
 				<File
 					RelativePath="scintilla\src\KeyMap.h">
-				</File>
-				<File
-					RelativePath="scintilla\src\KeyWords.cxx">
-				</File>
-				<File
-					RelativePath="scintilla\src\LexAsm.cxx">
-				</File>
-				<File
-					RelativePath="scintilla\src\LexCPP.cxx">
-				</File>
-				<File
-					RelativePath="scintilla\src\LexCSS.cxx">
-				</File>
-				<File
-					RelativePath="scintilla\src\LexConf.cxx">
-				</File>
-				<File
-					RelativePath="scintilla\src\LexHTML.cxx">
-				</File>
-				<File
-					RelativePath="scintilla\src\LexOthers.cxx">
-				</File>
-				<File
-					RelativePath="scintilla\src\LexPascal.cxx">
-				</File>
-				<File
-					RelativePath="scintilla\src\LexPerl.cxx">
-				</File>
-				<File
-					RelativePath="scintilla\src\LexPowerShell.cxx">
-				</File>
-				<File
-					RelativePath="scintilla\src\LexPython.cxx">
-				</File>
-				<File
-					RelativePath="scintilla\src\LexSQL.cxx">
-				</File>
-				<File
-					RelativePath="scintilla\src\LexVB.cxx">
 				</File>
 				<File
 					RelativePath="scintilla\src\LineMarker.cxx">
@@ -370,9 +422,6 @@
 				</File>
 				<File
 					RelativePath="scintilla\src\PositionCache.h">
-				</File>
-				<File
-					RelativePath="scintilla\src\PropSet.cxx">
 				</File>
 				<File
 					RelativePath="scintilla\src\RESearch.cxx">
@@ -411,12 +460,6 @@
 					RelativePath="scintilla\src\Style.h">
 				</File>
 				<File
-					RelativePath="scintilla\src\StyleContext.cxx">
-				</File>
-				<File
-					RelativePath="scintilla\src\StyleContext.h">
-				</File>
-				<File
 					RelativePath="scintilla\src\UniConversion.cxx">
 				</File>
 				<File
@@ -427,9 +470,6 @@
 				</File>
 				<File
 					RelativePath="scintilla\src\ViewStyle.h">
-				</File>
-				<File
-					RelativePath="scintilla\src\WindowAccessor.cxx">
 				</File>
 				<File
 					RelativePath="scintilla\src\XPM.cxx">
@@ -443,9 +483,6 @@
 				Filter="">
 				<File
 					RelativePath="scintilla\win32\PlatWin.cxx">
-				</File>
-				<File
-					RelativePath="scintilla\win32\PlatformRes.h">
 				</File>
 				<File
 					RelativePath="scintilla\win32\ScintillaWin.cxx">
